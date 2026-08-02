@@ -1,0 +1,11 @@
+services:
+  analyzers:
+    image: analyzers:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+  quality:
+    image: quality:latest
+    build:
+      context: .
+      dockerfile: quality.Dockerfile
