@@ -41,7 +41,7 @@ Arguments (one or more):
   target:https://example.com  Network target: runs nuclei, naabu, httpx only
   name:target:HOST            Network target with an explicit artifact name
 
-With no arguments, the transit-repo default list is used minus k8s-kubernetes (too large).
+With no arguments, the default list of 3 repos is used (largest per language family).
 EOF
 }
 
@@ -204,14 +204,8 @@ REPOS=("$@")
 if [[ ${#REPOS[@]} -eq 0 ]]; then
     REPOS=(
         "go-gin|https://github.com/gin-gonic/gin"
-        "gin|https://github.com/gin-gonic/gin"
-        "go-mux|https://github.com/gorilla/mux"
-        "java-gson|https://github.com/google/gson"
         "java-springboot|https://github.com/spring-projects/spring-boot"
         "os-nova|https://github.com/openstack/nova"
-        "os-neutron|https://github.com/openstack/neutron"
-        "py-flask|https://github.com/pallets/flask"
-        "glance|https://github.com/openstack/glance"
     )
 fi
 

@@ -93,13 +93,8 @@ trap cleanup EXIT
 
 DEFAULT_REPOS=(
     "go-gin|https://github.com/gin-gonic/gin"
-    "go-mux|https://github.com/gorilla/mux"
-    "java-gson|https://github.com/google/gson"
     "java-springboot|https://github.com/spring-projects/spring-boot"
     "os-nova|https://github.com/openstack/nova"
-    "os-neutron|https://github.com/openstack/neutron"
-    "py-flask|https://github.com/pallets/flask"
-    "glance|https://github.com/openstack/glance"
 )
 
 REPOS=("$@")

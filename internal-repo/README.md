@@ -71,7 +71,7 @@ These are heavyweight server products; they are documented here, not installed i
 ## Usage
 
 ```bash
-./run-tools.sh                            # analyze the 9 default repos (transit list minus k8s-kubernetes)
+./run-tools.sh                            # analyze the 3 default repos (largest per language)
 ./run-tools.sh /path/to/local/repo        # analyze a local directory
 ./run-tools.sh https://github.com/user/repo     # shallow-clone a remote repo
 ./run-tools.sh myname:https://github.com/user/repo   # remote with explicit artifact name
@@ -89,21 +89,16 @@ The image is built in two stages (`Dockerfile`): a `golang:bookworm` stage compi
 
 ## Current results (2026-08-04 run)
 
-Default repos = transit-repo list minus `k8s-kubernetes` (too large for the heavy scanners). Per-repo notes in `summary/<repo>.md`.
+Default repos = largest repo per language family (go-gin / Go, java-springboot / Java, os-nova / Python). Per-repo notes in `summary/<repo>.md`.
 
 | Repo | SBOM pkgs (syft) | osv-scanner | trivy | gitleaks | trufflehog | opengrep |
 |---|---|---|---|---|---|---|
-| go-gin / gin | 50 | 42 | 3 (1 high) | 4 | 1 | 40 |
-| go-mux | 12 | 60 | 0 | 0 | 0 | 11 |
-| java-gson | 43 | 0 | 0 | 0 | 46 | 2 |
+| go-gin | 50 | 42 | 3 (1 high) | 4 | 1 | 40 |
 | java-springboot | 513 | 11 | 25 (1 crit, 17 high) | 198 | 94 | 167 |
 | os-nova | 2 | 80 | 0 (5 secrets) | 48 | 224 | 25 |
-| os-neutron | 1 | 45 | 0 (1 secret) | 7 | 162 | 18 |
-| py-flask | 123 | 27 | 13 (11 medium) | 6 | 7 | 16 |
-| glance | 1 | 48 | 0 | 19 | 72 | 10 |
 
 Notes:
 - `ggshield` and `codeql` were not run on this host: ggshield needs `GITGUARDIAN_API_KEY`; GitHub ships only an x86_64 CodeQL bundle, which won't run on the arm64 podman VM (rebuild on amd64 to enable).
-- `trivy` for the two Java repos (`java-gson`, `java-springboot`) was produced with the `trivy sbom` fallback against the syft SBOM, because the default `trivy fs` scan hit Maven Central rate limiting (HTTP 429) and, for spring-boot, unresolvable `@project.version@` poms. See `trivy/trivy.log` for the 429 errors.
+- `trivy` for java-springboot was produced with the `trivy sbom` fallback against the syft SBOM, because the default `trivy fs` scan hit Maven Central rate limiting (HTTP 429) and unresolvable `@project.version@` poms. See `trivy/trivy.log` for the 429 errors.
 - No malware found by ClamAV in any repo (0 infected).
 - Most gitleaks/trufflehog hits are test/dev fixtures in sample-heavy repos; verify before triaging as real secrets.

@@ -14,7 +14,7 @@ quality-tools.sh if you change one.
 
 Usage:
     ./run-quality.py                        # default repos (need artifacts first)
-    ./run-quality.py py-flask               # single already-analyzed repo
+    ./run-quality.py os-nova                # single already-analyzed repo
     ./run-quality.py go-gin:https://github.com/gin-gonic/gin
     ./run-quality.py -f go-gin              # force re-run
     MIN_CODE=20 ./run-quality.py os-nova    # lower language threshold
@@ -41,13 +41,8 @@ DOCKERFILE = "quality.Dockerfile"
 # The default set of repos, as (artifact name, clone URL) pairs.
 DEFAULT_REPOS = [
     ("go-gin", "https://github.com/gin-gonic/gin"),
-    ("go-mux", "https://github.com/gorilla/mux"),
-    ("java-gson", "https://github.com/google/gson"),
     ("java-springboot", "https://github.com/spring-projects/spring-boot"),
     ("os-nova", "https://github.com/openstack/nova"),
-    ("os-neutron", "https://github.com/openstack/neutron"),
-    ("py-flask", "https://github.com/pallets/flask"),
-    ("glance", "https://github.com/openstack/glance"),
 ]
 
 # Tools that run on every repo regardless of language (secrets scanning).

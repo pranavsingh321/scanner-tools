@@ -42,7 +42,7 @@ The 5 tools fall into two near-duplicate groups:
 | Group | Tools | Notes |
 |---|---|---|
 | LOC metrics | `tokei` ↔ `scc` | Same per-language code/comment/blank counts. tokei adds per-file reports; scc adds a complexity metric. Keep one. |
-| Full-content dumps | `repomix` ↔ `gitingest` ↔ `files-to-prompt` | All emit the repo's file contents (~95% overlap, ~36–38k lines for py-flask). repomix = richest (tree, security check, token metrics); gitingest = token estimate; files-to-prompt = bare concat, skips binaries. Keep one. |
+| Full-content dumps | `repomix` ↔ `gitingest` ↔ `files-to-prompt` | All emit the repo's file contents (~95% content overlap). repomix = richest (tree, security check, token metrics); gitingest = token estimate; files-to-prompt = bare concat, skips binaries. Keep one. |
 
 Effective minimal set: **`tokei` (metrics) + `repomix` (content)** — the other three add nothing unique.
 
@@ -66,14 +66,14 @@ All 5 tools scan local repos **offline**. Network is only needed for `git clone`
 | `scc` | ~100+ languages, same majors incl. HCL/Terraform, smaller list |
 | `repomix` / `gitingest` / `files-to-prompt` | Language-agnostic (pack any text file) — limited only by their ignore/config rules |
 
-## Repos analyzed (default list, `run-tools.sh:114`)
+## Repos analyzed (default list, `run-tools.sh:107`)
 
-`go-gin` (gin-gonic/gin), `go-mux` (gorilla/mux), `java-gson` (google/gson), `java-springboot` (spring-projects/spring-boot), `os-nova` / `os-neutron` / `glance` (openstack/*), `py-flask` (pallets/flask).
+Largest repo per language family (dedup of same-language repos): `go-gin` (gin-gonic/gin, Go), `java-springboot` (spring-projects/spring-boot, Java), `os-nova` (openstack/nova, Python).
 
 ## Usage
 
 ```bash
-./run-tools.sh                      # analyze the 10 default repos
+./run-tools.sh                      # analyze the 3 default repos
 ./run-tools.sh /path/to/local/repo  # analyze a local directory
 ./run-tools.sh https://github.com/user/repo   # shallow-clone a remote repo
 ./run-tools.sh myname:https://github.com/user/repo   # remote with explicit artifact name
@@ -112,8 +112,8 @@ Selection config lives in `quality-tools.sh` (functions `always_tools`, `lang_to
 
 ```bash
 ./run-quality.sh                     # default repos (must already have artifacts)
-./run-quality.sh py-flask            # just one repo (clones it, uses artifacts/ for languages)
-./run-quality.sh -f go-gin           # force re-run
+./run-quality.sh os-nova            # just one repo (clones it, uses artifacts/ for languages)
+./run-quality.sh -f go-gin          # force re-run
 MIN_CODE=20 ./run-quality.sh os-nova # lower language threshold
 ```
 
@@ -124,13 +124,8 @@ Run `./run-tools.sh <repo>` first if `artifacts/<repo>/scc/scc.json` doesn't exi
 
 | Repo | LOC (tokei) | LLM token estimate | repomix pack size |
 |---|---|---|---|
-| go-gin / gin | 19,341 | 250.5k | 872 KB |
-| go-mux | ~3k | — | 260 KB |
-| java-gson | ~70k | — | 2.3 MB |
+| go-gin | 19,341 | 250.5k | 872 KB |
 | java-springboot | ~4.0M | — | 41 MB |
 | os-nova | ~700k | — | 27 MB |
-| os-neutron | ~700k | — | 28 MB |
-| glance | ~180k | — | 7.3 MB |
-| py-flask | 25,703 | 444.0k | 4.1 MB |
 
 Cross-tool notes: tokei and scc agree closely on code LOC; they diverge on YAML/Markdown because scc counts embedded code blocks. For huge repos (e.g. kubernetes) full packing is impractical — prefer `digest.txt` or scope to a subtree.
