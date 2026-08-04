@@ -8,8 +8,14 @@ Batch repository analysis using 5 repo-analysis tools, each run in a container a
 |---|---|
 | `run-tools.sh` | Driver script: clones/loads repos, runs each tool in a container, saves output |
 | `Dockerfile` | Builds the `analyzers:latest` image containing all 5 tools |
+| `run-quality.sh` | Driver script: reads language artifacts, runs matching security/quality tools |
+| `run-quality.py` | Python alternative to `run-quality.sh` (same CLI, no jq dependency) |
+| `quality-tools.sh` | Sourced config: language → tool mapping and per-tool invocations |
+| `quality.Dockerfile` | Builds the `quality:latest` image (ruff, bandit, semgrep, gosec, staticcheck, shellcheck, hadolint, gitleaks) |
+| `compose.yaml` | Builds both images via `docker/podman compose build` |
 | `run-batch.log` | Console output of the most recent batch run |
 | `artifacts/<repo>/<tool>/` | Raw output files, one directory per tool and repo |
+| `quality/<repo>/<tool>/` | Security/quality tool output, one directory per tool and repo |
 | `summary/<repo>.md` | Hand-written analysis summary per repo (metrics + notes) |
 
 ## Tool → output file mapping
@@ -60,9 +66,9 @@ All 5 tools scan local repos **offline**. Network is only needed for `git clone`
 | `scc` | ~100+ languages, same majors incl. HCL/Terraform, smaller list |
 | `repomix` / `gitingest` / `files-to-prompt` | Language-agnostic (pack any text file) — limited only by their ignore/config rules |
 
-## Repos analyzed (default list, `run-tools.sh:108`)
+## Repos analyzed (default list, `run-tools.sh:114`)
 
-`go-gin` / `gin` (gin-gonic/gin), `go-mux` (gorilla/mux), `java-gson` (google/gson), `java-springboot` (spring-projects/spring-boot), `k8s-kubernetes` (kubernetes/kubernetes), `os-nova` / `os-neutron` / `glance` (openstack/*), `py-flask` (pallets/flask).
+`go-gin` (gin-gonic/gin), `go-mux` (gorilla/mux), `java-gson` (google/gson), `java-springboot` (spring-projects/spring-boot), `os-nova` / `os-neutron` / `glance` (openstack/*), `py-flask` (pallets/flask).
 
 ## Usage
 
@@ -81,6 +87,39 @@ Behavior: requires `podman` or `docker`. Builds `analyzers:latest` on first run,
 
 The image is built in two stages (`Dockerfile`): a `rust:alpine` stage compiles `tokei` (cargo) and `scc` (go install), then an `alpine:3.21` runtime stage adds `git`, `nodejs`/`npm` (for `repomix`), and `python3`/`pip` (for `gitingest`, `files-to-prompt`).
 
+The quality image (`quality.Dockerfile`) is separate so the inventory image stays lean: `python:3.12-slim` with pip (`semgrep`, `ruff`, `bandit`), apt (`shellcheck`), the Go toolchain, pinned release binaries (`gosec`, `staticcheck`, `gitleaks`, `hadolint`), and the semgrep `p/default` ruleset vendored at build time so scanning works fully offline.
+
+Both images can be built together with `docker compose build` (or `podman compose build`).
+
+## Security & code-quality analysis (`run-quality.sh`)
+
+`run-quality.sh` is the language-driven complement to `run-tools.sh`: it reads the inventory artifact for each repo (`artifacts/<repo>/scc/scc.json`, falling back to `tokei.json`), selects only the security/code-quality tools mapped to the languages actually present, and runs them in the `quality:latest` image. Output lands in `quality/<repo>/<tool>/` plus a per-tool `.exit` file carrying the tool's own exit code (findings, not container failures).
+
+Selection config lives in `quality-tools.sh` (functions `always_tools`, `lang_tools`, `semgrep_include`, `tool_cmd`).
+
+`run-quality.py` is an equivalent driver with the same CLI and behavior, written in Python for readability and without the `jq` dependency.
+
+| Detected language (scc name → category) | Tools |
+|---|---|
+| Python | `ruff`, `bandit` |
+| Go | `gosec`, `staticcheck` |
+| Java / Rust / JS+TS / Kotlin / Ruby / PHP / C++ / Terraform | `semgrep` scoped to that language (`semgrep-<lang>`) |
+| Shell / BASH | `shellcheck` |
+| Dockerfile | `hadolint` |
+| every repo | `gitleaks` (secrets) |
+
+`Dockerfile`/`Shell`/`BASH` are detected by file count (even a single small file triggers the tool); other languages need ≥ `MIN_CODE` lines (default 50).
+
+```bash
+./run-quality.sh                     # default repos (must already have artifacts)
+./run-quality.sh py-flask            # just one repo (clones it, uses artifacts/ for languages)
+./run-quality.sh -f go-gin           # force re-run
+MIN_CODE=20 ./run-quality.sh os-nova # lower language threshold
+```
+
+Run `./run-tools.sh <repo>` first if `artifacts/<repo>/scc/scc.json` doesn't exist.
+
+
 ## Current results (2026-08-02 run)
 
 | Repo | LOC (tokei) | LLM token estimate | repomix pack size |
@@ -89,7 +128,6 @@ The image is built in two stages (`Dockerfile`): a `rust:alpine` stage compiles 
 | go-mux | ~3k | — | 260 KB |
 | java-gson | ~70k | — | 2.3 MB |
 | java-springboot | ~4.0M | — | 41 MB |
-| k8s-kubernetes | 5,627,707 | 11.3M | 225 MB |
 | os-nova | ~700k | — | 27 MB |
 | os-neutron | ~700k | — | 28 MB |
 | glance | ~180k | — | 7.3 MB |

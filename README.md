@@ -4,7 +4,7 @@ Two independent, containerized analysis repos, each self-contained (own driver s
 
 | Folder | What it is |
 |---|---|
-| `transit-repo/` | Repo analysis / ingestion: `tokei`, `scc`, `repomix`, `gitingest`, `files-to-prompt` |
+| `transit-repo/` | Repo analysis / ingestion + quality: `tokei`, `scc`, `repomix`, `gitingest`, `files-to-prompt`, plus security/code-quality tools (`run-quality.sh`, `ruff`, `bandit`, `semgrep`, `gosec`, `staticcheck`, `shellcheck`, `hadolint`, `gitleaks`) |
 | `internal-repo/` | Security analysis: SBOM (Syft), dependency scanning (Trivy, osv-scanner), secrets (gitleaks, ggshield), code analysis (opengrep, CodeQL), malware (ClamAV), network/web (nuclei, naabu, httpx) + documented services (SonarQube, ZAP, OpenVAS, Falco) |
 
 Both folders follow the same layout and are run independently:
