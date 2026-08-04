@@ -1,0 +1,29 @@
+==> Image internal-analyzers:latest already present (use -r/--rebuild to force)
+==> Cloning java-gson (shallow)
+==> [java-gson] osv-scanner already has output, skipping (-f to force)
+==> [java-gson] syft already has output, skipping (-f to force)
+==> [java-gson] trivy
+       -> /Users/pp123/Desktop/proj/multi-tool/internal-repo/artifacts/java-gson/trivy/
+==> [java-gson] gitleaks already has output, skipping (-f to force)
+==> [java-gson] trufflehog already has output, skipping (-f to force)
+==> [java-gson] ggshield
+       -> skipped: set GITGUARDIAN_API_KEY to enable ggshield
+==> [java-gson] opengrep already has output, skipping (-f to force)
+==> [java-gson] codeql
+       -> skipped: codeql not installed (GitHub ships an x86_64-only bundle; rebuild on amd64 to enable)
+==> [java-gson] clamav already has output, skipping (-f to force)
+==> Cloning java-springboot (shallow)
+==> [java-springboot] osv-scanner already has output, skipping (-f to force)
+==> [java-springboot] syft already has output, skipping (-f to force)
+==> [java-springboot] trivy
+       -> /Users/pp123/Desktop/proj/multi-tool/internal-repo/artifacts/java-springboot/trivy/
+==> [java-springboot] gitleaks already has output, skipping (-f to force)
+==> [java-springboot] trufflehog already has output, skipping (-f to force)
+==> [java-springboot] ggshield
+       -> skipped: set GITGUARDIAN_API_KEY to enable ggshield
+==> [java-springboot] opengrep already has output, skipping (-f to force)
+==> [java-springboot] codeql
+       -> skipped: codeql not installed (GitHub ships an x86_64-only bundle; rebuild on amd64 to enable)
+==> [java-springboot] clamav already has output, skipping (-f to force)
+==> Done. Artifacts in /Users/pp123/Desktop/proj/multi-tool/internal-repo/artifacts
+==> Cleaning up temp clones

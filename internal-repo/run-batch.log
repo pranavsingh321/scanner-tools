@@ -1,0 +1,174 @@
+==> Image internal-analyzers:latest already present (use -r/--rebuild to force)
+==> Cloning go-gin (shallow)
+==> [go-gin] osv-scanner
+       -> /Users/pp123/Desktop/proj/multi-tool/internal-repo/artifacts/go-gin/osv-scanner/
+==> [go-gin] syft
+       -> /Users/pp123/Desktop/proj/multi-tool/internal-repo/artifacts/go-gin/syft/
+==> [go-gin] trivy
+       -> /Users/pp123/Desktop/proj/multi-tool/internal-repo/artifacts/go-gin/trivy/
+==> [go-gin] gitleaks
+       -> /Users/pp123/Desktop/proj/multi-tool/internal-repo/artifacts/go-gin/gitleaks/
+==> [go-gin] trufflehog
+       -> /Users/pp123/Desktop/proj/multi-tool/internal-repo/artifacts/go-gin/trufflehog/
+==> [go-gin] ggshield
+       -> skipped: set GITGUARDIAN_API_KEY to enable ggshield
+==> [go-gin] opengrep
+       -> /Users/pp123/Desktop/proj/multi-tool/internal-repo/artifacts/go-gin/opengrep/
+==> [go-gin] codeql
+       -> skipped: codeql not installed (GitHub ships an x86_64-only bundle; rebuild on amd64 to enable)
+==> [go-gin] clamav
+       -> /Users/pp123/Desktop/proj/multi-tool/internal-repo/artifacts/go-gin/clamav/
+==> Cloning gin (shallow)
+==> [gin] osv-scanner
+       -> /Users/pp123/Desktop/proj/multi-tool/internal-repo/artifacts/gin/osv-scanner/
+==> [gin] syft
+       -> /Users/pp123/Desktop/proj/multi-tool/internal-repo/artifacts/gin/syft/
+==> [gin] trivy
+       -> /Users/pp123/Desktop/proj/multi-tool/internal-repo/artifacts/gin/trivy/
+==> [gin] gitleaks
+       -> /Users/pp123/Desktop/proj/multi-tool/internal-repo/artifacts/gin/gitleaks/
+==> [gin] trufflehog
+       -> /Users/pp123/Desktop/proj/multi-tool/internal-repo/artifacts/gin/trufflehog/
+==> [gin] ggshield
+       -> skipped: set GITGUARDIAN_API_KEY to enable ggshield
+==> [gin] opengrep
+       -> /Users/pp123/Desktop/proj/multi-tool/internal-repo/artifacts/gin/opengrep/
+==> [gin] codeql
+       -> skipped: codeql not installed (GitHub ships an x86_64-only bundle; rebuild on amd64 to enable)
+==> [gin] clamav
+       -> /Users/pp123/Desktop/proj/multi-tool/internal-repo/artifacts/gin/clamav/
+==> Cloning go-mux (shallow)
+==> [go-mux] osv-scanner
+       -> /Users/pp123/Desktop/proj/multi-tool/internal-repo/artifacts/go-mux/osv-scanner/
+==> [go-mux] syft
+       -> /Users/pp123/Desktop/proj/multi-tool/internal-repo/artifacts/go-mux/syft/
+==> [go-mux] trivy
+       -> /Users/pp123/Desktop/proj/multi-tool/internal-repo/artifacts/go-mux/trivy/
+==> [go-mux] gitleaks
+       -> /Users/pp123/Desktop/proj/multi-tool/internal-repo/artifacts/go-mux/gitleaks/
+==> [go-mux] trufflehog
+       -> /Users/pp123/Desktop/proj/multi-tool/internal-repo/artifacts/go-mux/trufflehog/
+==> [go-mux] ggshield
+       -> skipped: set GITGUARDIAN_API_KEY to enable ggshield
+==> [go-mux] opengrep
+       -> /Users/pp123/Desktop/proj/multi-tool/internal-repo/artifacts/go-mux/opengrep/
+==> [go-mux] codeql
+       -> skipped: codeql not installed (GitHub ships an x86_64-only bundle; rebuild on amd64 to enable)
+==> [go-mux] clamav
+       -> /Users/pp123/Desktop/proj/multi-tool/internal-repo/artifacts/go-mux/clamav/
+==> Cloning java-gson (shallow)
+==> [java-gson] osv-scanner
+       -> /Users/pp123/Desktop/proj/multi-tool/internal-repo/artifacts/java-gson/osv-scanner/
+==> [java-gson] syft
+       -> /Users/pp123/Desktop/proj/multi-tool/internal-repo/artifacts/java-gson/syft/
+==> [java-gson] trivy
+       -> /Users/pp123/Desktop/proj/multi-tool/internal-repo/artifacts/java-gson/trivy/
+==> [java-gson] gitleaks
+       -> /Users/pp123/Desktop/proj/multi-tool/internal-repo/artifacts/java-gson/gitleaks/
+==> [java-gson] trufflehog
+       -> /Users/pp123/Desktop/proj/multi-tool/internal-repo/artifacts/java-gson/trufflehog/
+==> [java-gson] ggshield
+       -> skipped: set GITGUARDIAN_API_KEY to enable ggshield
+==> [java-gson] opengrep
+       -> /Users/pp123/Desktop/proj/multi-tool/internal-repo/artifacts/java-gson/opengrep/
+==> [java-gson] codeql
+       -> skipped: codeql not installed (GitHub ships an x86_64-only bundle; rebuild on amd64 to enable)
+==> [java-gson] clamav
+       -> /Users/pp123/Desktop/proj/multi-tool/internal-repo/artifacts/java-gson/clamav/
+==> Cloning java-springboot (shallow)
+==> [java-springboot] osv-scanner
+       -> /Users/pp123/Desktop/proj/multi-tool/internal-repo/artifacts/java-springboot/osv-scanner/
+==> [java-springboot] syft
+       -> /Users/pp123/Desktop/proj/multi-tool/internal-repo/artifacts/java-springboot/syft/
+==> [java-springboot] trivy
+       -> /Users/pp123/Desktop/proj/multi-tool/internal-repo/artifacts/java-springboot/trivy/
+==> [java-springboot] gitleaks
+       -> /Users/pp123/Desktop/proj/multi-tool/internal-repo/artifacts/java-springboot/gitleaks/
+==> [java-springboot] trufflehog
+       -> /Users/pp123/Desktop/proj/multi-tool/internal-repo/artifacts/java-springboot/trufflehog/
+==> [java-springboot] ggshield
+       -> skipped: set GITGUARDIAN_API_KEY to enable ggshield
+==> [java-springboot] opengrep
+       -> /Users/pp123/Desktop/proj/multi-tool/internal-repo/artifacts/java-springboot/opengrep/
+==> [java-springboot] codeql
+       -> skipped: codeql not installed (GitHub ships an x86_64-only bundle; rebuild on amd64 to enable)
+==> [java-springboot] clamav
+       -> /Users/pp123/Desktop/proj/multi-tool/internal-repo/artifacts/java-springboot/clamav/
+==> Cloning os-nova (shallow)
+==> [os-nova] osv-scanner
+       -> /Users/pp123/Desktop/proj/multi-tool/internal-repo/artifacts/os-nova/osv-scanner/
+==> [os-nova] syft
+       -> /Users/pp123/Desktop/proj/multi-tool/internal-repo/artifacts/os-nova/syft/
+==> [os-nova] trivy
+       -> /Users/pp123/Desktop/proj/multi-tool/internal-repo/artifacts/os-nova/trivy/
+==> [os-nova] gitleaks
+       -> /Users/pp123/Desktop/proj/multi-tool/internal-repo/artifacts/os-nova/gitleaks/
+==> [os-nova] trufflehog
+       -> /Users/pp123/Desktop/proj/multi-tool/internal-repo/artifacts/os-nova/trufflehog/
+==> [os-nova] ggshield
+       -> skipped: set GITGUARDIAN_API_KEY to enable ggshield
+==> [os-nova] opengrep
+       -> /Users/pp123/Desktop/proj/multi-tool/internal-repo/artifacts/os-nova/opengrep/
+==> [os-nova] codeql
+       -> skipped: codeql not installed (GitHub ships an x86_64-only bundle; rebuild on amd64 to enable)
+==> [os-nova] clamav
+       -> /Users/pp123/Desktop/proj/multi-tool/internal-repo/artifacts/os-nova/clamav/
+==> Cloning os-neutron (shallow)
+==> [os-neutron] osv-scanner
+       -> /Users/pp123/Desktop/proj/multi-tool/internal-repo/artifacts/os-neutron/osv-scanner/
+==> [os-neutron] syft
+       -> /Users/pp123/Desktop/proj/multi-tool/internal-repo/artifacts/os-neutron/syft/
+==> [os-neutron] trivy
+       -> /Users/pp123/Desktop/proj/multi-tool/internal-repo/artifacts/os-neutron/trivy/
+==> [os-neutron] gitleaks
+       -> /Users/pp123/Desktop/proj/multi-tool/internal-repo/artifacts/os-neutron/gitleaks/
+==> [os-neutron] trufflehog
+       -> /Users/pp123/Desktop/proj/multi-tool/internal-repo/artifacts/os-neutron/trufflehog/
+==> [os-neutron] ggshield
+       -> skipped: set GITGUARDIAN_API_KEY to enable ggshield
+==> [os-neutron] opengrep
+       -> /Users/pp123/Desktop/proj/multi-tool/internal-repo/artifacts/os-neutron/opengrep/
+==> [os-neutron] codeql
+       -> skipped: codeql not installed (GitHub ships an x86_64-only bundle; rebuild on amd64 to enable)
+==> [os-neutron] clamav
+       -> /Users/pp123/Desktop/proj/multi-tool/internal-repo/artifacts/os-neutron/clamav/
+==> Cloning py-flask (shallow)
+==> [py-flask] osv-scanner
+       -> /Users/pp123/Desktop/proj/multi-tool/internal-repo/artifacts/py-flask/osv-scanner/
+==> [py-flask] syft
+       -> /Users/pp123/Desktop/proj/multi-tool/internal-repo/artifacts/py-flask/syft/
+==> [py-flask] trivy
+       -> /Users/pp123/Desktop/proj/multi-tool/internal-repo/artifacts/py-flask/trivy/
+==> [py-flask] gitleaks
+       -> /Users/pp123/Desktop/proj/multi-tool/internal-repo/artifacts/py-flask/gitleaks/
+==> [py-flask] trufflehog
+       -> /Users/pp123/Desktop/proj/multi-tool/internal-repo/artifacts/py-flask/trufflehog/
+==> [py-flask] ggshield
+       -> skipped: set GITGUARDIAN_API_KEY to enable ggshield
+==> [py-flask] opengrep
+       -> /Users/pp123/Desktop/proj/multi-tool/internal-repo/artifacts/py-flask/opengrep/
+==> [py-flask] codeql
+       -> skipped: codeql not installed (GitHub ships an x86_64-only bundle; rebuild on amd64 to enable)
+==> [py-flask] clamav
+       -> /Users/pp123/Desktop/proj/multi-tool/internal-repo/artifacts/py-flask/clamav/
+==> Cloning glance (shallow)
+==> [glance] osv-scanner
+       -> /Users/pp123/Desktop/proj/multi-tool/internal-repo/artifacts/glance/osv-scanner/
+==> [glance] syft
+       -> /Users/pp123/Desktop/proj/multi-tool/internal-repo/artifacts/glance/syft/
+==> [glance] trivy
+       -> /Users/pp123/Desktop/proj/multi-tool/internal-repo/artifacts/glance/trivy/
+==> [glance] gitleaks
+       -> /Users/pp123/Desktop/proj/multi-tool/internal-repo/artifacts/glance/gitleaks/
+==> [glance] trufflehog
+       -> /Users/pp123/Desktop/proj/multi-tool/internal-repo/artifacts/glance/trufflehog/
+==> [glance] ggshield
+       -> skipped: set GITGUARDIAN_API_KEY to enable ggshield
+==> [glance] opengrep
+       -> /Users/pp123/Desktop/proj/multi-tool/internal-repo/artifacts/glance/opengrep/
+==> [glance] codeql
+       -> skipped: codeql not installed (GitHub ships an x86_64-only bundle; rebuild on amd64 to enable)
+==> [glance] clamav
+       -> /Users/pp123/Desktop/proj/multi-tool/internal-repo/artifacts/glance/clamav/
+==> Done. Artifacts in /Users/pp123/Desktop/proj/multi-tool/internal-repo/artifacts
+==> Cleaning up temp clones
