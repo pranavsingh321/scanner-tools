@@ -1,3 +1,0 @@
-[console_scripts]
-internal-graph = internal_graph:main
-transit-graph = transit_graph:main

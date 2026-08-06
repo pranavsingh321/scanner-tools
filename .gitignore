@@ -1,2 +1,15 @@
 .multi-work/
 *.tmp
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+*.egg-info/
+
+# Tool output / logs
+*.log
+langgraph-pipeline/artifacts/
+langgraph-pipeline/quality/
+langgraph-pipeline/summary/
+langgraph-pipeline/*.pdf
