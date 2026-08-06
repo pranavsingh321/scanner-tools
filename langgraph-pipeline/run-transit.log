@@ -1,0 +1,2106 @@
+[1/2] STEP 1/4: FROM rust:alpine AS build
+Resolved "rust" as an alias (/usr/share/containers/registries.conf.d/000-shortnames.conf)
+Trying to pull docker.io/library/rust:alpine...
+Getting image source signatures
+Copying blob sha256:183b6f598a30f0199416cbb70e19fd62927387b486991a6170546e409f5ce9a7
+Copying blob sha256:8b9c2b726b5180e4efad6d279289f964a1f98a67d0ccc83a245ea214877be791
+Copying blob sha256:5de55e5ef9c033997441461efe7ba23a986db059c0bb78b38f84ee0d72b99167
+Copying config sha256:d4155119ae49867b04ad46963a98c5a1cbdaf7efba38ec061de6310a4dcb2dd0
+Writing manifest to image destination
+[1/2] STEP 2/4: RUN apk add --no-cache build-base musl-dev git go
+( 1/20) Installing libmagic (5.47-r2)
+( 2/20) Installing file (5.47-r2)
+( 3/20) Installing libstdc++-dev (15.2.0-r5)
+( 4/20) Installing g++ (15.2.0-r5)
+( 5/20) Installing make (4.4.1-r4)
+( 6/20) Installing fortify-headers (3.0.1-r2)
+( 7/20) Installing patch (2.8-r0)
+( 8/20) Installing build-base (0.5-r4)
+( 9/20) Installing brotli-libs (1.2.0-r1)
+(10/20) Installing c-ares (1.34.8-r0)
+(11/20) Installing libunistring (1.4.2-r0)
+(12/20) Installing libidn2 (2.3.8-r0)
+(13/20) Installing nghttp2-libs (1.69.0-r0)
+(14/20) Installing libpsl (0.21.5-r3)
+(15/20) Installing libcurl (8.21.0-r0)
+(16/20) Installing libexpat (2.8.2-r0)
+(17/20) Installing pcre2 (10.47-r1)
+(18/20) Installing git (2.54.0-r0)
+(19/20) Installing git-init-template (2.54.0-r0)
+(20/20) Installing go (1.26.3-r0)
+Executing busybox-1.37.0-r31.trigger
+OK: 432.6 MiB in 51 packages
+--> fcb4c46f3718
+[1/2] STEP 3/4: RUN cargo install tokei --locked
+    Updating crates.io index
+ Downloading crates ...
+  Downloaded tokei v14.0.0
+  Installing tokei v14.0.0
+    Updating crates.io index
+warning: package `crossbeam-channel v0.5.13` in Cargo.lock is yanked in registry `crates-io`, consider running without --locked
+    Updating crates.io index
+ Downloading crates ...
+  Downloaded errno v0.3.9
+  Downloaded anstyle-query v1.1.1
+  Downloaded anstream v0.6.15
+  Downloaded cfg-if v1.0.0
+  Downloaded grep-matcher v0.1.7
+  Downloaded serde_spanned v0.6.7
+  Downloaded colorchoice v1.0.2
+  Downloaded clap-cargo v0.18.3
+  Downloaded anstyle v1.0.13
+  Downloaded anstyle-parse v0.2.5
+  Downloaded clap_lex v0.7.6
+  Downloaded quote v1.0.36
+  Downloaded globwalk v0.9.1
+  Downloaded clap_derive v4.5.49
+  Downloaded ignore v0.4.22
+  Downloaded crossbeam-epoch v0.9.18
+  Downloaded clap v4.5.53
+  Downloaded crossbeam-utils v0.8.20
+  Downloaded serde_derive v1.0.208
+  Downloaded aho-corasick v1.1.3
+  Downloaded generic-array v0.14.7
+  Downloaded clap_builder v4.5.53
+  Downloaded crossbeam-deque v0.8.5
+  Downloaded env_filter v0.1.2
+  Downloaded cpufeatures v0.2.13
+  Downloaded colored v2.1.0
+  Downloaded equivalent v1.0.1
+  Downloaded home v0.5.9
+  Downloaded memmap2 v0.9.4
+  Downloaded either v1.13.0
+  Downloaded heck v0.5.0
+  Downloaded encoding_rs_io v0.1.7
+  Downloaded libm v0.2.8
+  Downloaded regex-syntax v0.8.4
+  Downloaded crossbeam-channel v0.5.13
+  Downloaded grep-searcher v0.1.13
+  Downloaded itertools v0.11.0
+  Downloaded parking_lot_core v0.9.10
+  Downloaded deunicode v1.6.0
+  Downloaded getrandom v0.2.15
+  Downloaded humansize v2.1.3
+  Downloaded chrono-tz-build v0.3.0
+  Downloaded lock_api v0.4.12
+  Downloaded num-format v0.4.4
+  Downloaded derive_arbitrary v1.3.2
+  Downloaded env_logger v0.11.5
+  Downloaded dashmap v6.0.1
+  Downloaded parking_lot v0.12.3
+  Downloaded json5 v0.4.1
+  Downloaded etcetera v0.8.0
+  Downloaded is_terminal_polyfill v1.70.1
+  Downloaded itoa v1.0.11
+  Downloaded globset v0.4.14
+  Downloaded scopeguard v1.2.0
+  Downloaded rand_chacha v0.3.1
+  Downloaded phf_generator v0.11.2
+  Downloaded crypto-common v0.1.6
+  Downloaded byteorder v1.5.0
+  Downloaded rand_core v0.6.4
+  Downloaded bitflags v2.6.0
+  Downloaded iana-time-zone v0.1.60
+  Downloaded memchr v2.7.4
+  Downloaded lazy_static v1.5.0
+  Downloaded phf_shared v0.11.2
+  Downloaded block-buffer v0.10.4
+  Downloaded phf v0.11.2
+  Downloaded phf_codegen v0.11.2
+  Downloaded ppv-lite86 v0.2.20
+  Downloaded humantime v2.1.0
+  Downloaded same-file v1.0.6
+  Downloaded autocfg v1.3.0
+  Downloaded percent-encoding v2.3.1
+  Downloaded digest v0.10.7
+  Downloaded arrayvec v0.7.6
+  Downloaded pest_generator v2.7.11
+  Downloaded log v0.4.22
+  Downloaded syn v2.0.74
+  Downloaded arbitrary v1.3.2
+  Downloaded once_cell v1.19.0
+  Downloaded thiserror v1.0.63
+  Downloaded pest_meta v2.7.11
+  Downloaded utf8parse v0.2.2
+  Downloaded num-traits v0.2.19
+  Downloaded proc-macro2 v1.0.86
+  Downloaded table_formatter v0.6.1
+  Downloaded ryu v1.0.18
+  Downloaded parse-zoneinfo v0.3.1
+  Downloaded pest_derive v2.7.11
+  Downloaded indexmap v2.4.0
+  Downloaded rayon-core v1.12.1
+  Downloaded unic-ucd-version v0.9.0
+  Downloaded serde v1.0.208
+  Downloaded rand v0.8.5
+  Downloaded pest v2.7.11
+  Downloaded toml_datetime v0.6.8
+  Downloaded hashbrown v0.14.5
+  Downloaded zerocopy-derive v0.7.35
+  Downloaded serde_json v1.0.125
+  Downloaded rayon v1.10.0
+  Downloaded regex v1.10.6
+  Downloaded chrono v0.4.38
+  Downloaded unic-segment v0.9.0
+  Downloaded unic-ucd-segment v0.9.0
+  Downloaded unicode-ident v1.0.12
+  Downloaded chrono-tz v0.9.0
+  Downloaded rustix v0.38.34
+  Downloaded bstr v1.10.0
+  Downloaded siphasher v0.3.11
+  Downloaded unic-char-range v0.9.0
+  Downloaded version_check v0.9.5
+  Downloaded sha2 v0.10.8
+  Downloaded regex-automata v0.4.7
+  Downloaded libc v0.2.156
+  Downloaded ucd-trie v0.1.6
+  Downloaded toml v0.8.19
+  Downloaded winnow v0.6.18
+  Downloaded terminal_size v0.4.1
+  Downloaded unic-char-property v0.9.0
+  Downloaded unic-common v0.9.0
+  Downloaded term_size v0.3.2
+  Downloaded encoding_rs v0.8.34
+  Downloaded linux-raw-sys v0.4.14
+  Downloaded strsim v0.11.1
+  Downloaded tera v1.20.0
+  Downloaded toml_edit v0.22.20
+  Downloaded thiserror-impl v1.0.63
+  Downloaded typenum v1.17.0
+  Downloaded slug v0.1.6
+  Downloaded zerocopy v0.7.35
+  Downloaded smallvec v1.13.2
+  Downloaded walkdir v2.5.0
+   Compiling proc-macro2 v1.0.86
+   Compiling unicode-ident v1.0.12
+   Compiling libc v0.2.156
+   Compiling memchr v2.7.4
+   Compiling byteorder v1.5.0
+   Compiling thiserror v1.0.63
+   Compiling aho-corasick v1.1.3
+   Compiling cfg-if v1.0.0
+   Compiling regex-syntax v0.8.4
+   Compiling autocfg v1.3.0
+   Compiling quote v1.0.36
+   Compiling getrandom v0.2.15
+   Compiling syn v2.0.74
+   Compiling rand_core v0.6.4
+   Compiling siphasher v0.3.11
+   Compiling phf_shared v0.11.2
+   Compiling crossbeam-utils v0.8.20
+   Compiling serde v1.0.208
+   Compiling ucd-trie v0.1.6
+   Compiling regex-automata v0.4.7
+   Compiling phf v0.11.2
+   Compiling num-traits v0.2.19
+   Compiling serde_json v1.0.125
+   Compiling once_cell v1.19.0
+   Compiling crossbeam-epoch v0.9.18
+   Compiling bstr v1.10.0
+   Compiling zerocopy-derive v0.7.35
+   Compiling zerocopy v0.7.35
+   Compiling thiserror-impl v1.0.63
+   Compiling ppv-lite86 v0.2.20
+   Compiling rand_chacha v0.3.1
+   Compiling rand v0.8.5
+   Compiling regex v1.10.6
+   Compiling pest v2.7.11
+   Compiling parse-zoneinfo v0.3.1
+   Compiling phf_generator v0.11.2
+   Compiling phf_codegen v0.11.2
+   Compiling serde_derive v1.0.208
+   Compiling chrono-tz-build v0.3.0
+   Compiling pest_meta v2.7.11
+   Compiling unic-char-range v0.9.0
+   Compiling libm v0.2.8
+   Compiling unic-common v0.9.0
+   Compiling rustix v0.38.34
+   Compiling utf8parse v0.2.2
+   Compiling log v0.4.22
+   Compiling same-file v1.0.6
+   Compiling walkdir v2.5.0
+   Compiling globset v0.4.14
+   Compiling pest_generator v2.7.11
+   Compiling anstyle-parse v0.2.5
+   Compiling unic-ucd-version v0.9.0
+   Compiling unic-char-property v0.9.0
+   Compiling chrono-tz v0.9.0
+   Compiling crossbeam-deque v0.8.5
+   Compiling is_terminal_polyfill v1.70.1
+   Compiling bitflags v2.6.0
+   Compiling iana-time-zone v0.1.60
+   Compiling anstyle v1.0.13
+   Compiling colorchoice v1.0.2
+   Compiling anstyle-query v1.1.1
+   Compiling linux-raw-sys v0.4.14
+   Compiling anstream v0.6.15
+   Compiling chrono v0.4.38
+   Compiling ignore v0.4.22
+   Compiling pest_derive v2.7.11
+   Compiling unic-ucd-segment v0.9.0
+   Compiling lock_api v0.4.12
+   Compiling hashbrown v0.14.5
+   Compiling deunicode v1.6.0
+   Compiling itoa v1.0.11
+   Compiling parking_lot_core v0.9.10
+   Compiling ryu v1.0.18
+   Compiling globwalk v0.9.1
+   Compiling slug v0.1.6
+   Compiling humansize v2.1.3
+   Compiling unic-segment v0.9.0
+   Compiling terminal_size v0.4.1
+   Compiling lazy_static v1.5.0
+   Compiling percent-encoding v2.3.1
+   Compiling smallvec v1.13.2
+   Compiling scopeguard v1.2.0
+   Compiling equivalent v1.0.1
+   Compiling rayon-core v1.12.1
+   Compiling strsim v0.11.1
+   Compiling clap_lex v0.7.6
+   Compiling heck v0.5.0
+   Compiling either v1.13.0
+   Compiling clap_derive v4.5.49
+   Compiling clap_builder v4.5.53
+   Compiling indexmap v2.4.0
+   Compiling json5 v0.4.1
+   Compiling tera v1.20.0
+   Compiling serde_spanned v0.6.7
+   Compiling toml_datetime v0.6.8
+   Compiling encoding_rs v0.8.34
+   Compiling winnow v0.6.18
+   Compiling encoding_rs_io v0.1.7
+   Compiling toml_edit v0.22.20
+   Compiling colored v2.1.0
+   Compiling tokei v14.0.0
+   Compiling clap v4.5.53
+   Compiling env_filter v0.1.2
+   Compiling itertools v0.11.0
+   Compiling derive_arbitrary v1.3.2
+   Compiling memmap2 v0.9.4
+   Compiling grep-matcher v0.1.7
+   Compiling arrayvec v0.7.6
+   Compiling home v0.5.9
+   Compiling humantime v2.1.0
+   Compiling etcetera v0.8.0
+   Compiling dashmap v6.0.1
+   Compiling env_logger v0.11.5
+   Compiling num-format v0.4.4
+   Compiling grep-searcher v0.1.13
+   Compiling table_formatter v0.6.1
+   Compiling arbitrary v1.3.2
+   Compiling toml v0.8.19
+   Compiling rayon v1.10.0
+   Compiling clap-cargo v0.18.3
+   Compiling parking_lot v0.12.3
+   Compiling term_size v0.3.2
+   Compiling crossbeam-channel v0.5.13
+    Finished `release` profile [optimized] target(s) in 1m 52s
+  Installing /usr/local/cargo/bin/tokei
+   Installed package `tokei v14.0.0` (executable `tokei`)
+--> 2eb5e8482641
+[1/2] STEP 4/4: RUN go install github.com/boyter/scc/v3@latest
+go: downloading github.com/boyter/scc/v3 v3.7.0
+go: downloading github.com/boyter/scc v2.12.0+incompatible
+go: downloading github.com/spf13/cobra v1.10.1
+go: downloading github.com/spf13/pflag v1.0.10
+go: downloading github.com/agnivade/levenshtein v1.2.2-0.20250519083737-420867539855
+go: downloading github.com/boyter/gocodewalker v1.5.2-0.20260227212453-19676720409f
+go: downloading github.com/json-iterator/go v1.1.12
+go: downloading github.com/mattn/go-runewidth v0.0.19
+go: downloading go.yaml.in/yaml/v2 v2.4.3
+go: downloading golang.org/x/crypto v0.45.0
+go: downloading golang.org/x/text v0.31.0
+go: downloading golang.org/x/sync v0.18.0
+go: downloading github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd
+go: downloading github.com/modern-go/reflect2 v1.0.2
+go: downloading github.com/clipperhouse/uax29/v2 v2.2.0
+go: downloading github.com/danwakefield/fnmatch v0.0.0-20160403171240-cbb64ac3d964
+--> f3ac9b7f53f9
+[2/2] STEP 1/7: FROM alpine:3.21
+Resolved "alpine" as an alias (/usr/share/containers/registries.conf.d/000-shortnames.conf)
+Trying to pull docker.io/library/alpine:3.21...
+Getting image source signatures
+Copying blob sha256:2dd7199cff98a7400e801cbfad6de906972a4e3dd0a749d4c1b80f5a1e3e4108
+Copying config sha256:2155344e09b47f8ea09459100e050bed74b5202316318fd0ad0f7f6856089efc
+Writing manifest to image destination
+[2/2] STEP 2/7: RUN apk add --no-cache git ca-certificates nodejs npm python3 py3-pip
+fetch https://dl-cdn.alpinelinux.org/alpine/v3.21/main/aarch64/APKINDEX.tar.gz
+fetch https://dl-cdn.alpinelinux.org/alpine/v3.21/community/aarch64/APKINDEX.tar.gz
+(1/44) Installing ca-certificates (20260413-r0)
+(2/44) Installing brotli-libs (1.1.0-r2)
+(3/44) Installing c-ares (1.34.8-r0)
+(4/44) Installing libunistring (1.2-r0)
+(5/44) Installing libidn2 (2.3.7-r0)
+(6/44) Installing nghttp2-libs (1.69.0-r0)
+(7/44) Installing libpsl (0.21.5-r3)
+(8/44) Installing zstd-libs (1.5.6-r2)
+(9/44) Installing libcurl (8.14.1-r2)
+(10/44) Installing libexpat (2.8.2-r0)
+(11/44) Installing pcre2 (10.43-r0)
+(12/44) Installing git (2.47.3-r0)
+(13/44) Installing git-init-template (2.47.3-r0)
+(14/44) Installing libgcc (14.2.0-r4)
+(15/44) Installing libstdc++ (14.2.0-r4)
+(16/44) Installing ada-libs (2.9.2-r1)
+(17/44) Installing icu-data-en (74.2-r1)
+Executing icu-data-en-74.2-r1.post-install
+*
+* If you need ICU with non-English locales and legacy charset support, install
+* package icu-data-full.
+*
+(18/44) Installing icu-libs (74.2-r1)
+(19/44) Installing simdjson (3.10.1-r0)
+(20/44) Installing simdutf (5.6.3-r0)
+(21/44) Installing sqlite-libs (3.48.0-r4)
+(22/44) Installing nodejs (22.23.2-r0)
+(23/44) Installing npm (10.9.1-r0)
+(24/44) Installing libbz2 (1.0.8-r6)
+(25/44) Installing libffi (3.4.7-r0)
+(26/44) Installing gdbm (1.24-r0)
+(27/44) Installing xz-libs (5.8.3-r0)
+(28/44) Installing mpdecimal (4.0.0-r0)
+(29/44) Installing ncurses-terminfo-base (6.5_p20241006-r3)
+(30/44) Installing libncursesw (6.5_p20241006-r3)
+(31/44) Installing libpanelw (6.5_p20241006-r3)
+(32/44) Installing readline (8.2.13-r0)
+(33/44) Installing python3 (3.12.13-r0)
+(34/44) Installing python3-pycache-pyc0 (3.12.13-r0)
+(35/44) Installing pyc (3.12.13-r0)
+(36/44) Installing py3-setuptools-pyc (70.3.0-r0)
+(37/44) Installing py3-pip-pyc (24.3.1-r0)
+(38/44) Installing py3-parsing (3.1.4-r0)
+(39/44) Installing py3-parsing-pyc (3.1.4-r0)
+(40/44) Installing py3-packaging-pyc (24.2-r0)
+(41/44) Installing python3-pyc (3.12.13-r0)
+(42/44) Installing py3-packaging (24.2-r0)
+(43/44) Installing py3-setuptools (70.3.0-r0)
+(44/44) Installing py3-pip (24.3.1-r0)
+Executing busybox-1.37.0-r14.trigger
+Executing ca-certificates-20260413-r0.trigger
+OK: 141 MiB in 59 packages
+--> 249f71fe5454
+[2/2] STEP 3/7: COPY --from=build /usr/local/cargo/bin/tokei /usr/local/bin/tokei
+--> df697055f89f
+[2/2] STEP 4/7: COPY --from=build /root/go/bin/scc /usr/local/bin/scc
+--> f78b3ee54b2d
+[2/2] STEP 5/7: RUN npm install -g repomix
+
+added 170 packages in 26s
+
+50 packages are looking for funding
+  run `npm fund` for details
+--> 9e3fcb83fe22
+[2/2] STEP 6/7: RUN pip3 install --no-cache-dir --break-system-packages gitingest files-to-prompt
+Collecting gitingest
+  Downloading gitingest-0.3.1-py3-none-any.whl.metadata (17 kB)
+Collecting files-to-prompt
+  Downloading files_to_prompt-0.6-py3-none-any.whl.metadata (7.4 kB)
+Collecting click>=8.0.0 (from gitingest)
+  Downloading click-8.4.2-py3-none-any.whl.metadata (2.6 kB)
+Collecting httpx (from gitingest)
+  Downloading httpx-0.28.1-py3-none-any.whl.metadata (7.1 kB)
+Collecting loguru>=0.7.0 (from gitingest)
+  Downloading loguru-0.7.3-py3-none-any.whl.metadata (22 kB)
+Collecting pathspec>=0.12.1 (from gitingest)
+  Downloading pathspec-1.1.1-py3-none-any.whl.metadata (14 kB)
+Collecting pydantic (from gitingest)
+  Downloading pydantic-2.13.4-py3-none-any.whl.metadata (109 kB)
+Collecting python-dotenv (from gitingest)
+  Downloading python_dotenv-1.2.2-py3-none-any.whl.metadata (27 kB)
+Collecting starlette>=0.40.0 (from gitingest)
+  Downloading starlette-1.4.1-py3-none-any.whl.metadata (6.4 kB)
+Collecting tiktoken>=0.7.0 (from gitingest)
+  Downloading tiktoken-0.13.0-cp312-cp312-musllinux_1_2_aarch64.whl.metadata (6.7 kB)
+Collecting anyio<5,>=3.6.2 (from starlette>=0.40.0->gitingest)
+  Downloading anyio-4.14.2-py3-none-any.whl.metadata (4.6 kB)
+Collecting typing-extensions>=4.10.0 (from starlette>=0.40.0->gitingest)
+  Downloading typing_extensions-4.16.0-py3-none-any.whl.metadata (3.3 kB)
+Collecting regex (from tiktoken>=0.7.0->gitingest)
+  Downloading regex-2026.7.19-cp312-cp312-musllinux_1_2_aarch64.whl.metadata (40 kB)
+Collecting requests (from tiktoken>=0.7.0->gitingest)
+  Downloading requests-2.34.2-py3-none-any.whl.metadata (4.8 kB)
+Collecting certifi (from httpx->gitingest)
+  Downloading certifi-2026.7.22-py3-none-any.whl.metadata (2.5 kB)
+Collecting httpcore==1.* (from httpx->gitingest)
+  Downloading httpcore-1.0.9-py3-none-any.whl.metadata (21 kB)
+Collecting idna (from httpx->gitingest)
+  Downloading idna-3.18-py3-none-any.whl.metadata (6.1 kB)
+Collecting h11>=0.16 (from httpcore==1.*->httpx->gitingest)
+  Downloading h11-0.16.0-py3-none-any.whl.metadata (8.3 kB)
+Collecting annotated-types>=0.6.0 (from pydantic->gitingest)
+  Downloading annotated_types-0.8.0-py3-none-any.whl.metadata (15 kB)
+Collecting pydantic-core==2.46.4 (from pydantic->gitingest)
+  Downloading pydantic_core-2.46.4-cp312-cp312-musllinux_1_1_aarch64.whl.metadata (6.6 kB)
+Collecting typing-inspection>=0.4.2 (from pydantic->gitingest)
+  Downloading typing_inspection-0.4.2-py3-none-any.whl.metadata (2.6 kB)
+Collecting charset_normalizer<4,>=2 (from requests->tiktoken>=0.7.0->gitingest)
+  Downloading charset_normalizer-3.4.9-cp312-cp312-musllinux_1_2_aarch64.whl.metadata (41 kB)
+Collecting urllib3<3,>=1.26 (from requests->tiktoken>=0.7.0->gitingest)
+  Downloading urllib3-2.7.0-py3-none-any.whl.metadata (6.9 kB)
+Downloading gitingest-0.3.1-py3-none-any.whl (68 kB)
+Downloading files_to_prompt-0.6-py3-none-any.whl (10 kB)
+Downloading click-8.4.2-py3-none-any.whl (119 kB)
+Downloading loguru-0.7.3-py3-none-any.whl (61 kB)
+Downloading pathspec-1.1.1-py3-none-any.whl (57 kB)
+Downloading starlette-1.4.1-py3-none-any.whl (74 kB)
+Downloading tiktoken-0.13.0-cp312-cp312-musllinux_1_2_aarch64.whl (1.2 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.2/1.2 MB 2.2 MB/s eta 0:00:00
+Downloading httpx-0.28.1-py3-none-any.whl (73 kB)
+Downloading httpcore-1.0.9-py3-none-any.whl (78 kB)
+Downloading pydantic-2.13.4-py3-none-any.whl (472 kB)
+Downloading pydantic_core-2.46.4-cp312-cp312-musllinux_1_1_aarch64.whl (2.2 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 2.2/2.2 MB 6.4 MB/s eta 0:00:00
+Downloading python_dotenv-1.2.2-py3-none-any.whl (22 kB)
+Downloading annotated_types-0.8.0-py3-none-any.whl (13 kB)
+Downloading anyio-4.14.2-py3-none-any.whl (125 kB)
+Downloading idna-3.18-py3-none-any.whl (65 kB)
+Downloading typing_extensions-4.16.0-py3-none-any.whl (45 kB)
+Downloading typing_inspection-0.4.2-py3-none-any.whl (14 kB)
+Downloading certifi-2026.7.22-py3-none-any.whl (136 kB)
+Downloading regex-2026.7.19-cp312-cp312-musllinux_1_2_aarch64.whl (784 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 784.3/784.3 kB 18.1 MB/s eta 0:00:00
+Downloading requests-2.34.2-py3-none-any.whl (73 kB)
+Downloading charset_normalizer-3.4.9-cp312-cp312-musllinux_1_2_aarch64.whl (218 kB)
+Downloading h11-0.16.0-py3-none-any.whl (37 kB)
+Downloading urllib3-2.7.0-py3-none-any.whl (131 kB)
+Installing collected packages: urllib3, typing-extensions, regex, python-dotenv, pathspec, loguru, idna, h11, click, charset_normalizer, certifi, annotated-types, typing-inspection, requests, pydantic-core, httpcore, files-to-prompt, anyio, tiktoken, starlette, pydantic, httpx, gitingest
+Successfully installed annotated-types-0.8.0 anyio-4.14.2 certifi-2026.7.22 charset_normalizer-3.4.9 click-8.4.2 files-to-prompt-0.6 gitingest-0.3.1 h11-0.16.0 httpcore-1.0.9 httpx-0.28.1 idna-3.18 loguru-0.7.3 pathspec-1.1.1 pydantic-2.13.4 pydantic-core-2.46.4 python-dotenv-1.2.2 regex-2026.7.19 requests-2.34.2 starlette-1.4.1 tiktoken-0.13.0 typing-extensions-4.16.0 typing-inspection-0.4.2 urllib3-2.7.0
+WARNING: Running pip as the 'root' user can result in broken permissions and conflicting behaviour with the system package manager, possibly rendering your system unusable.It is recommended to use a virtual environment instead: https://pip.pypa.io/warnings/venv. Use the --root-user-action option if you know what you are doing and want to suppress this warning.
+--> 40d34a909120
+[2/2] STEP 7/7: WORKDIR /repo
+[2/2] COMMIT analyzers:latest
+--> 08444aa06606
+Successfully tagged localhost/analyzers:latest
+08444aa06606d5c6f83a987d02169e187d96ae405c0de3e2e7f8dc378ba07d16
+STEP 1/9: FROM python:3.12-slim
+Resolved "python" as an alias (/usr/share/containers/registries.conf.d/000-shortnames.conf)
+Trying to pull docker.io/library/python:3.12-slim...
+Getting image source signatures
+Copying blob sha256:ffe2235b438bf2d5a9725b6b391ca866f3ad9fa86d047bfa7f87b28b5f5bfa5a
+Copying blob sha256:1b7200988f192e72703c70486d494e2457935ac9b0f031ac09eb115b01a12d45
+Copying blob sha256:a2b3b32822dbd2735c2a373a3c64705aa5af5160784ec389567d91964e62e23d
+Copying blob sha256:e81bdc779ed996c55fa787ea36746f5042413c8b38f3521f3d6211b45af08058
+Copying config sha256:0445c02b019cf3f9d61bac90acaac8e2d37ae6991b3384bd9d75fec93bcdfe98
+Writing manifest to image destination
+STEP 2/9: ARG TARGETARCH
+--> 155d7b74a5a2
+STEP 3/9: ENV GOSEC_VERSION=2.28.0     STATICCHECK_VERSION=2026.1     GITLEAKS_VERSION=8.30.1     HADOLINT_VERSION=2.15.1     GO_VERSION=1.26.5     SEMGREP_RULES=/opt/semgrep/default.yaml
+--> 1f596c449158
+STEP 4/9: RUN apt-get update && apt-get install -y --no-install-recommends         git ca-certificates curl shellcheck     && rm -rf /var/lib/apt/lists/*
+Hit:1 http://deb.debian.org/debian trixie InRelease
+Get:2 http://deb.debian.org/debian trixie-updates InRelease [47.3 kB]
+Get:3 http://deb.debian.org/debian-security trixie-security InRelease [43.4 kB]
+Get:4 http://deb.debian.org/debian trixie/main arm64 Packages [9607 kB]
+Get:5 http://deb.debian.org/debian trixie-updates/main arm64 Packages [4424 B]
+Get:6 http://deb.debian.org/debian-security trixie-security/main arm64 Packages [235 kB]
+Fetched 9938 kB in 5s (2041 kB/s)
+Reading package lists...
+Reading package lists...
+Building dependency tree...
+Reading state information...
+ca-certificates is already the newest version (20250419).
+The following additional packages will be installed:
+  git-man libbrotli1 libcom-err2 libcurl3t64-gnutls libcurl4t64 liberror-perl
+  libexpat1 libgdbm-compat4t64 libgnutls30t64 libgssapi-krb5-2 libidn2-0
+  libk5crypto3 libkeyutils1 libkrb5-3 libkrb5support0 libldap2 libnghttp2-14
+  libnghttp3-9 libngtcp2-16 libngtcp2-crypto-gnutls8 libp11-kit0 libperl5.40
+  libpsl5t64 librtmp1 libsasl2-2 libsasl2-modules-db libssh2-1t64 libtasn1-6
+  libunistring5 perl perl-modules-5.40
+Suggested packages:
+  gettext-base git-doc git-email git-gui gitk gitweb git-cvs git-mediawiki
+  git-svn gnutls-bin krb5-doc krb5-user sensible-utils perl-doc
+  libterm-readline-gnu-perl | libterm-readline-perl-perl make
+  libtap-harness-archive-perl
+Recommended packages:
+  bash-completion patch less ssh-client krb5-locales libldap-common
+  publicsuffix libsasl2-modules
+The following NEW packages will be installed:
+  curl git git-man libbrotli1 libcom-err2 libcurl3t64-gnutls libcurl4t64
+  liberror-perl libexpat1 libgdbm-compat4t64 libgnutls30t64 libgssapi-krb5-2
+  libidn2-0 libk5crypto3 libkeyutils1 libkrb5-3 libkrb5support0 libldap2
+  libnghttp2-14 libnghttp3-9 libngtcp2-16 libngtcp2-crypto-gnutls8 libp11-kit0
+  libperl5.40 libpsl5t64 librtmp1 libsasl2-2 libsasl2-modules-db libssh2-1t64
+  libtasn1-6 libunistring5 perl perl-modules-5.40 shellcheck
+0 upgraded, 34 newly installed, 0 to remove and 0 not upgraded.
+Need to get 28.5 MB of archives.
+After this operation, 165 MB of additional disk space will be used.
+Get:1 http://deb.debian.org/debian-security trixie-security/main arm64 libexpat1 arm64 2.8.2-1~deb13u1 [108 kB]
+Get:2 http://deb.debian.org/debian trixie/main arm64 perl-modules-5.40 all 5.40.1-6 [3019 kB]
+Get:3 http://deb.debian.org/debian trixie/main arm64 libgdbm-compat4t64 arm64 1.24-2 [50.3 kB]
+Get:4 http://deb.debian.org/debian trixie/main arm64 libperl5.40 arm64 5.40.1-6 [4142 kB]
+Get:5 http://deb.debian.org/debian trixie/main arm64 perl arm64 5.40.1-6 [267 kB]
+Get:6 http://deb.debian.org/debian trixie/main arm64 libbrotli1 arm64 1.1.0-2+b7 [308 kB]
+Get:7 http://deb.debian.org/debian trixie/main arm64 libkrb5support0 arm64 1.21.3-5+deb13u1 [32.5 kB]
+Get:8 http://deb.debian.org/debian trixie/main arm64 libcom-err2 arm64 1.47.2-3+b11 [24.9 kB]
+Get:9 http://deb.debian.org/debian trixie/main arm64 libk5crypto3 arm64 1.21.3-5+deb13u1 [81.4 kB]
+Get:10 http://deb.debian.org/debian trixie/main arm64 libkeyutils1 arm64 1.6.3-6 [9716 B]
+Get:11 http://deb.debian.org/debian trixie/main arm64 libkrb5-3 arm64 1.21.3-5+deb13u1 [308 kB]
+Get:12 http://deb.debian.org/debian trixie/main arm64 libgssapi-krb5-2 arm64 1.21.3-5+deb13u1 [128 kB]
+Get:13 http://deb.debian.org/debian trixie/main arm64 libunistring5 arm64 1.3-2 [453 kB]
+Get:14 http://deb.debian.org/debian trixie/main arm64 libidn2-0 arm64 2.3.8-2 [107 kB]
+Get:15 http://deb.debian.org/debian trixie/main arm64 libsasl2-modules-db arm64 2.1.28+dfsg1-9 [20.1 kB]
+Get:16 http://deb.debian.org/debian trixie/main arm64 libsasl2-2 arm64 2.1.28+dfsg1-9 [55.6 kB]
+Get:17 http://deb.debian.org/debian trixie/main arm64 libldap2 arm64 2.6.10+dfsg-1 [179 kB]
+Get:18 http://deb.debian.org/debian trixie/main arm64 libnghttp2-14 arm64 1.64.0-1.1+deb13u1 [71.6 kB]
+Get:19 http://deb.debian.org/debian trixie/main arm64 libnghttp3-9 arm64 1.8.0-1 [63.2 kB]
+Get:20 http://deb.debian.org/debian trixie/main arm64 libpsl5t64 arm64 0.21.2-1.1+b1 [57.1 kB]
+Get:21 http://deb.debian.org/debian trixie/main arm64 libp11-kit0 arm64 0.25.5-3 [409 kB]
+Get:22 http://deb.debian.org/debian trixie/main arm64 libtasn1-6 arm64 4.20.0-2+deb13u1 [47.3 kB]
+Get:23 http://deb.debian.org/debian trixie/main arm64 libgnutls30t64 arm64 3.8.9-3+deb13u4 [1379 kB]
+Get:24 http://deb.debian.org/debian trixie/main arm64 librtmp1 arm64 2.4+20151223.gitfa8646d.1-2+b5 [56.8 kB]
+Get:25 http://deb.debian.org/debian trixie/main arm64 libssh2-1t64 arm64 1.11.1-1+deb13u1 [236 kB]
+Get:26 http://deb.debian.org/debian trixie/main arm64 libcurl4t64 arm64 8.14.1-2+deb13u4 [360 kB]
+Get:27 http://deb.debian.org/debian trixie/main arm64 curl arm64 8.14.1-2+deb13u4 [262 kB]
+Get:28 http://deb.debian.org/debian trixie/main arm64 libngtcp2-16 arm64 1.11.0-1+deb13u1 [121 kB]
+Get:29 http://deb.debian.org/debian trixie/main arm64 libngtcp2-crypto-gnutls8 arm64 1.11.0-1+deb13u1 [28.4 kB]
+Get:30 http://deb.debian.org/debian trixie/main arm64 libcurl3t64-gnutls arm64 8.14.1-2+deb13u4 [354 kB]
+Get:31 http://deb.debian.org/debian trixie/main arm64 liberror-perl all 0.17030-1 [26.9 kB]
+Get:32 http://deb.debian.org/debian trixie/main arm64 git-man all 1:2.47.3-0+deb13u1 [2205 kB]
+Get:33 http://deb.debian.org/debian trixie/main arm64 git arm64 1:2.47.3-0+deb13u1 [8666 kB]
+Get:34 http://deb.debian.org/debian trixie/main arm64 shellcheck arm64 0.10.0-1 [4899 kB]
+debconf: unable to initialize frontend: Dialog
+debconf: (TERM is not set, so the dialog frontend is not usable.)
+debconf: falling back to frontend: Readline
+debconf: unable to initialize frontend: Readline
+debconf: (Can't locate Term/ReadLine.pm in @INC (you may need to install the Term::ReadLine module) (@INC entries checked: /etc/perl /usr/local/lib/aarch64-linux-gnu/perl/5.40.1 /usr/local/share/perl/5.40.1 /usr/lib/aarch64-linux-gnu/perl5/5.40 /usr/share/perl5 /usr/lib/aarch64-linux-gnu/perl-base /usr/lib/aarch64-linux-gnu/perl/5.40 /usr/share/perl/5.40 /usr/local/lib/site_perl) at /usr/share/perl5/Debconf/FrontEnd/Readline.pm line 8, <STDIN> line 34.)
+debconf: falling back to frontend: Teletype
+debconf: unable to initialize frontend: Teletype
+debconf: (This frontend requires a controlling tty.)
+debconf: falling back to frontend: Noninteractive
+Fetched 28.5 MB in 4s (7864 kB/s)
+Selecting previously unselected package libexpat1:arm64.
+(Reading database ... (Reading database ... 5%(Reading database ... 10%(Reading database ... 15%(Reading database ... 20%(Reading database ... 25%(Reading database ... 30%(Reading database ... 35%(Reading database ... 40%(Reading database ... 45%(Reading database ... 50%(Reading database ... 55%(Reading database ... 60%(Reading database ... 65%(Reading database ... 70%(Reading database ... 75%(Reading database ... 80%(Reading database ... 85%(Reading database ... 90%(Reading database ... 95%(Reading database ... 100%(Reading database ... 5642 files and directories currently installed.)
+Preparing to unpack .../00-libexpat1_2.8.2-1~deb13u1_arm64.deb ...
+Unpacking libexpat1:arm64 (2.8.2-1~deb13u1) ...
+Selecting previously unselected package perl-modules-5.40.
+Preparing to unpack .../01-perl-modules-5.40_5.40.1-6_all.deb ...
+Unpacking perl-modules-5.40 (5.40.1-6) ...
+Selecting previously unselected package libgdbm-compat4t64:arm64.
+Preparing to unpack .../02-libgdbm-compat4t64_1.24-2_arm64.deb ...
+Unpacking libgdbm-compat4t64:arm64 (1.24-2) ...
+Selecting previously unselected package libperl5.40:arm64.
+Preparing to unpack .../03-libperl5.40_5.40.1-6_arm64.deb ...
+Unpacking libperl5.40:arm64 (5.40.1-6) ...
+Selecting previously unselected package perl.
+Preparing to unpack .../04-perl_5.40.1-6_arm64.deb ...
+Unpacking perl (5.40.1-6) ...
+Selecting previously unselected package libbrotli1:arm64.
+Preparing to unpack .../05-libbrotli1_1.1.0-2+b7_arm64.deb ...
+Unpacking libbrotli1:arm64 (1.1.0-2+b7) ...
+Selecting previously unselected package libkrb5support0:arm64.
+Preparing to unpack .../06-libkrb5support0_1.21.3-5+deb13u1_arm64.deb ...
+Unpacking libkrb5support0:arm64 (1.21.3-5+deb13u1) ...
+Selecting previously unselected package libcom-err2:arm64.
+Preparing to unpack .../07-libcom-err2_1.47.2-3+b11_arm64.deb ...
+Unpacking libcom-err2:arm64 (1.47.2-3+b11) ...
+Selecting previously unselected package libk5crypto3:arm64.
+Preparing to unpack .../08-libk5crypto3_1.21.3-5+deb13u1_arm64.deb ...
+Unpacking libk5crypto3:arm64 (1.21.3-5+deb13u1) ...
+Selecting previously unselected package libkeyutils1:arm64.
+Preparing to unpack .../09-libkeyutils1_1.6.3-6_arm64.deb ...
+Unpacking libkeyutils1:arm64 (1.6.3-6) ...
+Selecting previously unselected package libkrb5-3:arm64.
+Preparing to unpack .../10-libkrb5-3_1.21.3-5+deb13u1_arm64.deb ...
+Unpacking libkrb5-3:arm64 (1.21.3-5+deb13u1) ...
+Selecting previously unselected package libgssapi-krb5-2:arm64.
+Preparing to unpack .../11-libgssapi-krb5-2_1.21.3-5+deb13u1_arm64.deb ...
+Unpacking libgssapi-krb5-2:arm64 (1.21.3-5+deb13u1) ...
+Selecting previously unselected package libunistring5:arm64.
+Preparing to unpack .../12-libunistring5_1.3-2_arm64.deb ...
+Unpacking libunistring5:arm64 (1.3-2) ...
+Selecting previously unselected package libidn2-0:arm64.
+Preparing to unpack .../13-libidn2-0_2.3.8-2_arm64.deb ...
+Unpacking libidn2-0:arm64 (2.3.8-2) ...
+Selecting previously unselected package libsasl2-modules-db:arm64.
+Preparing to unpack .../14-libsasl2-modules-db_2.1.28+dfsg1-9_arm64.deb ...
+Unpacking libsasl2-modules-db:arm64 (2.1.28+dfsg1-9) ...
+Selecting previously unselected package libsasl2-2:arm64.
+Preparing to unpack .../15-libsasl2-2_2.1.28+dfsg1-9_arm64.deb ...
+Unpacking libsasl2-2:arm64 (2.1.28+dfsg1-9) ...
+Selecting previously unselected package libldap2:arm64.
+Preparing to unpack .../16-libldap2_2.6.10+dfsg-1_arm64.deb ...
+Unpacking libldap2:arm64 (2.6.10+dfsg-1) ...
+Selecting previously unselected package libnghttp2-14:arm64.
+Preparing to unpack .../17-libnghttp2-14_1.64.0-1.1+deb13u1_arm64.deb ...
+Unpacking libnghttp2-14:arm64 (1.64.0-1.1+deb13u1) ...
+Selecting previously unselected package libnghttp3-9:arm64.
+Preparing to unpack .../18-libnghttp3-9_1.8.0-1_arm64.deb ...
+Unpacking libnghttp3-9:arm64 (1.8.0-1) ...
+Selecting previously unselected package libpsl5t64:arm64.
+Preparing to unpack .../19-libpsl5t64_0.21.2-1.1+b1_arm64.deb ...
+Unpacking libpsl5t64:arm64 (0.21.2-1.1+b1) ...
+Selecting previously unselected package libp11-kit0:arm64.
+Preparing to unpack .../20-libp11-kit0_0.25.5-3_arm64.deb ...
+Unpacking libp11-kit0:arm64 (0.25.5-3) ...
+Selecting previously unselected package libtasn1-6:arm64.
+Preparing to unpack .../21-libtasn1-6_4.20.0-2+deb13u1_arm64.deb ...
+Unpacking libtasn1-6:arm64 (4.20.0-2+deb13u1) ...
+Selecting previously unselected package libgnutls30t64:arm64.
+Preparing to unpack .../22-libgnutls30t64_3.8.9-3+deb13u4_arm64.deb ...
+Unpacking libgnutls30t64:arm64 (3.8.9-3+deb13u4) ...
+Selecting previously unselected package librtmp1:arm64.
+Preparing to unpack .../23-librtmp1_2.4+20151223.gitfa8646d.1-2+b5_arm64.deb ...
+Unpacking librtmp1:arm64 (2.4+20151223.gitfa8646d.1-2+b5) ...
+Selecting previously unselected package libssh2-1t64:arm64.
+Preparing to unpack .../24-libssh2-1t64_1.11.1-1+deb13u1_arm64.deb ...
+Unpacking libssh2-1t64:arm64 (1.11.1-1+deb13u1) ...
+Selecting previously unselected package libcurl4t64:arm64.
+Preparing to unpack .../25-libcurl4t64_8.14.1-2+deb13u4_arm64.deb ...
+Unpacking libcurl4t64:arm64 (8.14.1-2+deb13u4) ...
+Selecting previously unselected package curl.
+Preparing to unpack .../26-curl_8.14.1-2+deb13u4_arm64.deb ...
+Unpacking curl (8.14.1-2+deb13u4) ...
+Selecting previously unselected package libngtcp2-16:arm64.
+Preparing to unpack .../27-libngtcp2-16_1.11.0-1+deb13u1_arm64.deb ...
+Unpacking libngtcp2-16:arm64 (1.11.0-1+deb13u1) ...
+Selecting previously unselected package libngtcp2-crypto-gnutls8:arm64.
+Preparing to unpack .../28-libngtcp2-crypto-gnutls8_1.11.0-1+deb13u1_arm64.deb ...
+Unpacking libngtcp2-crypto-gnutls8:arm64 (1.11.0-1+deb13u1) ...
+Selecting previously unselected package libcurl3t64-gnutls:arm64.
+Preparing to unpack .../29-libcurl3t64-gnutls_8.14.1-2+deb13u4_arm64.deb ...
+Unpacking libcurl3t64-gnutls:arm64 (8.14.1-2+deb13u4) ...
+Selecting previously unselected package liberror-perl.
+Preparing to unpack .../30-liberror-perl_0.17030-1_all.deb ...
+Unpacking liberror-perl (0.17030-1) ...
+Selecting previously unselected package git-man.
+Preparing to unpack .../31-git-man_1%3a2.47.3-0+deb13u1_all.deb ...
+Unpacking git-man (1:2.47.3-0+deb13u1) ...
+Selecting previously unselected package git.
+Preparing to unpack .../32-git_1%3a2.47.3-0+deb13u1_arm64.deb ...
+Unpacking git (1:2.47.3-0+deb13u1) ...
+Selecting previously unselected package shellcheck.
+Preparing to unpack .../33-shellcheck_0.10.0-1_arm64.deb ...
+Unpacking shellcheck (0.10.0-1) ...
+Setting up libexpat1:arm64 (2.8.2-1~deb13u1) ...
+Setting up libkeyutils1:arm64 (1.6.3-6) ...
+Setting up libgdbm-compat4t64:arm64 (1.24-2) ...
+Setting up libbrotli1:arm64 (1.1.0-2+b7) ...
+Setting up libnghttp2-14:arm64 (1.64.0-1.1+deb13u1) ...
+Setting up libcom-err2:arm64 (1.47.2-3+b11) ...
+Setting up shellcheck (0.10.0-1) ...
+Setting up libkrb5support0:arm64 (1.21.3-5+deb13u1) ...
+Setting up libsasl2-modules-db:arm64 (2.1.28+dfsg1-9) ...
+Setting up libp11-kit0:arm64 (0.25.5-3) ...
+Setting up libunistring5:arm64 (1.3-2) ...
+Setting up libk5crypto3:arm64 (1.21.3-5+deb13u1) ...
+Setting up libsasl2-2:arm64 (2.1.28+dfsg1-9) ...
+Setting up libnghttp3-9:arm64 (1.8.0-1) ...
+Setting up perl-modules-5.40 (5.40.1-6) ...
+Setting up libtasn1-6:arm64 (4.20.0-2+deb13u1) ...
+Setting up git-man (1:2.47.3-0+deb13u1) ...
+Setting up libngtcp2-16:arm64 (1.11.0-1+deb13u1) ...
+Setting up libkrb5-3:arm64 (1.21.3-5+deb13u1) ...
+Setting up libssh2-1t64:arm64 (1.11.1-1+deb13u1) ...
+Setting up libldap2:arm64 (2.6.10+dfsg-1) ...
+Setting up libidn2-0:arm64 (2.3.8-2) ...
+Setting up libperl5.40:arm64 (5.40.1-6) ...
+Setting up perl (5.40.1-6) ...
+Setting up libgssapi-krb5-2:arm64 (1.21.3-5+deb13u1) ...
+Setting up libgnutls30t64:arm64 (3.8.9-3+deb13u4) ...
+Setting up libpsl5t64:arm64 (0.21.2-1.1+b1) ...
+Setting up liberror-perl (0.17030-1) ...
+Setting up librtmp1:arm64 (2.4+20151223.gitfa8646d.1-2+b5) ...
+Setting up libngtcp2-crypto-gnutls8:arm64 (1.11.0-1+deb13u1) ...
+Setting up libcurl4t64:arm64 (8.14.1-2+deb13u4) ...
+Setting up libcurl3t64-gnutls:arm64 (8.14.1-2+deb13u4) ...
+Setting up git (1:2.47.3-0+deb13u1) ...
+Setting up curl (8.14.1-2+deb13u4) ...
+Processing triggers for libc-bin (2.41-12+deb13u3) ...
+--> 5fb68f58577a
+STEP 5/9: RUN pip3 install --no-cache-dir         semgrep==1.172.0 ruff==0.16.1 bandit==1.9.4
+Collecting semgrep==1.172.0
+  Downloading semgrep-1.172.0-cp310.cp311.cp312.cp313.cp314.py310.py311.py312.py313.py314-none-manylinux_2_34_aarch64.whl.metadata (22 kB)
+Collecting ruff==0.16.1
+  Downloading ruff-0.16.1-py3-none-manylinux_2_17_aarch64.manylinux2014_aarch64.whl.metadata (26 kB)
+Collecting bandit==1.9.4
+  Downloading bandit-1.9.4-py3-none-any.whl.metadata (7.1 kB)
+Collecting attrs>=21.3 (from semgrep==1.172.0)
+  Downloading attrs-26.1.0-py3-none-any.whl.metadata (8.8 kB)
+Collecting boltons~=21.0 (from semgrep==1.172.0)
+  Downloading boltons-21.0.0-py2.py3-none-any.whl.metadata (1.5 kB)
+Collecting click-option-group~=0.5 (from semgrep==1.172.0)
+  Downloading click_option_group-0.5.9-py3-none-any.whl.metadata (5.8 kB)
+Collecting click~=8.4.2 (from semgrep==1.172.0)
+  Downloading click-8.4.2-py3-none-any.whl.metadata (2.6 kB)
+Collecting colorama~=0.4.0 (from semgrep==1.172.0)
+  Downloading colorama-0.4.6-py2.py3-none-any.whl.metadata (17 kB)
+Collecting exceptiongroup~=1.2.0 (from semgrep==1.172.0)
+  Downloading exceptiongroup-1.2.2-py3-none-any.whl.metadata (6.6 kB)
+Collecting glom>=23.3 (from semgrep==1.172.0)
+  Downloading glom-25.12.0-py3-none-any.whl.metadata (5.2 kB)
+Collecting jsonschema~=4.25.1 (from semgrep==1.172.0)
+  Downloading jsonschema-4.25.1-py3-none-any.whl.metadata (7.6 kB)
+Collecting mcp==1.23.3 (from semgrep==1.172.0)
+  Downloading mcp-1.23.3-py3-none-any.whl.metadata (89 kB)
+Collecting opentelemetry-api~=1.37.0 (from semgrep==1.172.0)
+  Downloading opentelemetry_api-1.37.0-py3-none-any.whl.metadata (1.5 kB)
+Collecting opentelemetry-sdk~=1.37.0 (from semgrep==1.172.0)
+  Downloading opentelemetry_sdk-1.37.0-py3-none-any.whl.metadata (1.5 kB)
+Collecting opentelemetry-exporter-otlp-proto-http~=1.37.0 (from semgrep==1.172.0)
+  Downloading opentelemetry_exporter_otlp_proto_http-1.37.0-py3-none-any.whl.metadata (2.3 kB)
+Collecting opentelemetry-instrumentation-requests~=0.58b0 (from semgrep==1.172.0)
+  Downloading opentelemetry_instrumentation_requests-0.65b0-py3-none-any.whl.metadata (2.6 kB)
+Collecting opentelemetry-instrumentation-threading~=0.58b0 (from semgrep==1.172.0)
+  Downloading opentelemetry_instrumentation_threading-0.65b0-py3-none-any.whl.metadata (2.1 kB)
+Collecting packaging>=21.0 (from semgrep==1.172.0)
+  Downloading packaging-26.3-py3-none-any.whl.metadata (3.5 kB)
+Collecting peewee~=3.14 (from semgrep==1.172.0)
+  Downloading peewee-3.19.0-py3-none-any.whl.metadata (7.0 kB)
+Collecting pyjwt~=2.13.0 (from pyjwt[crypto]~=2.13.0->semgrep==1.172.0)
+  Downloading pyjwt-2.13.0-py3-none-any.whl.metadata (3.4 kB)
+Collecting requests~=2.22 (from semgrep==1.172.0)
+  Downloading requests-2.34.2-py3-none-any.whl.metadata (4.8 kB)
+Collecting rich>=13.5.2 (from semgrep==1.172.0)
+  Downloading rich-15.0.0-py3-none-any.whl.metadata (18 kB)
+Collecting ruamel.yaml>=0.18.15 (from semgrep==1.172.0)
+  Downloading ruamel_yaml-0.19.1-py3-none-any.whl.metadata (16 kB)
+Collecting ruamel.yaml.clib==0.2.15 (from semgrep==1.172.0)
+  Downloading ruamel_yaml_clib-0.2.15-cp312-cp312-manylinux2014_aarch64.manylinux_2_17_aarch64.manylinux_2_28_aarch64.whl.metadata (3.5 kB)
+Collecting semantic-version~=2.10.0 (from semgrep==1.172.0)
+  Downloading semantic_version-2.10.0-py2.py3-none-any.whl.metadata (9.7 kB)
+Collecting tomli~=2.4.0 (from semgrep==1.172.0)
+  Downloading tomli-2.4.1-cp312-cp312-manylinux2014_aarch64.manylinux_2_17_aarch64.manylinux_2_28_aarch64.whl.metadata (10 kB)
+Collecting typing-extensions~=4.2 (from semgrep==1.172.0)
+  Downloading typing_extensions-4.16.0-py3-none-any.whl.metadata (3.3 kB)
+Collecting urllib3~=2.0 (from semgrep==1.172.0)
+  Downloading urllib3-2.7.0-py3-none-any.whl.metadata (6.9 kB)
+Collecting wcmatch~=8.3 (from semgrep==1.172.0)
+  Downloading wcmatch-8.5.2-py3-none-any.whl.metadata (4.8 kB)
+Collecting PyYAML>=5.3.1 (from bandit==1.9.4)
+  Downloading pyyaml-6.0.3-cp312-cp312-manylinux2014_aarch64.manylinux_2_17_aarch64.manylinux_2_28_aarch64.whl.metadata (2.4 kB)
+Collecting stevedore>=1.20.0 (from bandit==1.9.4)
+  Downloading stevedore-5.9.0-py3-none-any.whl.metadata (2.3 kB)
+Collecting anyio>=4.5 (from mcp==1.23.3->semgrep==1.172.0)
+  Downloading anyio-4.14.2-py3-none-any.whl.metadata (4.6 kB)
+Collecting httpx-sse>=0.4 (from mcp==1.23.3->semgrep==1.172.0)
+  Downloading httpx_sse-0.4.3-py3-none-any.whl.metadata (9.7 kB)
+Collecting httpx>=0.27.1 (from mcp==1.23.3->semgrep==1.172.0)
+  Downloading httpx-0.28.1-py3-none-any.whl.metadata (7.1 kB)
+Collecting pydantic-settings>=2.5.2 (from mcp==1.23.3->semgrep==1.172.0)
+  Downloading pydantic_settings-2.14.2-py3-none-any.whl.metadata (3.4 kB)
+Collecting pydantic<3.0.0,>=2.11.0 (from mcp==1.23.3->semgrep==1.172.0)
+  Downloading pydantic-2.13.4-py3-none-any.whl.metadata (109 kB)
+Collecting python-multipart>=0.0.9 (from mcp==1.23.3->semgrep==1.172.0)
+  Downloading python_multipart-0.0.32-py3-none-any.whl.metadata (2.1 kB)
+Collecting sse-starlette>=1.6.1 (from mcp==1.23.3->semgrep==1.172.0)
+  Downloading sse_starlette-3.4.8-py3-none-any.whl.metadata (15 kB)
+Collecting starlette>=0.27 (from mcp==1.23.3->semgrep==1.172.0)
+  Downloading starlette-1.4.1-py3-none-any.whl.metadata (6.4 kB)
+Collecting typing-inspection>=0.4.1 (from mcp==1.23.3->semgrep==1.172.0)
+  Downloading typing_inspection-0.4.2-py3-none-any.whl.metadata (2.6 kB)
+Collecting uvicorn>=0.31.1 (from mcp==1.23.3->semgrep==1.172.0)
+  Downloading uvicorn-0.52.1-py3-none-any.whl.metadata (6.6 kB)
+Collecting face>=20.1.1 (from glom>=23.3->semgrep==1.172.0)
+  Downloading face-26.0.1-py3-none-any.whl.metadata (1.8 kB)
+Collecting jsonschema-specifications>=2023.03.6 (from jsonschema~=4.25.1->semgrep==1.172.0)
+  Downloading jsonschema_specifications-2025.9.1-py3-none-any.whl.metadata (2.9 kB)
+Collecting referencing>=0.28.4 (from jsonschema~=4.25.1->semgrep==1.172.0)
+  Downloading referencing-0.37.0-py3-none-any.whl.metadata (2.8 kB)
+Collecting rpds-py>=0.7.1 (from jsonschema~=4.25.1->semgrep==1.172.0)
+  Downloading rpds_py-2026.6.3-cp312-cp312-manylinux_2_17_aarch64.manylinux2014_aarch64.whl.metadata (4.1 kB)
+Collecting importlib-metadata<8.8.0,>=6.0 (from opentelemetry-api~=1.37.0->semgrep==1.172.0)
+  Downloading importlib_metadata-8.7.1-py3-none-any.whl.metadata (4.7 kB)
+Collecting googleapis-common-protos~=1.52 (from opentelemetry-exporter-otlp-proto-http~=1.37.0->semgrep==1.172.0)
+  Downloading googleapis_common_protos-1.75.1-py3-none-any.whl.metadata (8.5 kB)
+Collecting opentelemetry-exporter-otlp-proto-common==1.37.0 (from opentelemetry-exporter-otlp-proto-http~=1.37.0->semgrep==1.172.0)
+  Downloading opentelemetry_exporter_otlp_proto_common-1.37.0-py3-none-any.whl.metadata (1.8 kB)
+Collecting opentelemetry-proto==1.37.0 (from opentelemetry-exporter-otlp-proto-http~=1.37.0->semgrep==1.172.0)
+  Downloading opentelemetry_proto-1.37.0-py3-none-any.whl.metadata (2.3 kB)
+Collecting protobuf<7.0,>=5.0 (from opentelemetry-proto==1.37.0->opentelemetry-exporter-otlp-proto-http~=1.37.0->semgrep==1.172.0)
+  Downloading protobuf-6.33.6-cp39-abi3-manylinux2014_aarch64.whl.metadata (593 bytes)
+Collecting opentelemetry-instrumentation==0.65b0 (from opentelemetry-instrumentation-requests~=0.58b0->semgrep==1.172.0)
+  Downloading opentelemetry_instrumentation-0.65b0-py3-none-any.whl.metadata (7.2 kB)
+Collecting opentelemetry-semantic-conventions==0.65b0 (from opentelemetry-instrumentation-requests~=0.58b0->semgrep==1.172.0)
+  Downloading opentelemetry_semantic_conventions-0.65b0-py3-none-any.whl.metadata (2.4 kB)
+Collecting opentelemetry-util-http==0.65b0 (from opentelemetry-instrumentation-requests~=0.58b0->semgrep==1.172.0)
+  Downloading opentelemetry_util_http-0.65b0-py3-none-any.whl.metadata (2.6 kB)
+Collecting wrapt<3.0.0,>=1.0.0 (from opentelemetry-instrumentation==0.65b0->opentelemetry-instrumentation-requests~=0.58b0->semgrep==1.172.0)
+  Downloading wrapt-2.3.0-cp312-cp312-manylinux2014_aarch64.manylinux_2_17_aarch64.manylinux_2_28_aarch64.whl.metadata (7.4 kB)
+INFO: pip is looking at multiple versions of opentelemetry-semantic-conventions to determine which version is compatible with other requirements. This could take a while.
+Collecting opentelemetry-instrumentation-requests~=0.58b0 (from semgrep==1.172.0)
+  Downloading opentelemetry_instrumentation_requests-0.64b0-py3-none-any.whl.metadata (2.6 kB)
+Collecting opentelemetry-instrumentation==0.64b0 (from opentelemetry-instrumentation-requests~=0.58b0->semgrep==1.172.0)
+  Downloading opentelemetry_instrumentation-0.64b0-py3-none-any.whl.metadata (7.2 kB)
+Collecting opentelemetry-semantic-conventions==0.64b0 (from opentelemetry-instrumentation-requests~=0.58b0->semgrep==1.172.0)
+  Downloading opentelemetry_semantic_conventions-0.64b0-py3-none-any.whl.metadata (2.4 kB)
+Collecting opentelemetry-util-http==0.64b0 (from opentelemetry-instrumentation-requests~=0.58b0->semgrep==1.172.0)
+  Downloading opentelemetry_util_http-0.64b0-py3-none-any.whl.metadata (2.6 kB)
+Collecting opentelemetry-instrumentation-requests~=0.58b0 (from semgrep==1.172.0)
+  Downloading opentelemetry_instrumentation_requests-0.63b1-py3-none-any.whl.metadata (2.6 kB)
+Collecting opentelemetry-instrumentation==0.63b1 (from opentelemetry-instrumentation-requests~=0.58b0->semgrep==1.172.0)
+  Downloading opentelemetry_instrumentation-0.63b1-py3-none-any.whl.metadata (7.2 kB)
+Collecting opentelemetry-semantic-conventions==0.63b1 (from opentelemetry-instrumentation-requests~=0.58b0->semgrep==1.172.0)
+  Downloading opentelemetry_semantic_conventions-0.63b1-py3-none-any.whl.metadata (2.4 kB)
+Collecting opentelemetry-util-http==0.63b1 (from opentelemetry-instrumentation-requests~=0.58b0->semgrep==1.172.0)
+  Downloading opentelemetry_util_http-0.63b1-py3-none-any.whl.metadata (2.6 kB)
+Collecting opentelemetry-instrumentation-requests~=0.58b0 (from semgrep==1.172.0)
+  Downloading opentelemetry_instrumentation_requests-0.63b0-py3-none-any.whl.metadata (2.6 kB)
+Collecting opentelemetry-instrumentation==0.63b0 (from opentelemetry-instrumentation-requests~=0.58b0->semgrep==1.172.0)
+  Downloading opentelemetry_instrumentation-0.63b0-py3-none-any.whl.metadata (7.2 kB)
+Collecting opentelemetry-semantic-conventions==0.63b0 (from opentelemetry-instrumentation-requests~=0.58b0->semgrep==1.172.0)
+  Downloading opentelemetry_semantic_conventions-0.63b0-py3-none-any.whl.metadata (2.4 kB)
+Collecting opentelemetry-util-http==0.63b0 (from opentelemetry-instrumentation-requests~=0.58b0->semgrep==1.172.0)
+  Downloading opentelemetry_util_http-0.63b0-py3-none-any.whl.metadata (2.6 kB)
+Collecting opentelemetry-instrumentation-requests~=0.58b0 (from semgrep==1.172.0)
+  Downloading opentelemetry_instrumentation_requests-0.62b1-py3-none-any.whl.metadata (2.7 kB)
+Collecting opentelemetry-instrumentation==0.62b1 (from opentelemetry-instrumentation-requests~=0.58b0->semgrep==1.172.0)
+  Downloading opentelemetry_instrumentation-0.62b1-py3-none-any.whl.metadata (7.2 kB)
+Collecting opentelemetry-semantic-conventions==0.62b1 (from opentelemetry-instrumentation-requests~=0.58b0->semgrep==1.172.0)
+  Downloading opentelemetry_semantic_conventions-0.62b1-py3-none-any.whl.metadata (2.5 kB)
+Collecting opentelemetry-util-http==0.62b1 (from opentelemetry-instrumentation-requests~=0.58b0->semgrep==1.172.0)
+  Downloading opentelemetry_util_http-0.62b1-py3-none-any.whl.metadata (2.6 kB)
+Collecting opentelemetry-instrumentation-requests~=0.58b0 (from semgrep==1.172.0)
+  Downloading opentelemetry_instrumentation_requests-0.62b0-py3-none-any.whl.metadata (2.7 kB)
+Collecting opentelemetry-instrumentation==0.62b0 (from opentelemetry-instrumentation-requests~=0.58b0->semgrep==1.172.0)
+  Downloading opentelemetry_instrumentation-0.62b0-py3-none-any.whl.metadata (7.2 kB)
+Collecting opentelemetry-semantic-conventions==0.62b0 (from opentelemetry-instrumentation-requests~=0.58b0->semgrep==1.172.0)
+  Downloading opentelemetry_semantic_conventions-0.62b0-py3-none-any.whl.metadata (2.5 kB)
+Collecting opentelemetry-util-http==0.62b0 (from opentelemetry-instrumentation-requests~=0.58b0->semgrep==1.172.0)
+  Downloading opentelemetry_util_http-0.62b0-py3-none-any.whl.metadata (2.6 kB)
+Collecting opentelemetry-instrumentation-requests~=0.58b0 (from semgrep==1.172.0)
+  Downloading opentelemetry_instrumentation_requests-0.61b0-py3-none-any.whl.metadata (2.7 kB)
+Collecting opentelemetry-instrumentation==0.61b0 (from opentelemetry-instrumentation-requests~=0.58b0->semgrep==1.172.0)
+  Downloading opentelemetry_instrumentation-0.61b0-py3-none-any.whl.metadata (7.2 kB)
+Collecting opentelemetry-semantic-conventions==0.61b0 (from opentelemetry-instrumentation-requests~=0.58b0->semgrep==1.172.0)
+  Downloading opentelemetry_semantic_conventions-0.61b0-py3-none-any.whl.metadata (2.5 kB)
+Collecting opentelemetry-util-http==0.61b0 (from opentelemetry-instrumentation-requests~=0.58b0->semgrep==1.172.0)
+  Downloading opentelemetry_util_http-0.61b0-py3-none-any.whl.metadata (2.6 kB)
+Collecting wrapt<2.0.0,>=1.0.0 (from opentelemetry-instrumentation==0.61b0->opentelemetry-instrumentation-requests~=0.58b0->semgrep==1.172.0)
+  Downloading wrapt-1.17.3-cp312-cp312-manylinux2014_aarch64.manylinux_2_17_aarch64.manylinux_2_28_aarch64.whl.metadata (6.4 kB)
+Collecting opentelemetry-instrumentation-requests~=0.58b0 (from semgrep==1.172.0)
+  Downloading opentelemetry_instrumentation_requests-0.60b1-py3-none-any.whl.metadata (2.6 kB)
+Collecting opentelemetry-instrumentation==0.60b1 (from opentelemetry-instrumentation-requests~=0.58b0->semgrep==1.172.0)
+  Downloading opentelemetry_instrumentation-0.60b1-py3-none-any.whl.metadata (7.2 kB)
+Collecting opentelemetry-semantic-conventions==0.60b1 (from opentelemetry-instrumentation-requests~=0.58b0->semgrep==1.172.0)
+  Downloading opentelemetry_semantic_conventions-0.60b1-py3-none-any.whl.metadata (2.4 kB)
+Collecting opentelemetry-util-http==0.60b1 (from opentelemetry-instrumentation-requests~=0.58b0->semgrep==1.172.0)
+  Downloading opentelemetry_util_http-0.60b1-py3-none-any.whl.metadata (2.6 kB)
+INFO: pip is still looking at multiple versions of opentelemetry-semantic-conventions to determine which version is compatible with other requirements. This could take a while.
+Collecting opentelemetry-instrumentation-requests~=0.58b0 (from semgrep==1.172.0)
+  Downloading opentelemetry_instrumentation_requests-0.60b0-py3-none-any.whl.metadata (2.6 kB)
+Collecting opentelemetry-instrumentation==0.60b0 (from opentelemetry-instrumentation-requests~=0.58b0->semgrep==1.172.0)
+  Downloading opentelemetry_instrumentation-0.60b0-py3-none-any.whl.metadata (7.2 kB)
+Collecting opentelemetry-semantic-conventions==0.60b0 (from opentelemetry-instrumentation-requests~=0.58b0->semgrep==1.172.0)
+  Downloading opentelemetry_semantic_conventions-0.60b0-py3-none-any.whl.metadata (2.4 kB)
+Collecting opentelemetry-util-http==0.60b0 (from opentelemetry-instrumentation-requests~=0.58b0->semgrep==1.172.0)
+  Downloading opentelemetry_util_http-0.60b0-py3-none-any.whl.metadata (2.6 kB)
+Collecting opentelemetry-instrumentation-requests~=0.58b0 (from semgrep==1.172.0)
+  Downloading opentelemetry_instrumentation_requests-0.59b0-py3-none-any.whl.metadata (2.6 kB)
+Collecting opentelemetry-instrumentation==0.59b0 (from opentelemetry-instrumentation-requests~=0.58b0->semgrep==1.172.0)
+  Downloading opentelemetry_instrumentation-0.59b0-py3-none-any.whl.metadata (7.1 kB)
+Collecting opentelemetry-semantic-conventions==0.59b0 (from opentelemetry-instrumentation-requests~=0.58b0->semgrep==1.172.0)
+  Downloading opentelemetry_semantic_conventions-0.59b0-py3-none-any.whl.metadata (2.4 kB)
+Collecting opentelemetry-util-http==0.59b0 (from opentelemetry-instrumentation-requests~=0.58b0->semgrep==1.172.0)
+  Downloading opentelemetry_util_http-0.59b0-py3-none-any.whl.metadata (2.6 kB)
+Collecting opentelemetry-instrumentation-requests~=0.58b0 (from semgrep==1.172.0)
+  Downloading opentelemetry_instrumentation_requests-0.58b0-py3-none-any.whl.metadata (2.6 kB)
+Collecting opentelemetry-instrumentation==0.58b0 (from opentelemetry-instrumentation-requests~=0.58b0->semgrep==1.172.0)
+  Downloading opentelemetry_instrumentation-0.58b0-py3-none-any.whl.metadata (7.1 kB)
+Collecting opentelemetry-semantic-conventions==0.58b0 (from opentelemetry-instrumentation-requests~=0.58b0->semgrep==1.172.0)
+  Downloading opentelemetry_semantic_conventions-0.58b0-py3-none-any.whl.metadata (2.4 kB)
+Collecting opentelemetry-util-http==0.58b0 (from opentelemetry-instrumentation-requests~=0.58b0->semgrep==1.172.0)
+  Downloading opentelemetry_util_http-0.58b0-py3-none-any.whl.metadata (2.6 kB)
+INFO: pip is looking at multiple versions of opentelemetry-instrumentation-threading to determine which version is compatible with other requirements. This could take a while.
+Collecting opentelemetry-instrumentation-threading~=0.58b0 (from semgrep==1.172.0)
+  Downloading opentelemetry_instrumentation_threading-0.64b0-py3-none-any.whl.metadata (2.1 kB)
+  Downloading opentelemetry_instrumentation_threading-0.63b1-py3-none-any.whl.metadata (2.1 kB)
+  Downloading opentelemetry_instrumentation_threading-0.63b0-py3-none-any.whl.metadata (2.1 kB)
+  Downloading opentelemetry_instrumentation_threading-0.62b1-py3-none-any.whl.metadata (2.2 kB)
+  Downloading opentelemetry_instrumentation_threading-0.62b0-py3-none-any.whl.metadata (2.2 kB)
+  Downloading opentelemetry_instrumentation_threading-0.61b0-py3-none-any.whl.metadata (2.2 kB)
+  Downloading opentelemetry_instrumentation_threading-0.60b1-py3-none-any.whl.metadata (2.1 kB)
+INFO: pip is still looking at multiple versions of opentelemetry-instrumentation-threading to determine which version is compatible with other requirements. This could take a while.
+  Downloading opentelemetry_instrumentation_threading-0.60b0-py3-none-any.whl.metadata (2.1 kB)
+  Downloading opentelemetry_instrumentation_threading-0.59b0-py3-none-any.whl.metadata (2.1 kB)
+  Downloading opentelemetry_instrumentation_threading-0.58b0-py3-none-any.whl.metadata (2.1 kB)
+Collecting cryptography>=3.4.0 (from pyjwt[crypto]~=2.13.0->semgrep==1.172.0)
+  Downloading cryptography-50.0.0-cp311-abi3-manylinux_2_34_aarch64.whl.metadata (4.3 kB)
+Collecting charset_normalizer<4,>=2 (from requests~=2.22->semgrep==1.172.0)
+  Downloading charset_normalizer-3.4.9-cp312-cp312-manylinux2014_aarch64.manylinux_2_17_aarch64.manylinux_2_28_aarch64.whl.metadata (41 kB)
+Collecting idna<4,>=2.5 (from requests~=2.22->semgrep==1.172.0)
+  Downloading idna-3.18-py3-none-any.whl.metadata (6.1 kB)
+Collecting certifi>=2023.5.7 (from requests~=2.22->semgrep==1.172.0)
+  Downloading certifi-2026.7.22-py3-none-any.whl.metadata (2.5 kB)
+Collecting markdown-it-py>=2.2.0 (from rich>=13.5.2->semgrep==1.172.0)
+  Downloading markdown_it_py-4.2.0-py3-none-any.whl.metadata (7.4 kB)
+Collecting pygments<3.0.0,>=2.13.0 (from rich>=13.5.2->semgrep==1.172.0)
+  Downloading pygments-2.20.0-py3-none-any.whl.metadata (2.5 kB)
+Collecting bracex>=2.1.1 (from wcmatch~=8.3->semgrep==1.172.0)
+  Downloading bracex-3.0.1-py3-none-any.whl.metadata (3.3 kB)
+Collecting cffi>=2.0.0 (from cryptography>=3.4.0->pyjwt[crypto]~=2.13.0->semgrep==1.172.0)
+  Downloading cffi-2.1.1-cp312-cp312-manylinux2014_aarch64.manylinux_2_17_aarch64.whl.metadata (2.5 kB)
+Collecting httpcore==1.* (from httpx>=0.27.1->mcp==1.23.3->semgrep==1.172.0)
+  Downloading httpcore-1.0.9-py3-none-any.whl.metadata (21 kB)
+Collecting h11>=0.16 (from httpcore==1.*->httpx>=0.27.1->mcp==1.23.3->semgrep==1.172.0)
+  Downloading h11-0.16.0-py3-none-any.whl.metadata (8.3 kB)
+Collecting zipp>=3.20 (from importlib-metadata<8.8.0,>=6.0->opentelemetry-api~=1.37.0->semgrep==1.172.0)
+  Downloading zipp-4.1.0-py3-none-any.whl.metadata (3.6 kB)
+Collecting mdurl~=0.1 (from markdown-it-py>=2.2.0->rich>=13.5.2->semgrep==1.172.0)
+  Downloading mdurl-0.1.2-py3-none-any.whl.metadata (1.6 kB)
+Collecting annotated-types>=0.6.0 (from pydantic<3.0.0,>=2.11.0->mcp==1.23.3->semgrep==1.172.0)
+  Downloading annotated_types-0.8.0-py3-none-any.whl.metadata (15 kB)
+Collecting pydantic-core==2.46.4 (from pydantic<3.0.0,>=2.11.0->mcp==1.23.3->semgrep==1.172.0)
+  Downloading pydantic_core-2.46.4-cp312-cp312-manylinux_2_17_aarch64.manylinux2014_aarch64.whl.metadata (6.6 kB)
+Collecting python-dotenv>=0.21.0 (from pydantic-settings>=2.5.2->mcp==1.23.3->semgrep==1.172.0)
+  Downloading python_dotenv-1.2.2-py3-none-any.whl.metadata (27 kB)
+Collecting pycparser (from cffi>=2.0.0->cryptography>=3.4.0->pyjwt[crypto]~=2.13.0->semgrep==1.172.0)
+  Downloading pycparser-3.0-py3-none-any.whl.metadata (8.2 kB)
+Downloading semgrep-1.172.0-cp310.cp311.cp312.cp313.cp314.py310.py311.py312.py313.py314-none-manylinux_2_34_aarch64.whl (71.7 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 71.7/71.7 MB 19.0 MB/s eta 0:00:00
+Downloading ruff-0.16.1-py3-none-manylinux_2_17_aarch64.manylinux2014_aarch64.whl (10.9 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 10.9/10.9 MB 22.5 MB/s eta 0:00:00
+Downloading bandit-1.9.4-py3-none-any.whl (134 kB)
+Downloading mcp-1.23.3-py3-none-any.whl (231 kB)
+Downloading ruamel_yaml_clib-0.2.15-cp312-cp312-manylinux2014_aarch64.manylinux_2_17_aarch64.manylinux_2_28_aarch64.whl (753 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 753.3/753.3 kB 23.3 MB/s eta 0:00:00
+Downloading attrs-26.1.0-py3-none-any.whl (67 kB)
+Downloading boltons-21.0.0-py2.py3-none-any.whl (193 kB)
+Downloading click-8.4.2-py3-none-any.whl (119 kB)
+Downloading click_option_group-0.5.9-py3-none-any.whl (11 kB)
+Downloading colorama-0.4.6-py2.py3-none-any.whl (25 kB)
+Downloading exceptiongroup-1.2.2-py3-none-any.whl (16 kB)
+Downloading glom-25.12.0-py3-none-any.whl (103 kB)
+Downloading jsonschema-4.25.1-py3-none-any.whl (90 kB)
+Downloading opentelemetry_api-1.37.0-py3-none-any.whl (65 kB)
+Downloading opentelemetry_exporter_otlp_proto_http-1.37.0-py3-none-any.whl (19 kB)
+Downloading opentelemetry_exporter_otlp_proto_common-1.37.0-py3-none-any.whl (18 kB)
+Downloading opentelemetry_proto-1.37.0-py3-none-any.whl (72 kB)
+Downloading opentelemetry_instrumentation_requests-0.58b0-py3-none-any.whl (12 kB)
+Downloading opentelemetry_instrumentation-0.58b0-py3-none-any.whl (33 kB)
+Downloading opentelemetry_semantic_conventions-0.58b0-py3-none-any.whl (207 kB)
+Downloading opentelemetry_util_http-0.58b0-py3-none-any.whl (7.7 kB)
+Downloading opentelemetry_instrumentation_threading-0.58b0-py3-none-any.whl (9.3 kB)
+Downloading opentelemetry_sdk-1.37.0-py3-none-any.whl (131 kB)
+Downloading packaging-26.3-py3-none-any.whl (129 kB)
+Downloading peewee-3.19.0-py3-none-any.whl (411 kB)
+Downloading pyjwt-2.13.0-py3-none-any.whl (31 kB)
+Downloading pyyaml-6.0.3-cp312-cp312-manylinux2014_aarch64.manylinux_2_17_aarch64.manylinux_2_28_aarch64.whl (775 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 775.1/775.1 kB 22.3 MB/s eta 0:00:00
+Downloading requests-2.34.2-py3-none-any.whl (73 kB)
+Downloading rich-15.0.0-py3-none-any.whl (310 kB)
+Downloading ruamel_yaml-0.19.1-py3-none-any.whl (118 kB)
+Downloading semantic_version-2.10.0-py2.py3-none-any.whl (15 kB)
+Downloading stevedore-5.9.0-py3-none-any.whl (54 kB)
+Downloading tomli-2.4.1-cp312-cp312-manylinux2014_aarch64.manylinux_2_17_aarch64.manylinux_2_28_aarch64.whl (244 kB)
+Downloading typing_extensions-4.16.0-py3-none-any.whl (45 kB)
+Downloading urllib3-2.7.0-py3-none-any.whl (131 kB)
+Downloading wcmatch-8.5.2-py3-none-any.whl (39 kB)
+Downloading anyio-4.14.2-py3-none-any.whl (125 kB)
+Downloading bracex-3.0.1-py3-none-any.whl (11 kB)
+Downloading certifi-2026.7.22-py3-none-any.whl (136 kB)
+Downloading charset_normalizer-3.4.9-cp312-cp312-manylinux2014_aarch64.manylinux_2_17_aarch64.manylinux_2_28_aarch64.whl (215 kB)
+Downloading cryptography-50.0.0-cp311-abi3-manylinux_2_34_aarch64.whl (4.7 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 4.7/4.7 MB 22.4 MB/s eta 0:00:00
+Downloading face-26.0.1-py3-none-any.whl (57 kB)
+Downloading googleapis_common_protos-1.75.1-py3-none-any.whl (300 kB)
+Downloading httpx-0.28.1-py3-none-any.whl (73 kB)
+Downloading httpcore-1.0.9-py3-none-any.whl (78 kB)
+Downloading httpx_sse-0.4.3-py3-none-any.whl (9.0 kB)
+Downloading idna-3.18-py3-none-any.whl (65 kB)
+Downloading importlib_metadata-8.7.1-py3-none-any.whl (27 kB)
+Downloading jsonschema_specifications-2025.9.1-py3-none-any.whl (18 kB)
+Downloading markdown_it_py-4.2.0-py3-none-any.whl (91 kB)
+Downloading pydantic-2.13.4-py3-none-any.whl (472 kB)
+Downloading pydantic_core-2.46.4-cp312-cp312-manylinux_2_17_aarch64.manylinux2014_aarch64.whl (2.0 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 2.0/2.0 MB 23.6 MB/s eta 0:00:00
+Downloading pydantic_settings-2.14.2-py3-none-any.whl (61 kB)
+Downloading pygments-2.20.0-py3-none-any.whl (1.2 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.2/1.2 MB 23.3 MB/s eta 0:00:00
+Downloading python_multipart-0.0.32-py3-none-any.whl (30 kB)
+Downloading referencing-0.37.0-py3-none-any.whl (26 kB)
+Downloading rpds_py-2026.6.3-cp312-cp312-manylinux_2_17_aarch64.manylinux2014_aarch64.whl (368 kB)
+Downloading sse_starlette-3.4.8-py3-none-any.whl (16 kB)
+Downloading starlette-1.4.1-py3-none-any.whl (74 kB)
+Downloading typing_inspection-0.4.2-py3-none-any.whl (14 kB)
+Downloading uvicorn-0.52.1-py3-none-any.whl (79 kB)
+Downloading wrapt-1.17.3-cp312-cp312-manylinux2014_aarch64.manylinux_2_17_aarch64.manylinux_2_28_aarch64.whl (88 kB)
+Downloading annotated_types-0.8.0-py3-none-any.whl (13 kB)
+Downloading cffi-2.1.1-cp312-cp312-manylinux2014_aarch64.manylinux_2_17_aarch64.whl (222 kB)
+Downloading h11-0.16.0-py3-none-any.whl (37 kB)
+Downloading mdurl-0.1.2-py3-none-any.whl (10.0 kB)
+Downloading protobuf-6.33.6-cp39-abi3-manylinux2014_aarch64.whl (324 kB)
+Downloading python_dotenv-1.2.2-py3-none-any.whl (22 kB)
+Downloading zipp-4.1.0-py3-none-any.whl (10 kB)
+Downloading pycparser-3.0-py3-none-any.whl (48 kB)
+Installing collected packages: peewee, boltons, zipp, wrapt, urllib3, typing-extensions, tomli, stevedore, semantic-version, ruff, ruamel.yaml.clib, ruamel.yaml, rpds-py, PyYAML, python-multipart, python-dotenv, pyjwt, pygments, pycparser, protobuf, packaging, opentelemetry-util-http, mdurl, idna, httpx-sse, h11, face, exceptiongroup, colorama, click, charset_normalizer, certifi, bracex, attrs, annotated-types, wcmatch, uvicorn, typing-inspection, requests, referencing, pydantic-core, opentelemetry-proto, markdown-it-py, importlib-metadata, httpcore, googleapis-common-protos, glom, click-option-group, cffi, anyio, starlette, rich, pydantic, opentelemetry-exporter-otlp-proto-common, opentelemetry-api, jsonschema-specifications, httpx, cryptography, sse-starlette, pydantic-settings, opentelemetry-semantic-conventions, jsonschema, bandit, opentelemetry-sdk, opentelemetry-instrumentation, mcp, opentelemetry-instrumentation-threading, opentelemetry-instrumentation-requests, opentelemetry-exporter-otlp-proto-http, semgrep
+Successfully installed PyYAML-6.0.3 annotated-types-0.8.0 anyio-4.14.2 attrs-26.1.0 bandit-1.9.4 boltons-21.0.0 bracex-3.0.1 certifi-2026.7.22 cffi-2.1.1 charset_normalizer-3.4.9 click-8.4.2 click-option-group-0.5.9 colorama-0.4.6 cryptography-50.0.0 exceptiongroup-1.2.2 face-26.0.1 glom-25.12.0 googleapis-common-protos-1.75.1 h11-0.16.0 httpcore-1.0.9 httpx-0.28.1 httpx-sse-0.4.3 idna-3.18 importlib-metadata-8.7.1 jsonschema-4.25.1 jsonschema-specifications-2025.9.1 markdown-it-py-4.2.0 mcp-1.23.3 mdurl-0.1.2 opentelemetry-api-1.37.0 opentelemetry-exporter-otlp-proto-common-1.37.0 opentelemetry-exporter-otlp-proto-http-1.37.0 opentelemetry-instrumentation-0.58b0 opentelemetry-instrumentation-requests-0.58b0 opentelemetry-instrumentation-threading-0.58b0 opentelemetry-proto-1.37.0 opentelemetry-sdk-1.37.0 opentelemetry-semantic-conventions-0.58b0 opentelemetry-util-http-0.58b0 packaging-26.3 peewee-3.19.0 protobuf-6.33.6 pycparser-3.0 pydantic-2.13.4 pydantic-core-2.46.4 pydantic-settings-2.14.2 pygments-2.20.0 pyjwt-2.13.0 python-dotenv-1.2.2 python-multipart-0.0.32 referencing-0.37.0 requests-2.34.2 rich-15.0.0 rpds-py-2026.6.3 ruamel.yaml-0.19.1 ruamel.yaml.clib-0.2.15 ruff-0.16.1 semantic-version-2.10.0 semgrep-1.172.0 sse-starlette-3.4.8 starlette-1.4.1 stevedore-5.9.0 tomli-2.4.1 typing-extensions-4.16.0 typing-inspection-0.4.2 urllib3-2.7.0 uvicorn-0.52.1 wcmatch-8.5.2 wrapt-1.17.3 zipp-4.1.0
+WARNING: Running pip as the 'root' user can result in broken permissions and conflicting behaviour with the system package manager, possibly rendering your system unusable. It is recommended to use a virtual environment instead: https://pip.pypa.io/warnings/venv. Use the --root-user-action option if you know what you are doing and want to suppress this warning.
+
+[notice] A new release of pip is available: 25.0.1 -> 26.2.1
+[notice] To update, run: pip install --upgrade pip
+--> b6dc726872eb
+STEP 6/9: RUN set -eux;     curl -fsSLo /tmp/go.tgz "https://go.dev/dl/go${GO_VERSION}.linux-${TARGETARCH:-amd64}.tar.gz";     tar xzf /tmp/go.tgz -C /usr/local;     rm -f /tmp/go.tgz;     /usr/local/go/bin/go version
++ curl -fsSLo /tmp/go.tgz https://go.dev/dl/go1.26.5.linux-arm64.tar.gz
++ tar xzf /tmp/go.tgz -C /usr/local
++ rm -f /tmp/go.tgz
++ /usr/local/go/bin/go version
+go version go1.26.5 linux/arm64
+--> 36084a3de637
+STEP 7/9: RUN set -eux; arch="${TARGETARCH:-amd64}";     mkdir -p /opt/tools /tmp/build;     curl -fsSLo /tmp/build/gosec.tgz "https://github.com/securego/gosec/releases/download/v${GOSEC_VERSION}/gosec_${GOSEC_VERSION}_linux_${arch}.tar.gz";     tar xzf /tmp/build/gosec.tgz -C /opt/tools gosec;     curl -fsSLo /tmp/build/staticcheck.tgz "https://github.com/dominikh/go-tools/releases/download/${STATICCHECK_VERSION}/staticcheck_linux_${arch}.tar.gz";     tar xzf /tmp/build/staticcheck.tgz -C /tmp/build;     mv /tmp/build/staticcheck/staticcheck /opt/tools/staticcheck;     garch="${arch}"; if [ "${arch}" = "amd64" ]; then garch=x64; fi;     curl -fsSLo /tmp/build/gitleaks.tgz "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_${garch}.tar.gz";     tar xzf /tmp/build/gitleaks.tgz -C /opt/tools gitleaks;     harch="${arch}"; if [ "${arch}" = "amd64" ]; then harch=x86_64; fi;     curl -fsSLo /opt/tools/hadolint "https://github.com/hadolint/hadolint/releases/download/v${HADOLINT_VERSION}/hadolint-linux-${harch}";     chmod +x /opt/tools/hadolint;     mkdir -p /opt/semgrep;     curl -fsSLo "${SEMGREP_RULES}" "https://semgrep.dev/c/p/default";     rm -rf /tmp/build
++ arch=arm64
++ mkdir -p /opt/tools /tmp/build
++ curl -fsSLo /tmp/build/gosec.tgz https://github.com/securego/gosec/releases/download/v2.28.0/gosec_2.28.0_linux_arm64.tar.gz
++ tar xzf /tmp/build/gosec.tgz -C /opt/tools gosec
++ curl -fsSLo /tmp/build/staticcheck.tgz https://github.com/dominikh/go-tools/releases/download/2026.1/staticcheck_linux_arm64.tar.gz
++ tar xzf /tmp/build/staticcheck.tgz -C /tmp/build
++ mv /tmp/build/staticcheck/staticcheck /opt/tools/staticcheck
++ garch=arm64
++ [ arm64 = amd64 ]
++ curl -fsSLo /tmp/build/gitleaks.tgz https://github.com/gitleaks/gitleaks/releases/download/v8.30.1/gitleaks_8.30.1_linux_arm64.tar.gz
++ tar xzf /tmp/build/gitleaks.tgz -C /opt/tools gitleaks
++ harch=arm64
++ [ arm64 = amd64 ]
++ curl -fsSLo /opt/tools/hadolint https://github.com/hadolint/hadolint/releases/download/v2.15.1/hadolint-linux-arm64
++ chmod +x /opt/tools/hadolint
++ mkdir -p /opt/semgrep
++ curl -fsSLo /opt/semgrep/default.yaml https://semgrep.dev/c/p/default
++ rm -rf /tmp/build
+--> d0bbd1a5a465
+STEP 8/9: ENV PATH="/opt/tools:/usr/local/go/bin:${PATH}"
+--> 6a756f310cdb
+STEP 9/9: WORKDIR /repo
+COMMIT quality:latest
+--> 1eee6e1cbcc4
+Successfully tagged localhost/quality:latest
+1eee6e1cbcc48953986e3193227c8362822fca77186c1e5266d7670e28e68ac1
+
+📦 Repomix v1.18.0
+
+No custom config found at repomix.config.ts, repomix.config.mts, repomix.config.cts, repomix.config.js, repomix.config.mjs, repomix.config.cjs, repomix.config.json5, repomix.config.jsonc, repomix.config.json or global config at /root/.config/repomix/repomix.config.ts, /root/.config/repomix/repomix.config.mts, /root/.config/repomix/repomix.config.cts, /root/.config/repomix/repomix.config.js, /root/.config/repomix/repomix.config.mjs, /root/.config/repomix/repomix.config.cjs, /root/.config/repomix/repomix.config.json5, /root/.config/repomix/repomix.config.jsonc, /root/.config/repomix/repomix.config.json.
+You can add a config file for additional settings. Please check https://github.com/yamadashy/repomix for more information.
+[K[?25l⠋ Initializing...
+[K[1A[K[?25l⠙ Searching for files...
+[K[1A[K[?25l⠹ Searching for files...
+[K[1A[K[?25l⠸ Collect file... (50/129) internal/bytesconv/bytesconv_test.go
+[K[1A[K[?25l⠼ Processing file... (129/129) version.go
+[K[1A[K[?25l⠴ Processing file... (129/129) version.go
+[K[1A[K[?25l⠦ Processing file... (129/129) version.go
+[K[1A[K[?25l⠧ Processing file... (129/129) version.go
+[K[1A[K[?25l⠇ Processing file... (129/129) version.go
+[K[1A[K[?25l⠏ Generating output...
+[K[1A[K[?25l⠋ Generating output...
+[K[1A[K[?25l⠙ Writing output file...
+[K[1A[K[?25l⠹ Writing output file...
+[K[1A[K[?25l⠸ Calculating metrics... (100/128) fs.go
+[K[1A[K[?25l⠼ Calculating metrics... (100/128) fs.go
+[K[1A[K[?25l⠴ Calculating metrics... (128/128) version.go
+[K[1A[K[?25l✔ Packing completed successfully!
+[?25h
+📈 Top 5 Files by Token Count:
+──────────────────────────────
+1.  context_test.go (33,651 tokens, 118,195 chars, 13.8%)
+2.  docs/doc.md (18,686 tokens, 69,010 chars, 7.6%)
+3.  CHANGELOG.md (14,908 tokens, 50,829 chars, 6.1%)
+4.  tree_test.go (12,586 tokens, 35,887 chars, 5.1%)
+5.  context.go (12,153 tokens, 48,273 chars, 5%)
+
+🔎 Security Check:
+──────────────────
+1 suspicious file(s) detected and excluded from the output:
+1. testdata/certificate/key.pem
+   - 1 security issue detected
+
+These files have been excluded from the output for security reasons.
+Please review these files for potential sensitive information.
+
+
+📊 Pack Summary:
+────────────────
+  Total Files: 128 files
+ Total Tokens: 244,437 tokens
+  Total Chars: 872,081 chars
+       Output: repomix.txt
+     Security: 1 suspicious file(s) detected and excluded
+
+🎉 All Done!
+Your repository has been successfully packed.
+
+💡 Repomix is now available in your browser! Try it at https://repomix.com
+Analyzing source, output will be written to 'digest.txt'...
+2026-08-06 19:12:20.693 | INFO     | gitingest.entrypoint:ingest_async:89 | Starting ingestion process | {"source":"/repo"}
+2026-08-06 19:12:20.694 | INFO     | gitingest.entrypoint:ingest_async:105 | Processing local directory | {"source":"/repo"}
+2026-08-06 19:12:20.694 | INFO     | gitingest.entrypoint:ingest_async:134 | Starting local directory processing
+2026-08-06 19:12:20.765 | INFO     | gitingest.entrypoint:ingest_async:140 | Processing files and generating output
+2026-08-06 19:12:20.765 | INFO     | gitingest.ingestion:ingest_query:44 | Starting file ingestion | {"slug":"repo","subpath":"/","local_path":"/repo","max_file_size":10485760}
+2026-08-06 19:12:20.766 | INFO     | gitingest.ingestion:ingest_query:96 | Processing directory | {"directory_path":"/repo"}
+2026-08-06 19:12:20.960 | INFO     | gitingest.ingestion:ingest_query:109 | Directory processing completed | {"total_files":129,"total_directories":17,"total_size_bytes":870574,"stats_total_files":129,"stats_total_size":870574}
+Analysis complete! Output written to: digest.txt
+
+Summary:
+Directory: repo
+Files analyzed: 129
+
+Estimated tokens: 250.5k
+2026-08-06 19:12:25.510 | INFO     | gitingest.entrypoint:ingest_async:147 | Ingestion completed successfully
+
+📦 Repomix v1.18.0
+
+No custom config found at repomix.config.ts, repomix.config.mts, repomix.config.cts, repomix.config.js, repomix.config.mjs, repomix.config.cjs, repomix.config.json5, repomix.config.jsonc, repomix.config.json or global config at /root/.config/repomix/repomix.config.ts, /root/.config/repomix/repomix.config.mts, /root/.config/repomix/repomix.config.cts, /root/.config/repomix/repomix.config.js, /root/.config/repomix/repomix.config.mjs, /root/.config/repomix/repomix.config.cjs, /root/.config/repomix/repomix.config.json5, /root/.config/repomix/repomix.config.jsonc, /root/.config/repomix/repomix.config.json.
+You can add a config file for additional settings. Please check https://github.com/yamadashy/repomix for more information.
+[K[?25l⠋ Initializing...
+[K[1A[K[?25l⠙ Searching for files...
+[K[1A[K[?25l⠹ Searching for files...
+[K[1A[K[?25l⠸ Searching for files...
+[K[1A[K[?25l⠼ Searching for files...
+[K[1A[K[?25l⠴ Searching for files...
+[K[1A[K[?25l⠦ Searching for files...
+[K[1A[K[?25l⠧ Searching for files...
+[K[1A[K[?25l⠇ Searching for files...
+[K[1A[K[?25l⠏ Searching for files...
+[K[1A[K[?25l⠋ Searching for files...
+[K[1A[K[?25l⠙ Searching for files...
+[K[1A[K[?25l⠹ Searching for files...
+[K[1A[K[?25l⠸ Searching for files...
+[K[1A[K[?25l⠼ Searching for files...
+[K[1A[K[?25l⠴ Searching for files...
+[K[1A[K[?25l⠦ Searching for files...
+[K[1A[K[?25l⠧ Searching for files...
+[K[1A[K[?25l⠇ Searching for files...
+[K[1A[K[?25l⠏ Searching for files...
+[K[1A[K[?25l⠋ Searching for files...
+[K[1A[K[?25l⠙ Searching for files...
+[K[1A[K[?25l⠹ Searching for files...
+[K[1A[K[?25l⠸ Searching for files...
+[K[1A[K[?25l⠼ Searching for files...
+[K[1A[K[?25l⠴ Searching for files...
+[K[1A[K[?25l⠦ Searching for files...
+[K[1A[K[?25l⠧ Searching for files...
+[K[1A[K[?25l⠇ Searching for files...
+[K[1A[K[?25l⠏ Searching for files...
+[K[1A[K[?25l⠋ Searching for files...
+[K[1A[K[?25l⠙ Searching for files...
+[K[1A[K[?25l⠹ Searching for files...
+[K[1A[K[?25l⠸ Searching for files...
+[K[1A[K[?25l⠼ Searching for files...
+[K[1A[K[?25l⠴ Searching for files...
+[K[1A[K[?25l⠦ Searching for files...
+[K[1A[K[?25l⠧ Searching for files...
+[K[1A[K[?25l⠇ Searching for files...
+[K[1A[K[?25l⠏ Searching for files...
+[K[1A[K[?25l⠋ Searching for files...
+[K[1A[K[?25l⠙ Searching for files...
+[K[1A[K[?25l⠹ Searching for files...
+[K[1A[K[?25l⠸ Searching for files...
+[K[1A[K[?25l⠼ Searching for files...
+[K[1A[K[?25l⠴ Searching for files...
+[K[1A[K[?25l⠦ Searching for files...
+[K[1A[K[?25l⠧ Searching for files...
+[K[1A[K[?25l⠇ Searching for files...
+[K[1A[K[?25l⠏ Searching for files...
+[K[1A[K[?25l⠋ Searching for files...
+[K[1A[K[?25l⠙ Searching for files...
+[K[1A[K[?25l⠹ Searching for files...
+[K[1A[K[?25l⠸ Searching for files...
+[K[1A[K[?25l⠼ Searching for files...
+[K[1A[K[?25l⠴ Searching for files...
+[K[1A[K[?25l⠦ Searching for files...
+[K[1A[K[?25l⠧ Searching for files...
+[K[1A[K[?25l⠇ Searching for files...
+[K[1A[K[?25l⠏ Searching for files...
+[K[1A[K[?25l⠋ Searching for files...
+[K[1A[K[?25l⠙ Searching for files...
+[K[1A[K[?25l⠹ Searching for files...
+[K[1A[K[?25l⠸ Searching for files...
+[K[1A[K[?25l⠼ Searching for files...
+[K[1A[K[?25l⠴ Searching for files...
+[K[1A[K[?25l⠦ Searching for files...
+[K[1A[K[?25l⠧ Searching for files...
+[K[1A[K[?25l⠇ Searching for files...
+[K[1A[K[?25l⠏ Searching for files...
+[K[1A[K[?25l⠋ Searching for files...
+[K[1A[K[?25l⠙ Searching for files...
+[K[1A[K[?25l⠹ Searching for files...
+[K[1A[K[?25l⠸ Searching for files...
+[K[1A[K[?25l⠼ Searching for files...
+[K[1A[K[?25l⠴ Searching for files...
+[K[1A[K[?25l⠦ Searching for files...
+[K[1A[K[?25l⠧ Searching for files...
+[K[1A[K[?25l⠇ Searching for files...
+[K[1A[K[?25l⠏ Searching for files...
+[K[1A[K[?25l⠋ Searching for files...
+[K[1A[K[?25l⠙ Searching for files...
+[K[1A[K[?25l⠹ Searching for files...
+[K[1A[K[?25l⠸ Searching for files...
+[K[1A[K[?25l⠼ Searching for files...
+[K[1A[K[?25l⠴ Searching for files...
+[K[1A[K[?25l⠦ Searching for files...
+[K[1A[K[?25l⠧ Searching for files...
+[K[1A[K[?25l⠇ Searching for files...
+[K[1A[K[?25l⠏ Searching for files...
+[K[1A[K[?25l⠋ Searching for files...
+[K[1A[K[?25l⠙ Searching for files...
+[K[1A[K[?25l⠹ Searching for files...
+[K[1A[K[?25l⠸ Searching for files...
+[K[1A[K[?25l⠼ Searching for files...
+[K[1A[K[?25l⠴ Searching for files...
+[K[1A[K[?25l⠦ Searching for files...
+[K[1A[K[?25l⠧ Searching for files...
+[K[1A[K[?25l⠇ Searching for files...
+[K[1A[K[?25l⠏ Searching for files...
+[K[1A[K[?25l⠋ Searching for files...
+[K[1A[K[?25l⠙ Searching for files...
+[K[1A[K[?25l⠹ Searching for files...
+[K[1A[K[?25l⠸ Searching for files...
+[K[1A[K[?25l⠼ Searching for files...
+[K[1A[K[?25l⠴ Searching for files...
+[K[1A[K[?25l⠦ Searching for files...
+[K[1A[K[?25l⠧ Searching for files...
+[K[1A[K[?25l⠇ Searching for files...
+[K[1A[K[?25l⠏ Searching for files...
+[K[1A[K[?25l⠋ Searching for files...
+[K[1A[K[?25l⠙ Searching for files...
+[K[1A[K[?25l⠹ Searching for files...
+[K[1A[K[?25l⠸ Searching for files...
+[K[1A[K[?25l⠼ Searching for files...
+[K[1A[K[?25l⠴ Searching for files...
+[K[1A[K[?25l⠦ Searching for files...
+[K[1A[K[?25l⠧ Searching for files...
+[K[1A[K[?25l⠇ Searching for files...
+[K[1A[K[?25l⠏ Searching for files...
+[K[1A[K[?25l⠋ Searching for files...
+[K[1A[K[?25l⠙ Searching for files...
+[K[1A[K[?25l⠹ Searching for files...
+[K[1A[K[?25l⠸ Searching for files...
+[K[1A[K[?25l⠼ Searching for files...
+[K[1A[K[?25l⠴ Searching for files...
+[K[1A[K[?25l⠦ Searching for files...
+[K[1A[K[?25l⠧ Searching for files...
+[K[1A[K[?25l⠇ Searching for files...
+[K[1A[K[?25l⠏ Searching for files...
+[K[1A[K[?25l⠋ Searching for files...
+[K[1A[K[?25l⠙ Searching for files...
+[K[1A[K[?25l⠹ Searching for files...
+[K[1A[K[?25l⠸ Searching for files...
+[K[1A[K[?25l⠼ Searching for files...
+[K[1A[K[?25l⠴ Searching for files...
+[K[1A[K[?25l⠦ Searching for files...
+[K[1A[K[?25l⠧ Searching for files...
+[K[1A[K[?25l⠇ Searching for files...
+[K[1A[K[?25l⠏ Searching for files...
+[K[1A[K[?25l⠋ Searching for files...
+[K[1A[K[?25l⠙ Searching for files...
+[K[1A[K[?25l⠹ Searching for files...
+[K[1A[K[?25l⠸ Searching for files...
+[K[1A[K[?25l⠼ Searching for files...
+[K[1A[K[?25l⠴ Searching for files...
+[K[1A[K[?25l⠦ Searching for files...
+[K[1A[K[?25l⠧ Searching for files...
+[K[1A[K[?25l⠇ Searching for files...
+[K[1A[K[?25l⠏ Searching for files...
+[K[1A[K[?25l⠋ Searching for files...
+[K[1A[K[?25l⠙ Searching for files...
+[K[1A[K[?25l⠹ Searching for files...
+[K[1A[K[?25l⠸ Searching for files...
+[K[1A[K[?25l⠼ Searching for files...
+[K[1A[K[?25l⠴ Searching for files...
+[K[1A[K[?25l⠦ Searching for files...
+[K[1A[K[?25l⠧ Searching for files...
+[K[1A[K[?25l⠇ Searching for files...
+[K[1A[K[?25l⠏ Searching for files...
+[K[1A[K[?25l⠋ Searching for files...
+[K[1A[K[?25l⠙ Searching for files...
+[K[1A[K[?25l⠹ Searching for files...
+[K[1A[K[?25l⠸ Searching for files...
+[K[1A[K[?25l⠼ Searching for files...
+[K[1A[K[?25l⠴ Searching for files...
+[K[1A[K[?25l⠦ Searching for files...
+[K[1A[K[?25l⠧ Searching for files...
+[K[1A[K[?25l⠇ Searching for files...
+[K[1A[K[?25l⠏ Searching for files...
+[K[1A[K[?25l⠋ Searching for files...
+[K[1A[K[?25l⠙ Searching for files...
+[K[1A[K[?25l⠹ Searching for files...
+[K[1A[K[?25l⠸ Searching for files...
+[K[1A[K[?25l⠼ Searching for files...
+[K[1A[K[?25l⠴ Searching for files...
+[K[1A[K[?25l⠦ Searching for files...
+[K[1A[K[?25l⠧ Searching for files...
+[K[1A[K[?25l⠇ Searching for files...
+[K[1A[K[?25l⠏ Searching for files...
+[K[1A[K[?25l⠋ Searching for files...
+[K[1A[K[?25l⠙ Searching for files...
+[K[1A[K[?25l⠹ Searching for files...
+[K[1A[K[?25l⠸ Searching for files...
+[K[1A[K[?25l⠼ Searching for files...
+[K[1A[K[?25l⠴ Searching for files...
+[K[1A[K[?25l⠦ Collecting files...
+[K[1A[K[?25l⠧ Collect file... (95/11835) build-plugin/spring-boot-gradle-plugin/src/docs/antora/modules/gradle-plugin/examples/integrating-with-actuator/build-info-exclude-time.gradle.kts
+[K[1A[K[?25l⠇ Collect file... (240/11835) build-plugin/spring-boot-gradle-plugin/src/main/java/org/springframework/boot/gradle/util/VersionExtractor.java
+[K[1A[K[?25l⠏ Collect file... (350/11835) build-plugin/spring-boot-gradle-plugin/src/test/resources/org/springframework/boot/gradle/plugin/KotlinPluginActionIntegrationTests-taskConfigurationIsAvoided.gradle
+[K[1A[K[?25l⠋ Collect file... (442/11835) build-plugin/spring-boot-gradle-plugin/src/test/resources/org/springframework/boot/gradle/tasks/bundling/BootWarIntegrationTests-upToDateWhenBuiltWithDefaultLayeredAndThenWithExplicitLayered.gradle
+[K[1A[K[?25l⠙ Collect file... (486/11835) build-plugin/spring-boot-maven-plugin/src/dockerTest/projects/build-image/src/main/java/org/test/SampleApplication.java
+[K[1A[K[?25l⠹ Collect file... (492/11835) build-plugin/spring-boot-maven-plugin/src/dockerTest/projects/build-image-bind-caches/src/main/java/org/test/SampleApplication.java
+[K[1A[K[?25l⠸ Collect file... (492/11835) build-plugin/spring-boot-maven-plugin/src/dockerTest/projects/build-image-bind-caches/src/main/java/org/test/SampleApplication.java
+[K[1A[K[?25l⠼ Collect file... (497/11835) build-plugin/spring-boot-maven-plugin/src/dockerTest/projects/build-image-builder-error/src/main/java/org/test/SampleApplication.java
+[K[1A[K[?25l⠴ Collect file... (578/11835) build-plugin/spring-boot-maven-plugin/src/docs/antora/modules/maven-plugin/examples/aot-native/pom.xml
+[K[1A[K[?25l⠦ Collect file... (634/11835) build-plugin/spring-boot-maven-plugin/src/intTest/java/org/springframework/boot/maven/WarIntegrationTests.java
+[K[1A[K[?25l⠧ Collect file... (691/11835) build-plugin/spring-boot-maven-plugin/src/intTest/projects/build-info-reproducible-epoch-seconds/pom.xml
+[K[1A[K[?25l⠇ Collect file... (770/11835) build-plugin/spring-boot-maven-plugin/src/intTest/projects/jar-pom/pom.xml
+[K[1A[K[?25l⠏ Collect file... (824/11835) build-plugin/spring-boot-maven-plugin/src/intTest/projects/start-stop-skip/src/main/java/org/test/SampleApplication.java
+[K[1A[K[?25l⠋ Collect file... (893/11835) build-plugin/spring-boot-maven-plugin/src/main/java/org/springframework/boot/maven/EnvVariables.java
+[K[1A[K[?25l⠙ Collect file... (972/11835) buildpack/spring-boot-buildpack-platform/src/main/java/org/springframework/boot/buildpack/platform/build/BuildLog.java
+[K[1A[K[?25l⠹ Collect file... (1103/11835) buildpack/spring-boot-buildpack-platform/src/test/java/org/springframework/boot/buildpack/platform/build/DirectoryBuildpackTests.java
+[K[1A[K[?25l⠸ Collect file... (1221/11835) buildpack/spring-boot-buildpack-platform/src/test/resources/org/springframework/boot/buildpack/platform/build/lifecycle-detector-app-dir.json
+[K[1A[K[?25l⠼ Collect file... (1367/11835) buildSrc/src/main/java/org/springframework/boot/build/bom/bomr/UpgradeResolver.java
+[K[1A[K[?25l⠴ Collect file... (1482/11835) buildSrc/src/test/java/org/springframework/boot/build/architecture/conditionalonmissingbean/withname/WithNameAttribute.java
+[K[1A[K[?25l⠦ Collect file... (1589/11835) cli/spring-boot-cli/src/main/java/org/springframework/boot/cli/command/init/ProjectGenerator.java
+[K[1A[K[?25l⠧ Collect file... (1715/11835) configuration-metadata/spring-boot-configuration-metadata/src/main/java/org/springframework/boot/configurationmetadata/ConfigurationMetadataSource.java
+[K[1A[K[?25l⠇ Collect file... (1902/11835) configuration-metadata/spring-boot-configuration-processor/src/test/java/org/springframework/boot/configurationsample/method/NestedPropertiesMethodImmutable.java
+[K[1A[K[?25l⠏ Collect file... (2098/11835) core/spring-boot/src/main/java/org/springframework/boot/context/event/ApplicationStartingEvent.java
+[K[1A[K[?25l⠋ Collect file... (2311/11835) core/spring-boot/src/main/java/org/springframework/boot/json/WritableJson.java
+[K[1A[K[?25l⠙ Collect file... (2526/11835) core/spring-boot/src/main/java/org/springframework/boot/LazyInitializationBeanFactoryPostProcessor.java
+[K[1A[K[?25l⠹ Collect file... (2728/11835) core/spring-boot/src/test/java/org/springframework/boot/context/properties/ValidatorPropertiesWithDefaultValues.java
+[K[1A[K[?25l⠸ Collect file... (2932/11835) core/spring-boot/src/test/java/org/springframework/boot/system/MockApplicationPid.java
+[K[1A[K[?25l⠼ Collect file... (3046/11835) core/spring-boot/src/test/resources/org/springframework/boot/info/test-expired.p12
+[K[1A[K[?25l⠴ Collect file... (3127/11835) core/spring-boot-autoconfigure/src/main/java/org/springframework/boot/autoconfigure/context/LifecycleProperties.java
+[K[1A[K[?25l⠦ Collect file... (3263/11835) core/spring-boot-autoconfigure/src/test/java/org/springframework/boot/autoconfigure/condition/ConditionalOnThreadingTests.java
+[K[1A[K[?25l⠧ Collect file... (3423/11835) core/spring-boot-docker-compose/src/main/java/org/springframework/boot/docker/compose/lifecycle/LifecycleManagement.java
+[K[1A[K[?25l⠇ Collect file... (3592/11835) core/spring-boot-test/src/test/java/org/springframework/boot/test/context/example/duplicate/first/package-info.java
+[K[1A[K[?25l⠏ Collect file... (3753/11835) core/spring-boot-testcontainers/src/dockerTest/java/org/springframework/boot/testcontainers/lifecycle/TestcontainersLifecycleOrderIntegrationTests.java
+[K[1A[K[?25l⠋ Collect file... (3900/11835) documentation/spring-boot-docs/src/docs/antora/modules/build-tool-plugin/pages/other-build-systems.adoc
+[K[1A[K[?25l⠙ Collect file... (4059/11835) documentation/spring-boot-docs/src/main/java/org/springframework/boot/docs/actuator/endpoints/security/typical/MySecurityConfiguration.java
+[K[1A[K[?25l⠹ Collect file... (4198/11835) documentation/spring-boot-docs/src/main/java/org/springframework/boot/docs/howto/dataaccess/configurecustomdatasource/configurable/MyDataSourceConfiguration.java
+[K[1A[K[?25l⠸ Collect file... (4336/11835) documentation/spring-boot-docs/src/main/java/org/springframework/boot/docs/messaging/rsocket/requester/User.java
+[K[1A[K[?25l⠼ Collect file... (4486/11835) documentation/spring-boot-docs/src/main/java/org/springframework/boot/docs/web/servlet/springmvc/messageconverters/MyHttpMessageConvertersConfiguration.java
+[K[1A[K[?25l⠴ Collect file... (4633/11835) documentation/spring-boot-docs/src/main/kotlin/org/springframework/boot/docs/features/taskexecutionandscheduling/defaultcandidate/MyTaskExecutorConfiguration.kt
+[K[1A[K[?25l⠦ Collect file... (4782/11835) documentation/spring-boot-docs/src/main/kotlin/org/springframework/boot/docs/testing/springbootapplications/autoconfiguredspringdatacassandra/SomeRepository.kt
+[K[1A[K[?25l⠧ Collect file... (4918/11835) documentation/spring-boot-docs/src/test/java/org/springframework/boot/docs/features/springapplication/fluentbuilderapi/MyApplicationTests.java
+[K[1A[K[?25l⠇ Collect file... (5022/11835) integration-test/spring-boot-server-integration-tests/build.gradle
+[K[1A[K[?25l⠏ Collect file... (5192/11835) loader/spring-boot-loader/src/main/resources/META-INF/services/java.nio.file.spi.FileSystemProvider
+[K[1A[K[?25l⠋ Collect file... (5334/11835) loader/spring-boot-loader-tools/src/test/java/org/springframework/boot/loader/tools/ZipHeaderPeekInputStreamTests.java
+[K[1A[K[?25l⠙ Collect file... (5503/11835) module/spring-boot-actuator/src/main/java/org/springframework/boot/actuate/endpoint/ExposableEndpoint.java
+[K[1A[K[?25l⠹ Collect file... (5649/11835) module/spring-boot-actuator/src/test/java/org/springframework/boot/actuate/security/AuthenticationAuditListenerTests.java
+[K[1A[K[?25l⠸ Collect file... (5768/11835) module/spring-boot-actuator-autoconfigure/src/test/java/org/springframework/boot/actuate/autoconfigure/info/InfoContributorAutoConfigurationTests.java
+[K[1A[K[?25l⠼ Collect file... (5897/11835) module/spring-boot-artemis/src/test/resources/logback-test.xml
+[K[1A[K[?25l⠴ Collect file... (6028/11835) module/spring-boot-cassandra/src/dockerTest/resources/logback-test.xml
+[K[1A[K[?25l⠦ Collect file... (6159/11835) module/spring-boot-data-cassandra/src/test/java/org/springframework/boot/data/cassandra/autoconfigure/DataCassandraAutoConfigurationTests.java
+[K[1A[K[?25l⠧ Collect file... (6289/11835) module/spring-boot-data-elasticsearch-test/src/dockerTest/java/org/springframework/boot/data/elasticsearch/test/autoconfigure/ExampleDocument.java
+[K[1A[K[?25l⠇ Collect file... (6399/11835) module/spring-boot-data-mongodb/src/main/java/org/springframework/boot/data/mongodb/autoconfigure/DataMongoRepositoriesAutoConfiguration.java
+[K[1A[K[?25l⠏ Collect file... (6535/11835) module/spring-boot-data-redis/src/main/java/org/springframework/boot/data/redis/autoconfigure/health/DataRedisReactiveHealthContributorAutoConfiguration.java
+[K[1A[K[?25l⠋ Collect file... (6692/11835) module/spring-boot-devtools/src/main/java/org/springframework/boot/devtools/restart/classloader/ClassLoaderFileRepository.java
+[K[1A[K[?25l⠙ Collect file... (6835/11835) module/spring-boot-elasticsearch/src/test/java/org/springframework/boot/elasticsearch/health/ElasticsearchRestClientHealthIndicatorTests.java
+[K[1A[K[?25l⠹ Collect file... (6976/11835) module/spring-boot-groovy-templates/src/main/resources/META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports
+[K[1A[K[?25l⠸ Collect file... (7101/11835) module/spring-boot-grpc-test/src/test/java/org/springframework/boot/grpc/test/autoconfigure/AutoConfigureTestGrpcTransportTests.java
+[K[1A[K[?25l⠼ Collect file... (7249/11835) module/spring-boot-health/src/main/java/org/springframework/boot/health/autoconfigure/contributor/HealthContributorAutoConfiguration.java
+[K[1A[K[?25l⠴ Collect file... (7348/11835) module/spring-boot-health/src/test/java/org/springframework/boot/health/contributor/PingHealthIndicatorTests.java
+[K[1A[K[?25l⠦ Collect file... (7448/11835) module/spring-boot-http-client/src/main/resources/META-INF/spring/aot.factories
+[K[1A[K[?25l⠧ Collect file... (7547/11835) module/spring-boot-jackson/src/main/java/org/springframework/boot/jackson/autoconfigure/JacksonTesterTestAutoConfiguration.java
+[K[1A[K[?25l⠇ Collect file... (7643/11835) module/spring-boot-jackson2/src/test/java/org/springframework/boot/jackson2/scan/e/PrivateMixInClass.java
+[K[1A[K[?25l⠏ Collect file... (7766/11835) module/spring-boot-jdbc/src/main/resources/META-INF/spring.factories
+[K[1A[K[?25l⠋ Collect file... (7870/11835) module/spring-boot-jersey/src/main/java/org/springframework/boot/jersey/autoconfigure/actuate/web/JerseyManagementContextConfiguration.java
+[K[1A[K[?25l⠙ Collect file... (7983/11835) module/spring-boot-jetty/build.gradle
+[K[1A[K[?25l⠹ Collect file... (8093/11835) module/spring-boot-jsonb/src/test/java/org/springframework/boot/jsonb/autoconfigure/JsonTestApplication.java
+[K[1A[K[?25l⠸ Collect file... (8213/11835) module/spring-boot-mail/src/dockerTest/resources/org/springframework/boot/mail/autoconfigure/ssl/test-server.crt
+[K[1A[K[?25l⠼ Collect file... (8372/11835) module/spring-boot-micrometer-metrics/src/main/resources/META-INF/spring.factories
+[K[1A[K[?25l⠴ Collect file... (8508/11835) module/spring-boot-micrometer-tracing/src/main/resources/META-INF/additional-spring-configuration-metadata.json
+[K[1A[K[?25l⠦ Collect file... (8641/11835) module/spring-boot-mongodb/src/test/java/org/springframework/boot/mongodb/autoconfigure/metrics/MongoMetricsAutoConfigurationTests.java
+[K[1A[K[?25l⠧ Collect file... (8768/11835) module/spring-boot-opentelemetry/src/main/java/org/springframework/boot/opentelemetry/testcontainers/OtelCollectorOltpLoggingContainerConnectionDetailsFactory.java
+[K[1A[K[?25l⠇ Collect file... (8912/11835) module/spring-boot-r2dbc/src/main/java/org/springframework/boot/r2dbc/docker/compose/ConnectionFactoryOptionsBuilder.java
+[K[1A[K[?25l⠏ Collect file... (9063/11835) module/spring-boot-rabbitmq/src/test/java/org/springframework/boot/rabbitmq/health/RabbitHealthIndicatorTests.java
+[K[1A[K[?25l⠋ Collect file... (9220/11835) module/spring-boot-resttestclient/src/main/java/org/springframework/boot/resttestclient/autoconfigure/AutoConfigureTestRestTemplate.java
+[K[1A[K[?25l⠙ Collect file... (9343/11835) module/spring-boot-security/src/test/java/org/springframework/boot/security/autoconfigure/SecurityPropertiesTests.java
+[K[1A[K[?25l⠹ Collect file... (9490/11835) module/spring-boot-servlet/src/main/java/org/springframework/boot/servlet/actuate/web/mappings/ServletRegistrationMappingDescription.java
+[K[1A[K[?25l⠸ Collect file... (9619/11835) module/spring-boot-thymeleaf/src/main/resources/META-INF/spring.factories
+[K[1A[K[?25l⠼ Collect file... (9798/11835) module/spring-boot-web-server/src/main/java/org/springframework/boot/web/server/servlet/Jsp.java
+[K[1A[K[?25l⠴ Collect file... (9953/11835) module/spring-boot-webclient/src/main/java/org/springframework/boot/webclient/autoconfigure/WebClientCodecCustomizer.java
+[K[1A[K[?25l⠦ Collect file... (10123/11835) module/spring-boot-webmvc/src/main/java/org/springframework/boot/webmvc/autoconfigure/actuate/web/CompositeHandlerMapping.java
+[K[1A[K[?25l⠧ Collect file... (10265/11835) module/spring-boot-webmvc-test/src/test/java/org/springframework/boot/webmvc/test/autoconfigure/mockmvc/WebMvcTestPrintDefaultOverrideIntegrationTests.java
+[K[1A[K[?25l⠇ Collect file... (10395/11835) module/spring-boot-zipkin/src/test/java/org/springframework/boot/zipkin/testcontainers/ZipkinContainerConnectionDetailsFactoryWithoutActuatorTests.java
+[K[1A[K[?25l⠏ Collect file... (10538/11835) smoke-test/spring-boot-smoke-test-autoconfigure-classic/src/main/java/smoketest/autoconfigureclassic/package-info.java
+[K[1A[K[?25l⠋ Collect file... (10665/11835) smoke-test/spring-boot-smoke-test-data-jpa/src/test/java/smoketest/data/jpa/SampleDataJpaApplicationTests.java
+[K[1A[K[?25l⠙ Collect file... (10795/11835) smoke-test/spring-boot-smoke-test-grpc-server/src/main/proto/hello.proto
+[K[1A[K[?25l⠹ Collect file... (10940/11835) smoke-test/spring-boot-smoke-test-jetty-ssl/src/main/java/smoketest/jetty/ssl/web/SampleController.java
+[K[1A[K[?25l⠸ Collect file... (11059/11835) smoke-test/spring-boot-smoke-test-pulsar/src/main/resources/application.properties
+[K[1A[K[?25l⠼ Collect file... (11197/11835) smoke-test/spring-boot-smoke-test-structured-logging-log4j2/src/main/resources/application.properties
+[K[1A[K[?25l⠴ Collect file... (11324/11835) smoke-test/spring-boot-smoke-test-web-groovy-templates/src/main/java/smoketest/groovytemplates/mvc/package-info.java
+[K[1A[K[?25l⠦ Collect file... (11452/11835) smoke-test/spring-boot-smoke-test-webservices/src/test/java/smoketest/webservices/SampleWsApplicationTests.java
+[K[1A[K[?25l⠧ Collect file... (11592/11835) starter/spring-boot-starter-grpc-server-test/build.gradle
+[K[1A[K[?25l⠇ Collect file... (11700/11835) system-test/spring-boot-deployment-system-tests/src/main/java/sample/autoconfig/package-info.java
+[K[1A[K[?25l⠏ Processing file... (11627/11627) SUPPORT.adoc
+[K[1A[K[?25l⠋ Processing file... (11627/11627) SUPPORT.adoc
+[K[1A[K[?25l⠙ Processing file... (11627/11627) SUPPORT.adoc
+[K[1A[K[?25l⠹ Running security check... (100/11627) build-plugin/spring-boot-gradle-plugin/src/dockerTest/resources/org/springframework/boot/gradle/tasks/bundling/BootBuildImageIntegrationTests-buildsImageWithBuildpackFromTarGzip.gradle
+[K[1A[K[?25l⠸ Running security check... (450/11627) build-plugin/spring-boot-gradle-plugin/src/test/resources/org/springframework/boot/gradle/tasks/run/BootRunIntegrationTests-applicationPluginMainClassNameIsNotUsedWhenItIsNull.gradle
+[K[1A[K[?25l⠼ Running security check... (1000/11627) buildpack/spring-boot-buildpack-platform/src/main/java/org/springframework/boot/buildpack/platform/docker/configuration/Credential.java
+[K[1A[K[?25l⠴ Running security check... (1350/11627) buildSrc/src/main/java/org/springframework/boot/build/bom/bomr/Upgrade.java
+[K[1A[K[?25l⠦ Running security check... (1750/11627) configuration-metadata/spring-boot-configuration-processor/src/main/java/org/springframework/boot/configurationprocessor/fieldvalues/javac/ExpressionTree.java
+[K[1A[K[?25l⠧ Running security check... (2200/11627) core/spring-boot/src/main/java/org/springframework/boot/context/properties/source/FilteredConfigurationPropertiesSource.java
+[K[1A[K[?25l⠇ Running security check... (2550/11627) core/spring-boot/src/main/resources/log4j2.springboot
+[K[1A[K[?25l⠏ Running security check... (2900/11627) core/spring-boot/src/test/java/org/springframework/boot/ssl/DefaultSslBundleRegistryTests.java
+[K[1A[K[?25l⠋ Running security check... (3300/11627) core/spring-boot-autoconfigure-processor/src/test/java/org/springframework/boot/autoconfigureprocessor/TestAutoConfigureOrder.java
+[K[1A[K[?25l⠙ Running security check... (3800/11627) documentation/spring-boot-actuator-docs/src/test/java/org/springframework/boot/actuate/docs/session/SessionsEndpointDocumentationTests.java
+[K[1A[K[?25l⠹ Running security check... (4400/11627) documentation/spring-boot-docs/src/main/java/org/springframework/boot/docs/web/servlet/jersey/MyJerseyConfig.java
+[K[1A[K[?25l⠸ Running security check... (5050/11627) loader/spring-boot-loader/src/main/java/org/springframework/boot/loader/launch/ClassPathIndexFile.java
+[K[1A[K[?25l⠼ Running security check... (5550/11627) module/spring-boot-actuator/src/test/java/org/springframework/boot/actuate/endpoint/SanitizerTests.java
+[K[1A[K[?25l⠴ Running security check... (6000/11627) module/spring-boot-cloudfoundry/src/main/java/org/springframework/boot/cloudfoundry/autoconfigure/actuate/endpoint/EndpointCloudFoundryExtension.java
+[K[1A[K[?25l⠦ Running security check... (6500/11627) module/spring-boot-data-redis-test/src/dockerTest/java/org/springframework/boot/data/redis/test/autoconfigure/DataRedisTestReactiveIntegrationTests.java
+[K[1A[K[?25l⠧ Running security check... (6950/11627) module/spring-boot-grpc-server/src/main/java/org/springframework/boot/grpc/server/autoconfigure/GrpcServerProperties.java
+[K[1A[K[?25l⠇ Running security check... (7400/11627) module/spring-boot-http-converter/src/main/java/org/springframework/boot/http/converter/autoconfigure/ClientHttpMessageConvertersCustomizer.java
+[K[1A[K[?25l⠏ Running security check... (7900/11627) module/spring-boot-jms/src/main/java/org/springframework/boot/jms/package-info.java
+[K[1A[K[?25l⠋ Running security check... (8250/11627) module/spring-boot-micrometer-metrics/src/main/java/org/springframework/boot/micrometer/metrics/export/prometheus/package-info.java
+[K[1A[K[?25l⠙ Running security check... (8650/11627) module/spring-boot-opentelemetry/src/main/java/org/springframework/boot/opentelemetry/autoconfigure/package-info.java
+[K[1A[K[?25l⠹ Running security check... (9000/11627) module/spring-boot-reactor/src/main/java/org/springframework/boot/reactor/autoconfigure/ReactorAutoConfiguration.java
+[K[1A[K[?25l⠸ Running security check... (9400/11627) module/spring-boot-security-test/src/test/java/org/springframework/boot/security/test/autoconfigure/webmvc/SecurityWebMvcTestIntegrationTests.java
+[K[1A[K[?25l⠼ Running security check... (9800/11627) module/spring-boot-webclient-test/src/test/java/org/springframework/boot/webclient/test/autoconfigure/WebClientTestPropertiesIntegrationTests.java
+[K[1A[K[?25l⠴ Running security check... (10300/11627) smoke-test/spring-boot-smoke-test-actuator-log4j2/src/test/java/smoketest/actuator/log4j2/SampleActuatorLog4J2ApplicationTests.java
+[K[1A[K[?25l⠦ Running security check... (11000/11627) smoke-test/spring-boot-smoke-test-session-data-redis/src/dockerTest/java/smoketest/session/redis/TestServiceConnectionSampleSessionRedisApplication.java
+[K[1A[K[?25l⠧ Running security check... (11627/11627) SUPPORT.adoc
+[K[1A[K[?25l⠇ Writing output file...
+[K[1A[K[?25l⠏ Calculating metrics... (100/11607) build-plugin/spring-boot-gradle-plugin/src/docs/antora/modules/gradle-plugin/examples/managing-dependencies/configure-platform.gradle.kts
+[K[1A[K[?25l⠋ Calculating metrics... (100/11607) build-plugin/spring-boot-gradle-plugin/src/docs/antora/modules/gradle-plugin/examples/managing-dependencies/configure-platform.gradle.kts
+[K[1A[K[?25l⠙ Calculating metrics... (300/11607) build-plugin/spring-boot-gradle-plugin/src/test/resources/org/springframework/boot/gradle/tasks/run/BootRunIntegrationTests-applicationPluginMainClassNameIsNotUsedWhenItIsNull.gradle
+[K[1A[K[?25l⠹ Calculating metrics... (400/11607) build-plugin/spring-boot-maven-plugin/src/dockerTest/projects/build-image-zip-packaging/src/main/java/org/test/SampleApplication.java
+[K[1A[K[?25l⠸ Calculating metrics... (500/11607) build-plugin/spring-boot-gradle-plugin/src/docs/antora/modules/gradle-plugin/examples/packaging/boot-jar-layered-disabled.gradle.kts
+[K[1A[K[?25l⠼ Calculating metrics... (800/11607) build-plugin/spring-boot-maven-plugin/src/intTest/projects/run-envargs/src/main/java/org/test/SampleApplication.java
+[K[1A[K[?25l⠴ Calculating metrics... (850/11607) build-plugin/spring-boot-maven-plugin/src/main/java/org/springframework/boot/maven/JarTypeFilter.java
+[K[1A[K[?25l⠦ Calculating metrics... (1150/11607) buildpack/spring-boot-buildpack-platform/src/test/java/org/springframework/boot/buildpack/platform/docker/type/ManifestListTests.java
+[K[1A[K[?25l⠧ Calculating metrics... (1400/11607) buildSrc/src/main/java/org/springframework/boot/build/antora/AntoraDependenciesPlugin.java
+[K[1A[K[?25l⠇ Calculating metrics... (1550/11607) cli/spring-boot-cli/src/main/java/org/springframework/boot/cli/command/CommandFactory.java
+[K[1A[K[?25l⠏ Calculating metrics... (1900/11607) configuration-metadata/spring-boot-configuration-processor/src/test/java/org/springframework/boot/configurationsample/specific/DeprecatedLessPreciseTypePojo.java
+[K[1A[K[?25l⠋ Calculating metrics... (2250/11607) core/spring-boot/src/main/java/org/springframework/boot/diagnostics/AbstractFailureAnalyzer.java
+[K[1A[K[?25l⠙ Calculating metrics... (2450/11607) core/spring-boot/src/main/java/org/springframework/boot/validation/beanvalidation/package-info.java
+[K[1A[K[?25l⠹ Calculating metrics... (2650/11607) core/spring-boot/src/test/java/org/springframework/boot/context/properties/ConfigurationPropertiesBindExceptionTests.java
+[K[1A[K[?25l⠸ Calculating metrics... (2850/11607) core/spring-boot/src/test/java/org/springframework/boot/ssl/FixedTrustManagerFactoryTests.java
+[K[1A[K[?25l⠼ Calculating metrics... (3000/11607) core/spring-boot-autoconfigure/src/main/java/org/springframework/boot/autoconfigure/ssl/PropertiesSslBundle.java
+[K[1A[K[?25l⠴ Calculating metrics... (3300/11607) core/spring-boot-autoconfigure/src/test/java/org/springframework/boot/autoconfigure/AutoConfigurationImportSelectorTests.java
+[K[1A[K[?25l⠦ Calculating metrics... (3500/11607) core/spring-boot-test-autoconfigure/src/main/resources/META-INF/spring.factories
+[K[1A[K[?25l⠧ Calculating metrics... (3800/11607) documentation/spring-boot-actuator-docs/src/test/resources/org/springframework/boot/actuate/docs/env/application.properties
+[K[1A[K[?25l⠇ Calculating metrics... (4000/11607) documentation/spring-boot-docs/src/docs/antora/modules/how-to/pages/spring-mvc.adoc
+[K[1A[K[?25l⠏ Calculating metrics... (4700/11607) documentation/spring-boot-docs/src/main/kotlin/org/springframework/boot/docs/web/reactive/webflux/CustomerRepository.kt
+[K[1A[K[?25l⠋ Calculating metrics... (5000/11607) loader/spring-boot-jarmode-tools/src/test/java/org/springframework/boot/jarmode/tools/ListCommandTests.java
+[K[1A[K[?25l⠙ Calculating metrics... (5350/11607) module/spring-boot-actuator/src/main/java/org/springframework/boot/actuate/endpoint/jackson/EndpointJackson2ObjectMapper.java
+[K[1A[K[?25l⠹ Calculating metrics... (5600/11607) integration-test/spring-boot-loader-integration-tests/spring-boot-loader-tests-app/src/main/java/org/springframework/boot/loaderapp/LoaderTestApplication.java
+[K[1A[K[?25l⠸ Calculating metrics... (5900/11607) module/spring-boot-cassandra/src/main/java/org/springframework/boot/cassandra/docker/compose/CassandraDockerComposeConnectionDetailsFactory.java
+[K[1A[K[?25l⠼ Calculating metrics... (6550/11607) module/spring-boot-devtools/src/main/java/org/springframework/boot/devtools/classpath/package-info.java
+[K[1A[K[?25l⠴ Calculating metrics... (7000/11607) module/spring-boot-grpc-server/src/main/java/org/springframework/boot/grpc/server/autoconfigure/ShadedNettyGrpcServerConfiguration.java
+[K[1A[K[?25l⠦ Calculating metrics... (7450/11607) module/spring-boot-jackson/src/test/java/org/springframework/boot/jackson/ObjectValueSerializerTests.java
+[K[1A[K[?25l⠧ Calculating metrics... (7950/11607) module/spring-boot-jms/src/test/java/org/springframework/boot/jms/ConnectionFactoryUnwrapperTests.java
+[K[1A[K[?25l⠇ Calculating metrics... (8400/11607) module/spring-boot-micrometer-metrics/src/test/java/org/springframework/boot/micrometer/metrics/autoconfigure/export/properties/PushRegistryPropertiesTests.java
+[K[1A[K[?25l⠏ Calculating metrics... (8900/11607) module/spring-boot-rabbitmq/src/main/java/org/springframework/boot/rabbitmq/autoconfigure/RabbitProperties.java
+[K[1A[K[?25l⠋ Calculating metrics... (9350/11607) module/spring-boot-session/src/main/java/org/springframework/boot/session/autoconfigure/SessionAutoConfiguration.java
+[K[1A[K[?25l⠙ Calculating metrics... (9750/11607) module/spring-boot-webflux/src/test/java/org/springframework/boot/webflux/autoconfigure/actuate/endpoint/web/WebFluxHealthEndpointExtensionAutoConfigurationTests.java
+[K[1A[K[?25l⠹ Calculating metrics... (10100/11607) module/spring-boot-websocket/src/main/java/org/springframework/boot/websocket/autoconfigure/servlet/package-info.java
+[K[1A[K[?25l⠸ Calculating metrics... (10700/11607) smoke-test/spring-boot-smoke-test-jersey/src/test/java/smoketest/jersey/JerseyServletManagementPortTests.java
+[K[1A[K[?25l⠼ Calculating metrics... (11300/11607) starter/spring-boot-starter-micrometer-metrics/build.gradle
+[K[1A[K[?25l⠴ Calculating metrics... (11557/11607) SUPPORT.adoc
+[K[1A[K[?25l⠦ Calculating metrics... (11607/11607) smoke-test/spring-boot-smoke-test-web-secure/src/test/java/smoketest/web/secure/ErrorPageTests.java
+[K[1A[K[?25l⠧ Calculating metrics... (11607/11607) smoke-test/spring-boot-smoke-test-web-secure/src/test/java/smoketest/web/secure/ErrorPageTests.java
+[K[1A[K[?25l⠇ Calculating metrics... (11607/11607) smoke-test/spring-boot-smoke-test-web-secure/src/test/java/smoketest/web/secure/ErrorPageTests.java
+[K[1A[K[?25l⠏ Calculating metrics... (11607/11607) smoke-test/spring-boot-smoke-test-web-secure/src/test/java/smoketest/web/secure/ErrorPageTests.java
+[K[1A[K[?25l⠋ Calculating metrics... (11607/11607) smoke-test/spring-boot-smoke-test-web-secure/src/test/java/smoketest/web/secure/ErrorPageTests.java
+[K[1A[K[?25l⠙ Calculating metrics... (11607/11607) smoke-test/spring-boot-smoke-test-web-secure/src/test/java/smoketest/web/secure/ErrorPageTests.java
+[K[1A[K[?25l⠹ Calculating metrics... (11607/11607) smoke-test/spring-boot-smoke-test-web-secure/src/test/java/smoketest/web/secure/ErrorPageTests.java
+[K[1A[K[?25l⠸ Calculating metrics... (11607/11607) smoke-test/spring-boot-smoke-test-web-secure/src/test/java/smoketest/web/secure/ErrorPageTests.java
+[K[1A[K[?25l⠼ Calculating metrics... (11607/11607) smoke-test/spring-boot-smoke-test-web-secure/src/test/java/smoketest/web/secure/ErrorPageTests.java
+[K[1A[K[?25l⠴ Calculating metrics... (11607/11607) smoke-test/spring-boot-smoke-test-web-secure/src/test/java/smoketest/web/secure/ErrorPageTests.java
+[K[1A[K[?25l⠦ Calculating metrics... (11607/11607) smoke-test/spring-boot-smoke-test-web-secure/src/test/java/smoketest/web/secure/ErrorPageTests.java
+[K[1A[K[?25l⠧ Calculating metrics... (11607/11607) smoke-test/spring-boot-smoke-test-web-secure/src/test/java/smoketest/web/secure/ErrorPageTests.java
+[K[1A[K[?25l⠇ Calculating metrics... (11607/11607) smoke-test/spring-boot-smoke-test-web-secure/src/test/java/smoketest/web/secure/ErrorPageTests.java
+[K[1A[K[?25l⠏ Calculating metrics... (11607/11607) smoke-test/spring-boot-smoke-test-web-secure/src/test/java/smoketest/web/secure/ErrorPageTests.java
+[K[1A[K[?25l⠋ Calculating metrics... (11607/11607) smoke-test/spring-boot-smoke-test-web-secure/src/test/java/smoketest/web/secure/ErrorPageTests.java
+[K[1A[K[?25l⠙ Calculating metrics... (11607/11607) smoke-test/spring-boot-smoke-test-web-secure/src/test/java/smoketest/web/secure/ErrorPageTests.java
+[K[1A[K[?25l⠹ Calculating metrics... (11607/11607) smoke-test/spring-boot-smoke-test-web-secure/src/test/java/smoketest/web/secure/ErrorPageTests.java
+[K[1A[K[?25l⠸ Calculating metrics... (11607/11607) smoke-test/spring-boot-smoke-test-web-secure/src/test/java/smoketest/web/secure/ErrorPageTests.java
+[K[1A[K[?25l⠼ Calculating metrics... (11607/11607) smoke-test/spring-boot-smoke-test-web-secure/src/test/java/smoketest/web/secure/ErrorPageTests.java
+[K[1A[K[?25l⠴ Calculating metrics... (11607/11607) smoke-test/spring-boot-smoke-test-web-secure/src/test/java/smoketest/web/secure/ErrorPageTests.java
+[K[1A[K[?25l⠦ Calculating metrics... (11607/11607) smoke-test/spring-boot-smoke-test-web-secure/src/test/java/smoketest/web/secure/ErrorPageTests.java
+[K[1A[K[?25l⠧ Calculating metrics... (11607/11607) smoke-test/spring-boot-smoke-test-web-secure/src/test/java/smoketest/web/secure/ErrorPageTests.java
+[K[1A[K[?25l✔ Packing completed successfully!
+[?25h
+📈 Top 5 Files by Token Count:
+──────────────────────────────
+1.  integration-test/spring-boot-actuator-integration-tests/src/test/resources/org/springframework/boot/actuate/sbom/syft.json (88,008 tokens, 310,104 chars, 0.9%)
+2.  module/spring-boot-actuator/src/test/resources/org/springframework/boot/actuate/sbom/syft.json (88,008 tokens, 310,104 chars, 0.9%)
+3.  documentation/spring-boot-docs/src/docs/antora/modules/ROOT/pages/redirect.adoc (70,495 tokens, 280,839 chars, 0.8%)
+4.  smoke-test/spring-boot-smoke-test-web-groovy-templates/src/main/resources/static/js/jquery-1.7.2.js (69,924 tokens, 274,464 chars, 0.8%)
+5.  documentation/spring-boot-actuator-docs/src/test/resources/org/springframework/boot/actuate/docs/sbom/cyclonedx.json (59,955 tokens, 160,313 chars, 0.6%)
+
+🔎 Security Check:
+──────────────────
+20 suspicious file(s) detected and excluded from the output:
+1. buildpack/spring-boot-buildpack-platform/src/test/java/org/springframework/boot/buildpack/platform/docker/ssl/PemFileWriter.java
+   - 1 security issue detected
+2. core/spring-boot/src/test/java/org/springframework/boot/ssl/pem/PemSslStoreBundleTests.java
+   - 1 security issue detected
+3. core/spring-boot/src/test/resources/org/springframework/boot/ssl/pem/ca.pem
+   - 1 security issue detected
+4. core/spring-boot/src/test/resources/org/springframework/boot/ssl/pem/test-key.pem
+   - 1 security issue detected
+5. core/spring-boot-autoconfigure/src/test/resources/org/springframework/boot/autoconfigure/ssl/key1.pem
+   - 1 security issue detected
+6. core/spring-boot-autoconfigure/src/test/resources/org/springframework/boot/autoconfigure/ssl/key2.pem
+   - 1 security issue detected
+7. core/spring-boot-autoconfigure/src/test/resources/org/springframework/boot/autoconfigure/ssl/rsa-key.pem
+   - 1 security issue detected
+8. module/spring-boot-cloudfoundry/src/test/java/org/springframework/boot/cloudfoundry/autoconfigure/actuate/endpoint/reactive/TokenValidatorTests.java
+   - 1 security issue detected
+9. module/spring-boot-cloudfoundry/src/test/java/org/springframework/boot/cloudfoundry/autoconfigure/actuate/endpoint/servlet/TokenValidatorTests.java
+   - 1 security issue detected
+10.module/spring-boot-couchbase/src/test/resources/org/springframework/boot/couchbase/autoconfigure/key.pem
+   - 1 security issue detected
+11.module/spring-boot-mongodb/src/dockerTest/resources/org/springframework/boot/mongodb/docker/compose/mongo.pem
+   - 1 security issue detected
+12.module/spring-boot-quartz/src/test/java/org/springframework/boot/quartz/actuate/endpoint/QuartzEndpointTests.java
+   - 6 security issues detected
+13.module/spring-boot-r2dbc/src/test/java/org/springframework/boot/r2dbc/autoconfigure/R2dbcAutoConfigurationTests.java
+   - 1 security issue detected
+14.module/spring-boot-rsocket/src/test/resources/org/springframework/boot/rsocket/netty/test-key.pem
+   - 1 security issue detected
+15.module/spring-boot-security-saml2/src/test/resources/org/springframework/boot/security/saml2/autoconfigure/private-key-location
+   - 1 security issue detected
+16.module/spring-boot-web-server/src/test/resources/org/springframework/boot/web/server/test-key.pem
+   - 1 security issue detected
+17.module/spring-boot-web-server/src/testFixtures/resources/org/springframework/boot/web/server/reactive/test-key.pem
+   - 1 security issue detected
+18.module/spring-boot-web-server/src/testFixtures/resources/org/springframework/boot/web/server/servlet/test-key.pem
+   - 1 security issue detected
+19.smoke-test/spring-boot-smoke-test-data-mongodb/src/test/resources/ssl/test-server.pem
+   - 1 security issue detected
+20.smoke-test/spring-boot-smoke-test-saml2-service-provider/src/main/resources/saml/privatekey.txt
+   - 1 security issue detected
+
+These files have been excluded from the output for security reasons.
+Please review these files for potential sensitive information.
+
+📄 Binary Files Detected:
+─────────────────────────
+65 files detected as binary by content inspection:
+1. buildpack/spring-boot-buildpack-platform/src/test/resources/org/springframework/boot/buildpack/platform/docker/log-update-event-ansi.stream
+2. buildpack/spring-boot-buildpack-platform/src/test/resources/org/springframework/boot/buildpack/platform/docker/log-update-event-invalid-stream-type.stream
+3. buildpack/spring-boot-buildpack-platform/src/test/resources/org/springframework/boot/buildpack/platform/docker/log-update-event.stream
+4. core/spring-boot/src/test/resources/org/springframework/boot/info/keystore.jks
+5. core/spring-boot/src/test/resources/org/springframework/boot/info/test-expired.p12
+6. core/spring-boot/src/test/resources/org/springframework/boot/info/test-not-yet-valid.p12
+7. core/spring-boot/src/test/resources/org/springframework/boot/info/test.p12
+8. core/spring-boot/src/test/resources/org/springframework/boot/info/truststore.jks
+9. core/spring-boot/src/test/resources/org/springframework/boot/info/will-expire-soon.p12
+10.core/spring-boot/src/test/resources/org/springframework/boot/ssl/jks/test.jks
+11.core/spring-boot/src/test/resources/org/springframework/boot/ssl/jks/test.p12
+12.core/spring-boot-autoconfigure/src/test/resources/org/springframework/boot/autoconfigure/ssl/keystore.jks
+13.core/spring-boot-autoconfigure/src/test/resources/org/springframework/boot/autoconfigure/ssl/keystore.pkcs12
+14.core/spring-boot-autoconfigure/src/test/resources/org/springframework/boot/autoconfigure/ssl/test.jks
+15.documentation/spring-boot-actuator-docs/src/test/resources/test.p12
+16.module/spring-boot-cassandra/src/dockerTest/resources/org/springframework/boot/cassandra/docker/compose/client-keystore.p12
+17.module/spring-boot-cassandra/src/dockerTest/resources/org/springframework/boot/cassandra/docker/compose/client-truststore.p12
+18.module/spring-boot-cassandra/src/dockerTest/resources/org/springframework/boot/cassandra/docker/compose/server-keystore.p12
+19.module/spring-boot-cassandra/src/dockerTest/resources/org/springframework/boot/cassandra/docker/compose/server-truststore.p12
+20.module/spring-boot-cassandra/src/test/resources/org/springframework/boot/cassandra/autoconfigure/test.jks
+21.module/spring-boot-cloudfoundry/src/test/resources/org/springframework/boot/cloudfoundry/autoconfigure/actuate/endpoint/reactive/test.jks
+22.module/spring-boot-cloudfoundry/src/test/resources/org/springframework/boot/cloudfoundry/autoconfigure/actuate/endpoint/servlet/test.jks
+23.module/spring-boot-couchbase/src/test/resources/org/springframework/boot/couchbase/autoconfigure/keystore.jks
+24.module/spring-boot-couchbase/src/test/resources/org/springframework/boot/couchbase/autoconfigure/test.jks
+25.module/spring-boot-data-redis/src/test/resources/org/springframework/boot/data/redis/autoconfigure/test.jks
+26.module/spring-boot-elasticsearch/src/test/resources/org/springframework/boot/elasticsearch/autoconfigure/test.jks
+27.module/spring-boot-grpc-server/src/test/resources/org/springframework/boot/grpc/server/autoconfigure/test.jks
+28.module/spring-boot-health/src/test/resources/org/springframework/boot/health/autoconfigure/application/test.jks
+29.module/spring-boot-http-client/src/test/resources/org/springframework/boot/http/client/reactive/test.jks
+30.module/spring-boot-http-client/src/test/resources/org/springframework/boot/http/client/test.jks
+31.module/spring-boot-jetty/src/test/resources/org/springframework/boot/jetty/autoconfigure/metrics/test.jks
+32.module/spring-boot-jetty/src/test/resources/org/springframework/boot/jetty/autoconfigure/test.jks
+33.module/spring-boot-jetty/src/test/resources/org/springframework/boot/jetty/servlet/test.jks
+34.module/spring-boot-jetty/src/test/resources/org/springframework/boot/jetty/test.jks
+35.module/spring-boot-ldap/src/test/resources/org/springframework/boot/ldap/autoconfigure/embedded/test.jks
+36.module/spring-boot-mail/src/test/resources/org/springframework/boot/mail/autoconfigure/test.jks
+37.module/spring-boot-micrometer-metrics/src/test/resources/certificates/chains.p12
+38.module/spring-boot-micrometer-metrics/src/test/resources/certificates/chains2.p12
+39.module/spring-boot-micrometer-metrics/src/test/resources/org/springframework/boot/micrometer/metrics/autoconfigure/export/otlp/test.jks
+40.module/spring-boot-micrometer-tracing-opentelemetry/src/test/resources/org/springframework/boot/micrometer/tracing/opentelemetry/autoconfigure/otlp/test.jks
+41.module/spring-boot-mongodb/src/test/resources/org/springframework/boot/mongodb/autoconfigure/test.jks
+42.module/spring-boot-opentelemetry/src/test/resources/org/springframework/boot/opentelemetry/autoconfigure/logging/otlp/test.jks
+43.module/spring-boot-rabbitmq/src/test/resources/org/springframework/boot/rabbitmq/autoconfigure/test.jks
+44.module/spring-boot-reactor-netty/src/test/resources/org/springframework/boot/reactor/netty/test.jks
+45.module/spring-boot-rsocket/src/test/resources/org/springframework/boot/rsocket/autoconfigure/test.jks
+46.module/spring-boot-rsocket/src/test/resources/org/springframework/boot/rsocket/netty/test.jks
+47.module/spring-boot-tomcat/src/test/resources/org/springframework/boot/tomcat/servlet/test.jks
+48.module/spring-boot-tomcat/src/test/resources/org/springframework/boot/tomcat/test.jks
+49.module/spring-boot-web-server/src/test/resources/org/springframework/boot/web/server/test.jks
+50.module/spring-boot-web-server/src/test/resources/org/springframework/boot/web/server/test.p12
+51.module/spring-boot-web-server/src/testFixtures/resources/org/springframework/boot/web/server/reactive/test.jks
+52.module/spring-boot-web-server/src/testFixtures/resources/org/springframework/boot/web/server/reactive/test.p12
+53.module/spring-boot-web-server/src/testFixtures/resources/org/springframework/boot/web/server/servlet/test.jks
+54.module/spring-boot-web-server/src/testFixtures/resources/org/springframework/boot/web/server/servlet/test.p12
+55.module/spring-boot-webclient/src/test/resources/org/springframework/boot/http/client/reactive/web/autoconfigure/test.jks
+56.module/spring-boot-webclient/src/test/resources/org/springframework/boot/http/client/reactive/test.jks
+57.smoke-test/spring-boot-smoke-test-data-cassandra/src/dockerTest/resources/ssl/test-ca.p12
+58.smoke-test/spring-boot-smoke-test-data-cassandra/src/dockerTest/resources/ssl/test-client.p12
+59.smoke-test/spring-boot-smoke-test-data-cassandra/src/dockerTest/resources/ssl/test-server.p12
+60.smoke-test/spring-boot-smoke-test-jetty-ssl/src/main/resources/sample.jks
+61.smoke-test/spring-boot-smoke-test-kafka/src/dockerTest/resources/ssl/test-ca.p12
+62.smoke-test/spring-boot-smoke-test-kafka/src/dockerTest/resources/ssl/test-client.p12
+63.smoke-test/spring-boot-smoke-test-kafka/src/dockerTest/resources/ssl/test-server.p12
+64.smoke-test/spring-boot-smoke-test-tomcat-multi-connectors/src/main/resources/sample.jks
+65.smoke-test/spring-boot-smoke-test-tomcat-ssl/src/main/resources/sample.jks
+
+These files have been excluded from the output.
+Please review these files if you expected them to contain text content.
+
+📊 Pack Summary:
+────────────────
+  Total Files: 11,607 files
+ Total Tokens: 9,302,732 tokens
+  Total Chars: 41,292,793 chars
+       Output: repomix.txt
+     Security: 20 suspicious file(s) detected and excluded
+
+🎉 All Done!
+Your repository has been successfully packed.
+
+💡 Repomix is now available in your browser! Try it at https://repomix.com
+Analyzing source, output will be written to 'digest.txt'...
+2026-08-06 19:13:04.338 | INFO     | gitingest.entrypoint:ingest_async:89 | Starting ingestion process | {"source":"/repo"}
+2026-08-06 19:13:04.338 | INFO     | gitingest.entrypoint:ingest_async:105 | Processing local directory | {"source":"/repo"}
+2026-08-06 19:13:04.338 | INFO     | gitingest.entrypoint:ingest_async:134 | Starting local directory processing
+2026-08-06 19:13:27.960 | INFO     | gitingest.entrypoint:ingest_async:140 | Processing files and generating output
+2026-08-06 19:13:27.960 | INFO     | gitingest.ingestion:ingest_query:44 | Starting file ingestion | {"slug":"repo","subpath":"/","local_path":"/repo","max_file_size":10485760}
+2026-08-06 19:13:27.961 | INFO     | gitingest.ingestion:ingest_query:96 | Processing directory | {"directory_path":"/repo"}
+2026-08-06 19:14:06.651 | WARNING  | gitingest.ingestion:_process_file:235 | Maximum file limit reached | {"current_files":10000,"max_files":10000,"file_path":"/repo/cli/spring-boot-cli/src/json-shade/java/org/springframework/boot/cli/json/JSONTokener.java"}
+2026-08-06 19:14:06.652 | WARNING  | gitingest.ingestion:_process_file:235 | Maximum file limit reached | {"current_files":10000,"max_files":10000,"file_path":"/repo/cli/spring-boot-cli/src/json-shade/java/org/springframework/boot/cli/json/JSON.java"}
+2026-08-06 19:14:06.654 | WARNING  | gitingest.ingestion:_process_file:235 | Maximum file limit reached | {"current_files":10000,"max_files":10000,"file_path":"/repo/cli/spring-boot-cli/src/json-shade/java/org/springframework/boot/cli/json/JSONObject.java"}
+2026-08-06 19:14:06.656 | WARNING  | gitingest.ingestion:_process_file:235 | Maximum file limit reached | {"current_files":10000,"max_files":10000,"file_path":"/repo/cli/spring-boot-cli/src/json-shade/java/org/springframework/boot/cli/json/package-info.java"}
+2026-08-06 19:14:06.657 | WARNING  | gitingest.ingestion:_process_file:235 | Maximum file limit reached | {"current_files":10000,"max_files":10000,"file_path":"/repo/cli/spring-boot-cli/src/json-shade/README.adoc"}
+2026-08-06 19:14:06.659 | WARNING  | gitingest.ingestion:limit_exceeded:306 | Maximum file limit reached | {"current_files":10000,"max_files":10000}
+2026-08-06 19:14:06.660 | WARNING  | gitingest.ingestion:limit_exceeded:306 | Maximum file limit reached | {"current_files":10000,"max_files":10000}
+2026-08-06 19:14:06.662 | WARNING  | gitingest.ingestion:_process_file:235 | Maximum file limit reached | {"current_files":10000,"max_files":10000,"file_path":"/repo/.editorconfig"}
+2026-08-06 19:14:06.664 | WARNING  | gitingest.ingestion:limit_exceeded:306 | Maximum file limit reached | {"current_files":10000,"max_files":10000}
+2026-08-06 19:14:06.666 | WARNING  | gitingest.ingestion:_process_file:235 | Maximum file limit reached | {"current_files":10000,"max_files":10000,"file_path":"/repo/README.adoc"}
+2026-08-06 19:14:06.668 | WARNING  | gitingest.ingestion:limit_exceeded:306 | Maximum file limit reached | {"current_files":10000,"max_files":10000}
+2026-08-06 19:14:06.670 | WARNING  | gitingest.ingestion:_process_file:235 | Maximum file limit reached | {"current_files":10000,"max_files":10000,"file_path":"/repo/gradlew"}
+2026-08-06 19:14:06.673 | WARNING  | gitingest.ingestion:limit_exceeded:306 | Maximum file limit reached | {"current_files":10000,"max_files":10000}
+2026-08-06 19:14:06.675 | WARNING  | gitingest.ingestion:limit_exceeded:306 | Maximum file limit reached | {"current_files":10000,"max_files":10000}
+2026-08-06 19:14:06.677 | WARNING  | gitingest.ingestion:limit_exceeded:306 | Maximum file limit reached | {"current_files":10000,"max_files":10000}
+2026-08-06 19:14:06.681 | WARNING  | gitingest.ingestion:_process_file:235 | Maximum file limit reached | {"current_files":10000,"max_files":10000,"file_path":"/repo/SUPPORT.adoc"}
+2026-08-06 19:14:06.683 | WARNING  | gitingest.ingestion:_process_file:235 | Maximum file limit reached | {"current_files":10000,"max_files":10000,"file_path":"/repo/gradle.properties"}
+2026-08-06 19:14:06.685 | WARNING  | gitingest.ingestion:limit_exceeded:306 | Maximum file limit reached | {"current_files":10000,"max_files":10000}
+2026-08-06 19:14:06.688 | WARNING  | gitingest.ingestion:_process_file:235 | Maximum file limit reached | {"current_files":10000,"max_files":10000,"file_path":"/repo/LICENSE.txt"}
+2026-08-06 19:14:06.690 | WARNING  | gitingest.ingestion:_process_file:235 | Maximum file limit reached | {"current_files":10000,"max_files":10000,"file_path":"/repo/gradlew.bat"}
+2026-08-06 19:14:06.693 | WARNING  | gitingest.ingestion:limit_exceeded:306 | Maximum file limit reached | {"current_files":10000,"max_files":10000}
+2026-08-06 19:14:06.695 | WARNING  | gitingest.ingestion:limit_exceeded:306 | Maximum file limit reached | {"current_files":10000,"max_files":10000}
+2026-08-06 19:14:06.697 | INFO     | gitingest.ingestion:ingest_query:109 | Directory processing completed | {"total_files":10000,"total_directories":8510,"total_size_bytes":34091969,"stats_total_files":10000,"stats_total_size":34091969}
+Analysis complete! Output written to: digest.txt
+
+Summary:
+Directory: repo
+Files analyzed: 10000
+
+Estimated tokens: 8.4M
+2026-08-06 19:14:28.414 | INFO     | gitingest.entrypoint:ingest_async:147 | Ingestion completed successfully
+Warning: Skipping file /repo/buildpack/spring-boot-buildpack-platform/src/test/resources/org/springframework/boot/buildpack/platform/docker/export-docker-desktop-containerd-alt-mediatype.tar due to UnicodeDecodeError
+Warning: Skipping file /repo/buildpack/spring-boot-buildpack-platform/src/test/resources/org/springframework/boot/buildpack/platform/docker/export-docker-desktop-containerd-manifest-list.tar due to UnicodeDecodeError
+Warning: Skipping file /repo/buildpack/spring-boot-buildpack-platform/src/test/resources/org/springframework/boot/buildpack/platform/docker/export-docker-desktop-containerd.tar due to UnicodeDecodeError
+Warning: Skipping file /repo/documentation/spring-boot-actuator-docs/src/test/resources/test.p12 due to UnicodeDecodeError
+Warning: Skipping file /repo/documentation/spring-boot-actuator-docs/src/test/resources/org/springframework/boot/actuate/docs/logging/sample.log.2021-06-15.0.gz due to UnicodeDecodeError
+Warning: Skipping file /repo/core/spring-boot-autoconfigure/src/test/resources/org/springframework/boot/autoconfigure/ssl/keystore.jks due to UnicodeDecodeError
+Warning: Skipping file /repo/core/spring-boot-autoconfigure/src/test/resources/org/springframework/boot/autoconfigure/ssl/keystore.pkcs12 due to UnicodeDecodeError
+Warning: Skipping file /repo/core/spring-boot-autoconfigure/src/test/resources/org/springframework/boot/autoconfigure/ssl/test.jks due to UnicodeDecodeError
+Warning: Skipping file /repo/core/spring-boot/src/test/resources/org/springframework/boot/ssl/jks/test.jks due to UnicodeDecodeError
+Warning: Skipping file /repo/core/spring-boot/src/test/resources/org/springframework/boot/ssl/jks/test.p12 due to UnicodeDecodeError
+Warning: Skipping file /repo/core/spring-boot/src/test/resources/org/springframework/boot/env/test-properties.properties due to UnicodeDecodeError
+Warning: Skipping file /repo/core/spring-boot/src/test/resources/org/springframework/boot/info/keystore.jks due to UnicodeDecodeError
+Warning: Skipping file /repo/core/spring-boot/src/test/resources/org/springframework/boot/info/test-expired.p12 due to UnicodeDecodeError
+Warning: Skipping file /repo/core/spring-boot/src/test/resources/org/springframework/boot/info/test-not-yet-valid.p12 due to UnicodeDecodeError
+Warning: Skipping file /repo/core/spring-boot/src/test/resources/org/springframework/boot/info/test.p12 due to UnicodeDecodeError
+Warning: Skipping file /repo/core/spring-boot/src/test/resources/org/springframework/boot/info/truststore.jks due to UnicodeDecodeError
+Warning: Skipping file /repo/core/spring-boot/src/test/resources/org/springframework/boot/info/will-expire-soon.p12 due to UnicodeDecodeError
+Warning: Skipping file /repo/core/spring-boot/src/test/resources/org/springframework/boot/json/large-malformed-json.txt due to UnicodeDecodeError
+Warning: Skipping file /repo/module/spring-boot-health/src/test/resources/org/springframework/boot/health/autoconfigure/application/test.jks due to UnicodeDecodeError
+Warning: Skipping file /repo/module/spring-boot-rabbitmq/src/test/resources/org/springframework/boot/rabbitmq/autoconfigure/test.jks due to UnicodeDecodeError
+Warning: Skipping file /repo/module/spring-boot-elasticsearch/src/test/resources/org/springframework/boot/elasticsearch/autoconfigure/test.jks due to UnicodeDecodeError
+Warning: Skipping file /repo/module/spring-boot-grpc-server/src/test/resources/org/springframework/boot/grpc/server/autoconfigure/test.jks due to UnicodeDecodeError
+Warning: Skipping file /repo/module/spring-boot-jetty/src/test/resources/org/springframework/boot/jetty/test.jks due to UnicodeDecodeError
+Warning: Skipping file /repo/module/spring-boot-jetty/src/test/resources/org/springframework/boot/jetty/servlet/test.jks due to UnicodeDecodeError
+Warning: Skipping file /repo/module/spring-boot-jetty/src/test/resources/org/springframework/boot/jetty/autoconfigure/test.jks due to UnicodeDecodeError
+Warning: Skipping file /repo/module/spring-boot-jetty/src/test/resources/org/springframework/boot/jetty/autoconfigure/metrics/test.jks due to UnicodeDecodeError
+Warning: Skipping file /repo/module/spring-boot-webclient/src/test/resources/org/springframework/boot/http/client/reactive/test.jks due to UnicodeDecodeError
+Warning: Skipping file /repo/module/spring-boot-webclient/src/test/resources/org/springframework/boot/http/client/reactive/web/autoconfigure/test.jks due to UnicodeDecodeError
+Warning: Skipping file /repo/module/spring-boot-web-server/src/test/resources/org/springframework/boot/web/server/test.jks due to UnicodeDecodeError
+Warning: Skipping file /repo/module/spring-boot-web-server/src/test/resources/org/springframework/boot/web/server/test.p12 due to UnicodeDecodeError
+Warning: Skipping file /repo/module/spring-boot-web-server/src/testFixtures/resources/org/springframework/boot/web/server/servlet/test.jks due to UnicodeDecodeError
+Warning: Skipping file /repo/module/spring-boot-web-server/src/testFixtures/resources/org/springframework/boot/web/server/servlet/test.p12 due to UnicodeDecodeError
+Warning: Skipping file /repo/module/spring-boot-web-server/src/testFixtures/resources/org/springframework/boot/web/server/reactive/test.jks due to UnicodeDecodeError
+Warning: Skipping file /repo/module/spring-boot-web-server/src/testFixtures/resources/org/springframework/boot/web/server/reactive/test.p12 due to UnicodeDecodeError
+Warning: Skipping file /repo/module/spring-boot-rsocket/src/test/resources/org/springframework/boot/rsocket/netty/test.jks due to UnicodeDecodeError
+Warning: Skipping file /repo/module/spring-boot-rsocket/src/test/resources/org/springframework/boot/rsocket/autoconfigure/test.jks due to UnicodeDecodeError
+Warning: Skipping file /repo/module/spring-boot-data-redis/src/test/resources/org/springframework/boot/data/redis/autoconfigure/test.jks due to UnicodeDecodeError
+Warning: Skipping file /repo/module/spring-boot-http-client/src/test/resources/org/springframework/boot/http/client/test.jks due to UnicodeDecodeError
+Warning: Skipping file /repo/module/spring-boot-http-client/src/test/resources/org/springframework/boot/http/client/reactive/test.jks due to UnicodeDecodeError
+Warning: Skipping file /repo/module/spring-boot-tomcat/src/test/resources/org/springframework/boot/tomcat/test.jks due to UnicodeDecodeError
+Warning: Skipping file /repo/module/spring-boot-tomcat/src/test/resources/org/springframework/boot/tomcat/servlet/test.jks due to UnicodeDecodeError
+Warning: Skipping file /repo/module/spring-boot-mail/src/test/resources/org/springframework/boot/mail/autoconfigure/test.jks due to UnicodeDecodeError
+Warning: Skipping file /repo/module/spring-boot-ldap/src/test/resources/org/springframework/boot/ldap/autoconfigure/embedded/test.jks due to UnicodeDecodeError
+Warning: Skipping file /repo/module/spring-boot-reactor-netty/src/test/resources/org/springframework/boot/reactor/netty/test.jks due to UnicodeDecodeError
+Warning: Skipping file /repo/module/spring-boot-mongodb/src/test/resources/org/springframework/boot/mongodb/autoconfigure/test.jks due to UnicodeDecodeError
+Warning: Skipping file /repo/module/spring-boot-cloudfoundry/src/test/resources/org/springframework/boot/cloudfoundry/autoconfigure/actuate/endpoint/servlet/test.jks due to UnicodeDecodeError
+Warning: Skipping file /repo/module/spring-boot-cloudfoundry/src/test/resources/org/springframework/boot/cloudfoundry/autoconfigure/actuate/endpoint/reactive/test.jks due to UnicodeDecodeError
+Warning: Skipping file /repo/module/spring-boot-couchbase/src/test/resources/org/springframework/boot/couchbase/autoconfigure/keystore.jks due to UnicodeDecodeError
+Warning: Skipping file /repo/module/spring-boot-couchbase/src/test/resources/org/springframework/boot/couchbase/autoconfigure/test.jks due to UnicodeDecodeError
+Warning: Skipping file /repo/module/spring-boot-opentelemetry/src/test/resources/org/springframework/boot/opentelemetry/autoconfigure/logging/otlp/test.jks due to UnicodeDecodeError
+Warning: Skipping file /repo/module/spring-boot-micrometer-tracing-opentelemetry/src/test/resources/org/springframework/boot/micrometer/tracing/opentelemetry/autoconfigure/otlp/test.jks due to UnicodeDecodeError
+Warning: Skipping file /repo/module/spring-boot-micrometer-metrics/src/test/resources/org/springframework/boot/micrometer/metrics/autoconfigure/export/otlp/test.jks due to UnicodeDecodeError
+Warning: Skipping file /repo/module/spring-boot-micrometer-metrics/src/test/resources/certificates/chains.p12 due to UnicodeDecodeError
+Warning: Skipping file /repo/module/spring-boot-micrometer-metrics/src/test/resources/certificates/chains2.p12 due to UnicodeDecodeError
+Warning: Skipping file /repo/module/spring-boot-cassandra/src/test/resources/org/springframework/boot/cassandra/autoconfigure/test.jks due to UnicodeDecodeError
+Warning: Skipping file /repo/module/spring-boot-cassandra/src/dockerTest/resources/org/springframework/boot/cassandra/docker/compose/client-keystore.p12 due to UnicodeDecodeError
+Warning: Skipping file /repo/module/spring-boot-cassandra/src/dockerTest/resources/org/springframework/boot/cassandra/docker/compose/client-truststore.p12 due to UnicodeDecodeError
+Warning: Skipping file /repo/module/spring-boot-cassandra/src/dockerTest/resources/org/springframework/boot/cassandra/docker/compose/server-keystore.p12 due to UnicodeDecodeError
+Warning: Skipping file /repo/module/spring-boot-cassandra/src/dockerTest/resources/org/springframework/boot/cassandra/docker/compose/server-truststore.p12 due to UnicodeDecodeError
+Warning: Skipping file /repo/smoke-test/spring-boot-smoke-test-simple/src/main/resources/banner.jpg due to UnicodeDecodeError
+Warning: Skipping file /repo/smoke-test/spring-boot-smoke-test-kafka/src/dockerTest/resources/ssl/test-ca.p12 due to UnicodeDecodeError
+Warning: Skipping file /repo/smoke-test/spring-boot-smoke-test-kafka/src/dockerTest/resources/ssl/test-client.p12 due to UnicodeDecodeError
+Warning: Skipping file /repo/smoke-test/spring-boot-smoke-test-kafka/src/dockerTest/resources/ssl/test-server.p12 due to UnicodeDecodeError
+Warning: Skipping file /repo/smoke-test/spring-boot-smoke-test-tomcat-jsp/src/main/resources/META-INF/resources/favicon.ico due to UnicodeDecodeError
+Warning: Skipping file /repo/smoke-test/spring-boot-smoke-test-tomcat-multi-connectors/src/main/resources/sample.jks due to UnicodeDecodeError
+Warning: Skipping file /repo/smoke-test/spring-boot-smoke-test-data-cassandra/src/dockerTest/resources/ssl/test-ca.p12 due to UnicodeDecodeError
+Warning: Skipping file /repo/smoke-test/spring-boot-smoke-test-data-cassandra/src/dockerTest/resources/ssl/test-client.p12 due to UnicodeDecodeError
+Warning: Skipping file /repo/smoke-test/spring-boot-smoke-test-data-cassandra/src/dockerTest/resources/ssl/test-server.p12 due to UnicodeDecodeError
+Warning: Skipping file /repo/smoke-test/spring-boot-smoke-test-web-thymeleaf/src/main/resources/static/favicon.ico due to UnicodeDecodeError
+Warning: Skipping file /repo/smoke-test/spring-boot-smoke-test-jetty-ssl/src/main/resources/sample.jks due to UnicodeDecodeError
+Warning: Skipping file /repo/smoke-test/spring-boot-smoke-test-autoconfigure-classic/src/main/resources/banner.jpg due to UnicodeDecodeError
+Warning: Skipping file /repo/smoke-test/spring-boot-smoke-test-tomcat-ssl/src/main/resources/sample.jks due to UnicodeDecodeError
+
+📦 Repomix v1.18.0
+
+No custom config found at repomix.config.ts, repomix.config.mts, repomix.config.cts, repomix.config.js, repomix.config.mjs, repomix.config.cjs, repomix.config.json5, repomix.config.jsonc, repomix.config.json or global config at /root/.config/repomix/repomix.config.ts, /root/.config/repomix/repomix.config.mts, /root/.config/repomix/repomix.config.cts, /root/.config/repomix/repomix.config.js, /root/.config/repomix/repomix.config.mjs, /root/.config/repomix/repomix.config.cjs, /root/.config/repomix/repomix.config.json5, /root/.config/repomix/repomix.config.jsonc, /root/.config/repomix/repomix.config.json.
+You can add a config file for additional settings. Please check https://github.com/yamadashy/repomix for more information.
+[K[?25l⠋ Initializing...
+[K[1A[K[?25l⠙ Searching for files...
+[K[1A[K[?25l⠹ Searching for files...
+[K[1A[K[?25l⠸ Searching for files...
+[K[1A[K[?25l⠼ Searching for files...
+[K[1A[K[?25l⠴ Searching for files...
+[K[1A[K[?25l⠦ Searching for files...
+[K[1A[K[?25l⠧ Searching for files...
+[K[1A[K[?25l⠇ Searching for files...
+[K[1A[K[?25l⠏ Searching for files...
+[K[1A[K[?25l⠋ Searching for files...
+[K[1A[K[?25l⠙ Collecting files...
+[K[1A[K[?25l⠹ Collect file... (194/4791) doc/api_samples/os-aggregates/aggregate-add-host-post-req.json
+[K[1A[K[?25l⠸ Collect file... (423/4791) doc/api_samples/os-networks/network-show-resp.json
+[K[1A[K[?25l⠼ Collect file... (603/4791) doc/api_samples/os-snapshots/snapshot-create-resp.json
+[K[1A[K[?25l⠴ Collect file... (841/4791) doc/notification_samples/common_payloads/ComputeTaskPayload.json
+[K[1A[K[?25l⠦ Collect file... (1090/4791) doc/source/admin/compute-node-identification.rst
+[K[1A[K[?25l⠧ Collect file... (1344/4791) nova/api/openstack/compute/schemas/server_external_events.py
+[K[1A[K[?25l⠇ Collect file... (1532/4791) nova/conductor/rpcapi.py
+[K[1A[K[?25l⠏ Collect file... (1736/4791) nova/policies/evacuate.py
+[K[1A[K[?25l⠋ Collect file... (1838/4791) nova/tests/fixtures/__init__.py
+[K[1A[K[?25l⠙ Collect file... (2024/4791) nova/tests/functional/api_sample_tests/api_samples/os-hosts/hosts-list-resp.json.tpl
+[K[1A[K[?25l⠹ Collect file... (2268/4791) nova/tests/functional/api_sample_tests/api_samples/os-server-shares/v2.97/server-shares-create-tag-req.json.tpl
+[K[1A[K[?25l⠸ Collect file... (2507/4791) nova/tests/functional/api_sample_tests/api_samples/servers/v2.94/server-action-rebuild-resp.json.tpl
+[K[1A[K[?25l⠼ Collect file... (2775/4791) nova/tests/functional/regressions/test_bug_1894966.py
+[K[1A[K[?25l⠴ Collect file... (3009/4791) nova/tests/unit/compute/test_virtapi.py
+[K[1A[K[?25l⠦ Collect file... (3217/4791) nova/tests/unit/scheduler/weights/test_cross_cell.py
+[K[1A[K[?25l⠧ Collect file... (3437/4791) nova/virt/libvirt/volume/quobyte.py
+[K[1A[K[?25l⠇ Collect file... (3659/4791) releasenotes/notes/bp-granular-placement-policy-65722fc6d7cb1359.yaml
+[K[1A[K[?25l⠏ Collect file... (3892/4791) releasenotes/notes/ceph-minimum-version-bump-6ef4597c3e117201.yaml
+[K[1A[K[?25l⠋ Collect file... (4131/4791) releasenotes/notes/instance-list-batching-45f90a8b13eef512.yaml
+[K[1A[K[?25l⠙ Collect file... (4370/4791) releasenotes/notes/rbd-hyperv-support-672a34b1d87e68eb.yaml
+[K[1A[K[?25l⠹ Collect file... (4606/4791) releasenotes/notes/threaded-nova-compute-9d28661295e09d74.yaml
+[K[1A[K[?25l⠸ Processing file... (4763/4763) tox.ini
+[K[1A[K[?25l⠼ Processing file... (4763/4763) tox.ini
+[K[1A[K[?25l⠴ Processing file... (4763/4763) tox.ini
+[K[1A[K[?25l⠦ Running security check... (150/4763) doc/api_samples/flavor-access/flavor-access-add-tenant-req.json
+[K[1A[K[?25l⠧ Running security check... (900/4763) doc/notification_samples/instance-delete-start_compute_down.json
+[K[1A[K[?25l⠇ Running security check... (1200/4763) doc/source/contributor/testing/eventlet-profiling.rst
+[K[1A[K[?25l⠏ Running security check... (1450/4763) nova/api/validation/extra_specs/validators.py
+[K[1A[K[?25l⠋ Running security check... (1650/4763) nova/policies/admin_actions.py
+[K[1A[K[?25l⠙ Running security check... (2300/4763) nova/tests/functional/api_sample_tests/api_samples/os-snapshots/snapshot-create-req.json.tpl
+[K[1A[K[?25l⠹ Running security check... (2800/4763) nova/tests/functional/regressions/test_bug_2143972.py
+[K[1A[K[?25l⠸ Running security check... (2950/4763) nova/tests/unit/cmd/__init__.py
+[K[1A[K[?25l⠼ Running security check... (3000/4763) nova/tests/unit/objects/test_block_device.py
+[K[1A[K[?25l⠴ Running security check... (3200/4763) nova/tests/unit/scheduler/weights/test_weights_pci.py
+[K[1A[K[?25l⠦ Running security check... (3300/4763) nova/tests/unit/test_fixtures.py
+[K[1A[K[?25l⠧ Running security check... (3700/4763) releasenotes/notes/bug-1559026-47c3fa3468d66b07.yaml
+[K[1A[K[?25l⠇ Running security check... (4650/4763) releasenotes/notes/vmware_limits-16edee7a9ad023bc.yaml
+[K[1A[K[?25l⠏ Writing output file...
+[K[1A[K[?25l⠋ Calculating metrics... (400/4752) doc/api_samples/os-migrations/v2.66/migrations-get.json
+[K[1A[K[?25l⠙ Calculating metrics... (1000/4752) doc/notification_samples/common_payloads/InstanceActionVolumeSwapPayload.json
+[K[1A[K[?25l⠹ Calculating metrics... (1000/4752) doc/notification_samples/common_payloads/InstanceActionVolumeSwapPayload.json
+[K[1A[K[?25l⠸ Calculating metrics... (1100/4752) doc/source/contributor/api.rst
+[K[1A[K[?25l⠼ Calculating metrics... (1450/4752) nova/accelerator/cyborg.py
+[K[1A[K[?25l⠴ Calculating metrics... (1450/4752) nova/accelerator/cyborg.py
+[K[1A[K[?25l⠦ Calculating metrics... (1500/4752) nova/console/securityproxy/base.py
+[K[1A[K[?25l⠧ Calculating metrics... (1650/4752) nova/privsep/linux_net.py
+[K[1A[K[?25l⠇ Calculating metrics... (2500/4752) nova/tests/functional/api_sample_tests/test_deferred_delete.py
+[K[1A[K[?25l⠏ Calculating metrics... (2650/4752) nova/tests/functional/regressions/test_bug_1909120.py
+[K[1A[K[?25l⠋ Calculating metrics... (2750/4752) nova/tests/functional/libvirt/test_report_cpu_traits.py
+[K[1A[K[?25l⠙ Calculating metrics... (2850/4752) nova/tests/unit/api/openstack/compute/test_aggregates.py
+[K[1A[K[?25l⠹ Calculating metrics... (2900/4752) nova/tests/unit/compute/monitors/__init__.py
+[K[1A[K[?25l⠸ Calculating metrics... (2900/4752) nova/tests/unit/compute/monitors/__init__.py
+[K[1A[K[?25l⠼ Calculating metrics... (2950/4752) nova/tests/unit/policies/test_attach_interfaces.py
+[K[1A[K[?25l⠴ Calculating metrics... (3050/4752) nova/tests/unit/objects/test_host_mapping.py
+[K[1A[K[?25l⠦ Calculating metrics... (3100/4752) nova/tests/unit/scheduler/test_rpcapi.py
+[K[1A[K[?25l⠧ Calculating metrics... (3200/4752) nova/objects/instance_action.py
+[K[1A[K[?25l⠇ Calculating metrics... (3350/4752) nova/virt/libvirt/volume/scaleio.py
+[K[1A[K[?25l⠏ Calculating metrics... (3950/4752) releasenotes/notes/forbidden-traits-in-nova-478f1884a06e50e7.yaml
+[K[1A[K[?25l⠋ Calculating metrics... (4550/4752) releasenotes/notes/vrouter-hw-offloads-38257f49ac1d3a60.yaml
+[K[1A[K[?25l⠙ Calculating metrics... (4652/4752) nova/virt/interfaces.template
+[K[1A[K[?25l⠹ Calculating metrics... (4652/4752) nova/virt/interfaces.template
+[K[1A[K[?25l⠸ Calculating metrics... (4702/4752) nova/tests/unit/virt/test_node.py
+[K[1A[K[?25l⠼ Calculating metrics... (4702/4752) nova/tests/unit/virt/test_node.py
+[K[1A[K[?25l⠴ Calculating metrics... (4702/4752) nova/tests/unit/virt/test_node.py
+[K[1A[K[?25l⠦ Calculating metrics... (4752/4752) roles/run-evacuate-hook/files/test_evacuate.sh
+[K[1A[K[?25l✔ Packing completed successfully!
+[?25h
+📈 Top 5 Files by Token Count:
+──────────────────────────────
+1.  nova/tests/unit/virt/libvirt/test_driver.py (330,096 tokens, 1,530,213 chars, 4.3%)
+2.  doc/source/_static/images/traits-taxonomy.svg (148,470 tokens, 247,103 chars, 1.9%)
+3.  nova/tests/unit/compute/test_compute_mgr.py (145,716 tokens, 753,225 chars, 1.9%)
+4.  nova/tests/unit/compute/test_compute.py (132,201 tokens, 678,075 chars, 1.7%)
+5.  nova/virt/libvirt/driver.py (127,993 tokens, 630,004 chars, 1.7%)
+
+🔎 Security Check:
+──────────────────
+11 suspicious file(s) detected and excluded from the output:
+1. doc/api_samples/os-certificates/certificate-create-resp.json
+   - 1 security issue detected
+2. doc/api_samples/os-keypairs/v2.10/keypairs-post-resp.json
+   - 1 security issue detected
+3. doc/api_samples/os-keypairs/v2.2/keypairs-post-resp.json
+   - 1 security issue detected
+4. doc/api_samples/os-keypairs/v2.35/keypairs-post-resp.json
+   - 1 security issue detected
+5. doc/api_samples/os-keypairs/keypairs-post-resp.json
+   - 1 security issue detected
+6. doc/source/admin/cells.rst
+   - 5 security issues detected
+7. doc/source/contributor/testing/down-cell.rst
+   - 2 security issues detected
+8. doc/source/install/controller-install-rdo.rst
+   - 2 security issues detected
+9. doc/source/install/controller-install-ubuntu.rst
+   - 2 security issues detected
+10.nova/tests/unit/cmd/test_manage.py
+   - 5 security issues detected
+11.nova/tests/unit/test_crypto.py
+   - 1 security issue detected
+
+These files have been excluded from the output for security reasons.
+Please review these files for potential sensitive information.
+
+📄 Binary Files Detected:
+─────────────────────────
+3 files detected as binary by content inspection:
+1. doc/source/_static/images/architecture.dia
+2. doc/source/admin/figures/SCH_5007_V00_NUAC-multi_nic_OpenStack.vsd
+3. doc/source/admin/figures/SCH_5009_V00_NUAC-VNC_OpenStack.vsd
+
+These files have been excluded from the output.
+Please review these files if you expected them to contain text content.
+
+📊 Pack Summary:
+────────────────
+  Total Files: 4,752 files
+ Total Tokens: 7,682,825 tokens
+  Total Chars: 33,330,570 chars
+       Output: repomix.txt
+     Security: 11 suspicious file(s) detected and excluded
+
+🎉 All Done!
+Your repository has been successfully packed.
+
+💡 Repomix is now available in your browser! Try it at https://repomix.com
+Analyzing source, output will be written to 'digest.txt'...
+2026-08-06 19:15:08.649 | INFO     | gitingest.entrypoint:ingest_async:89 | Starting ingestion process | {"source":"/repo"}
+2026-08-06 19:15:08.650 | INFO     | gitingest.entrypoint:ingest_async:105 | Processing local directory | {"source":"/repo"}
+2026-08-06 19:15:08.650 | INFO     | gitingest.entrypoint:ingest_async:134 | Starting local directory processing
+2026-08-06 19:15:09.817 | INFO     | gitingest.entrypoint:ingest_async:140 | Processing files and generating output
+2026-08-06 19:15:09.818 | INFO     | gitingest.ingestion:ingest_query:44 | Starting file ingestion | {"slug":"repo","subpath":"/","local_path":"/repo","max_file_size":10485760}
+2026-08-06 19:15:09.818 | INFO     | gitingest.ingestion:ingest_query:96 | Processing directory | {"directory_path":"/repo"}
+2026-08-06 20:04:20.391 | INFO     | gitingest.ingestion:ingest_query:109 | Directory processing completed | {"total_files":4752,"total_directories":578,"total_size_bytes":35434509,"stats_total_files":4752,"stats_total_size":35434509}
+Analysis complete! Output written to: digest.txt
+
+Summary:
+Directory: repo
+Files analyzed: 4752
+
+Estimated tokens: 7.4M
+2026-08-06 20:04:33.847 | INFO     | gitingest.entrypoint:ingest_async:147 | Ingestion completed successfully
+Warning: Skipping file /repo/nova/tests/unit/image/abs.tar.gz due to UnicodeDecodeError
+Warning: Skipping file /repo/nova/tests/unit/image/rel.tar.gz due to UnicodeDecodeError
+Warning: Skipping file /repo/doc/source/install/figures/hwreqs.graffle due to UnicodeDecodeError
+Warning: Skipping file /repo/doc/source/install/figures/hwreqs.png due to UnicodeDecodeError
+Warning: Skipping file /repo/doc/source/install/figures/network1-services.graffle due to UnicodeDecodeError
+Warning: Skipping file /repo/doc/source/install/figures/network1-services.png due to UnicodeDecodeError
+Warning: Skipping file /repo/doc/source/install/figures/network2-services.graffle due to UnicodeDecodeError
+Warning: Skipping file /repo/doc/source/install/figures/network2-services.png due to UnicodeDecodeError
+Warning: Skipping file /repo/doc/source/admin/figures/SCH_5007_V00_NUAC-multi_nic_OpenStack-Flat-DHCP-manager.jpg due to UnicodeDecodeError
+Warning: Skipping file /repo/doc/source/admin/figures/SCH_5007_V00_NUAC-multi_nic_OpenStack-Flat-manager.jpg due to UnicodeDecodeError
+Warning: Skipping file /repo/doc/source/admin/figures/SCH_5007_V00_NUAC-multi_nic_OpenStack-VLAN-manager.jpg due to UnicodeDecodeError
+Warning: Skipping file /repo/doc/source/admin/figures/SCH_5007_V00_NUAC-multi_nic_OpenStack.vsd due to UnicodeDecodeError
+Warning: Skipping file /repo/doc/source/admin/figures/SCH_5009_V00_NUAC-VNC_OpenStack.png due to UnicodeDecodeError
+Warning: Skipping file /repo/doc/source/admin/figures/SCH_5009_V00_NUAC-VNC_OpenStack.vsd due to UnicodeDecodeError
+Warning: Skipping file /repo/doc/source/_static/images/architecture.dia due to UnicodeDecodeError
+Warning: Skipping file /repo/doc/source/_static/images/evolution-of-api.png due to UnicodeDecodeError
+Warning: Skipping file /repo/doc/source/_static/images/filtering-workflow-1.png due to UnicodeDecodeError
+Warning: Skipping file /repo/doc/source/_static/images/filtering-workflow-2.png due to UnicodeDecodeError
+Warning: Skipping file /repo/doc/source/_static/images/nova-weighting-hosts.png due to UnicodeDecodeError
+Warning: Skipping file /repo/doc/source/_static/images/rpc-arch.png due to UnicodeDecodeError
+Warning: Skipping file /repo/doc/source/_static/images/rpc-flow-1.png due to UnicodeDecodeError
+Warning: Skipping file /repo/doc/source/_static/images/rpc-flow-2.png due to UnicodeDecodeError
+Warning: Skipping file /repo/doc/source/_static/images/rpc-rabt.png due to UnicodeDecodeError
+Warning: Skipping file /repo/doc/source/_static/images/rpc-state.png due to UnicodeDecodeError
+Warning: Skipping file /repo/doc/source/_static/images/vmware-nova-driver-architecture.jpg due to UnicodeDecodeError
+Warning: Skipping file /repo/doc/source/_static/images/xenserver_architecture.png due to UnicodeDecodeError
+[gosec] 2026/08/06 20:04:44 Including rules: default
+[gosec] 2026/08/06 20:04:44 Excluding rules: default
+[gosec] 2026/08/06 20:04:44 Including analyzers: default
+[gosec] 2026/08/06 20:04:44 Excluding analyzers: default
+[gosec] 2026/08/06 20:04:44 Import directory: /repo
+[gosec] 2026/08/06 20:04:44 Import directory: /repo/codec/json
+[gosec] 2026/08/06 20:04:44 Import directory: /repo/ginS
+[gosec] 2026/08/06 20:04:44 Import directory: /repo/internal/bytesconv
+[gosec] 2026/08/06 20:04:45 Checking package: bytesconv
+[gosec] 2026/08/06 20:04:45 Checking file: /repo/internal/bytesconv/bytesconv.go
+[gosec] 2026/08/06 20:04:45 Import directory: /repo/testdata/protoexample
+[gosec] 2026/08/06 20:04:53 Checking package: json
+[gosec] 2026/08/06 20:04:53 Checking file: /repo/codec/json/api.go
+[gosec] 2026/08/06 20:04:53 Checking file: /repo/codec/json/json.go
+[gosec] 2026/08/06 20:04:54 Import directory: /repo/binding
+[gosec] 2026/08/06 20:04:56 Checking package: protoexample
+[gosec] 2026/08/06 20:04:56 Checking file: /repo/testdata/protoexample/test.pb.go
+[gosec] 2026/08/06 20:04:56 Import directory: /repo/internal/fs
+[gosec] 2026/08/06 20:05:31 Checking package: fs
+[gosec] 2026/08/06 20:05:31 Checking file: /repo/internal/fs/fs.go
+[gosec] 2026/08/06 20:05:31 Import directory: /repo/render
+[gosec] 2026/08/06 20:05:41 Checking package: binding
+[gosec] 2026/08/06 20:05:41 Checking file: /repo/binding/binding.go
+[gosec] 2026/08/06 20:05:41 Checking file: /repo/binding/bson.go
+[gosec] 2026/08/06 20:05:41 Checking file: /repo/binding/default_validator.go
+[gosec] 2026/08/06 20:05:41 Checking file: /repo/binding/form.go
+[gosec] 2026/08/06 20:05:41 Checking file: /repo/binding/form_mapping.go
+[gosec] 2026/08/06 20:05:42 Checking file: /repo/binding/header.go
+[gosec] 2026/08/06 20:05:42 Checking file: /repo/binding/json.go
+[gosec] 2026/08/06 20:05:42 Checking file: /repo/binding/msgpack.go
+[gosec] 2026/08/06 20:05:42 Checking file: /repo/binding/multipart_form_mapping.go
+[gosec] 2026/08/06 20:05:42 Checking file: /repo/binding/plain.go
+[gosec] 2026/08/06 20:05:42 Checking file: /repo/binding/protobuf.go
+[gosec] 2026/08/06 20:05:42 Checking file: /repo/binding/query.go
+[gosec] 2026/08/06 20:05:42 Checking file: /repo/binding/toml.go
+[gosec] 2026/08/06 20:05:42 Checking file: /repo/binding/uri.go
+[gosec] 2026/08/06 20:05:42 Checking file: /repo/binding/xml.go
+[gosec] 2026/08/06 20:05:42 Checking file: /repo/binding/yaml.go
+[gosec] 2026/08/06 20:05:42 Error building the SSA representation of the package binding: package binding has type errors, skipping SSA analysis, no ssa result
+[gosec] 2026/08/06 20:05:46 Checking package: gin
+[gosec] 2026/08/06 20:05:46 Checking file: /repo/auth.go
+[gosec] 2026/08/06 20:05:46 Checking file: /repo/context.go
+[gosec] 2026/08/06 20:05:46 Checking file: /repo/debug.go
+[gosec] 2026/08/06 20:05:46 Checking file: /repo/deprecated.go
+[gosec] 2026/08/06 20:05:46 Checking file: /repo/doc.go
+[gosec] 2026/08/06 20:05:46 Checking file: /repo/errors.go
+[gosec] 2026/08/06 20:05:46 Checking file: /repo/fs.go
+[gosec] 2026/08/06 20:05:46 Checking file: /repo/gin.go
+[gosec] 2026/08/06 20:05:47 Checking file: /repo/logger.go
+[gosec] 2026/08/06 20:05:47 Checking file: /repo/mode.go
+[gosec] 2026/08/06 20:05:47 Checking file: /repo/path.go
+[gosec] 2026/08/06 20:05:47 Checking file: /repo/recovery.go
+[gosec] 2026/08/06 20:05:47 Checking file: /repo/response_writer.go
+[gosec] 2026/08/06 20:05:47 Checking file: /repo/routergroup.go
+[gosec] 2026/08/06 20:05:47 Checking file: /repo/test_helpers.go
+[gosec] 2026/08/06 20:05:47 Checking file: /repo/tree.go
+[gosec] 2026/08/06 20:05:47 Checking file: /repo/utils.go
+[gosec] 2026/08/06 20:05:47 Checking file: /repo/version.go
+[gosec] 2026/08/06 20:05:47 Error building the SSA representation of the package gin: package gin has type errors, skipping SSA analysis, no ssa result
+[gosec] 2026/08/06 20:05:54 Checking package: render
+[gosec] 2026/08/06 20:05:54 Checking file: /repo/render/bson.go
+[gosec] 2026/08/06 20:05:54 Checking file: /repo/render/data.go
+[gosec] 2026/08/06 20:05:54 Checking file: /repo/render/html.go
+[gosec] 2026/08/06 20:05:54 Checking file: /repo/render/json.go
+[gosec] 2026/08/06 20:05:54 Checking file: /repo/render/msgpack.go
+[gosec] 2026/08/06 20:05:54 Checking file: /repo/render/pdf.go
+[gosec] 2026/08/06 20:05:54 Checking file: /repo/render/protobuf.go
+[gosec] 2026/08/06 20:05:54 Checking file: /repo/render/reader.go
+[gosec] 2026/08/06 20:05:54 Checking file: /repo/render/redirect.go
+[gosec] 2026/08/06 20:05:54 Checking file: /repo/render/render.go
+[gosec] 2026/08/06 20:05:54 Checking file: /repo/render/text.go
+[gosec] 2026/08/06 20:05:54 Checking file: /repo/render/toml.go
+[gosec] 2026/08/06 20:05:54 Checking file: /repo/render/xml.go
+[gosec] 2026/08/06 20:05:54 Checking file: /repo/render/yaml.go
+[gosec] 2026/08/06 20:05:54 Error building the SSA representation of the package render: package render has type errors, skipping SSA analysis, no ssa result
+[gosec] 2026/08/06 20:06:00 Checking package: ginS
+[gosec] 2026/08/06 20:06:00 Checking file: /repo/ginS/gins.go
+==> Built analyzers:latest
+==> Built quality:latest
+==> Cloning go-gin (shallow)
+==> Cloning java-springboot (shallow)
+==> Cloning os-nova (shallow)
+==> [go-gin] tokei
+       -> /Users/pp123/Desktop/proj/multi-tool/langgraph-pipeline/artifacts/go-gin/tokei/
+==> [go-gin] scc
+       -> /Users/pp123/Desktop/proj/multi-tool/langgraph-pipeline/artifacts/go-gin/scc/
+==> [go-gin] repomix
+       -> /Users/pp123/Desktop/proj/multi-tool/langgraph-pipeline/artifacts/go-gin/repomix/
+==> [go-gin] gitingest
+       -> /Users/pp123/Desktop/proj/multi-tool/langgraph-pipeline/artifacts/go-gin/gitingest/
+==> [go-gin] files-to-prompt
+       -> /Users/pp123/Desktop/proj/multi-tool/langgraph-pipeline/artifacts/go-gin/files-to-prompt/
+==> [java-springboot] tokei
+       -> /Users/pp123/Desktop/proj/multi-tool/langgraph-pipeline/artifacts/java-springboot/tokei/
+==> [java-springboot] scc
+       -> /Users/pp123/Desktop/proj/multi-tool/langgraph-pipeline/artifacts/java-springboot/scc/
+==> [java-springboot] repomix
+       -> /Users/pp123/Desktop/proj/multi-tool/langgraph-pipeline/artifacts/java-springboot/repomix/
+==> [java-springboot] gitingest
+       -> /Users/pp123/Desktop/proj/multi-tool/langgraph-pipeline/artifacts/java-springboot/gitingest/
+==> [java-springboot] files-to-prompt
+       -> /Users/pp123/Desktop/proj/multi-tool/langgraph-pipeline/artifacts/java-springboot/files-to-prompt/
+==> [os-nova] tokei
+       -> /Users/pp123/Desktop/proj/multi-tool/langgraph-pipeline/artifacts/os-nova/tokei/
+==> [os-nova] scc
+       -> /Users/pp123/Desktop/proj/multi-tool/langgraph-pipeline/artifacts/os-nova/scc/
+==> [os-nova] repomix
+       -> /Users/pp123/Desktop/proj/multi-tool/langgraph-pipeline/artifacts/os-nova/repomix/
+==> [os-nova] gitingest
+       -> /Users/pp123/Desktop/proj/multi-tool/langgraph-pipeline/artifacts/os-nova/gitingest/
+==> [os-nova] files-to-prompt
+       -> /Users/pp123/Desktop/proj/multi-tool/langgraph-pipeline/artifacts/os-nova/files-to-prompt/
+==> [go-gin] languages: Go YAML Markdown Makefile
+==> [go-gin] quality tools: gitleaks gosec staticcheck
+==> [go-gin] no tool mapped for: YAML Markdown Makefile
+==> [java-springboot] languages: Java Gradle Kotlin XML JSON AsciiDoc Properties File YAML Plain Text HTML Groovy SQL XML Schema Protocol Buffers JavaServer Pages Shell Smarty Template Batch JavaScript Markdown Ruby BASH Dockerfile
+==> [java-springboot] quality tools: gitleaks semgrep-java semgrep-kotlin shellcheck semgrep-js semgrep-ruby hadolint
+==> [java-springboot] no tool mapped for: Gradle XML JSON AsciiDoc Properties File YAML Plain Text HTML SQL XML Schema Protocol Buffers JavaServer Pages Smarty Template Batch Markdown
+==> [os-nova] languages: Python YAML JSON Smarty Template ReStructuredText Shell SVG Plain Text INI Mako License TOML XML
+==> [os-nova] quality tools: gitleaks ruff bandit shellcheck
+==> [os-nova] no tool mapped for: YAML JSON Smarty Template ReStructuredText SVG Plain Text INI Mako License TOML XML
+==> [go-gin] gitleaks
+       -> /Users/pp123/Desktop/proj/multi-tool/langgraph-pipeline/quality/go-gin/gitleaks/ (findings)
+==> [go-gin] gosec
+       -> /Users/pp123/Desktop/proj/multi-tool/langgraph-pipeline/quality/go-gin/gosec/ (findings)
+==> [go-gin] staticcheck
+       -> /Users/pp123/Desktop/proj/multi-tool/langgraph-pipeline/quality/go-gin/staticcheck/ (findings)
+==> [java-springboot] gitleaks
+       -> /Users/pp123/Desktop/proj/multi-tool/langgraph-pipeline/quality/java-springboot/gitleaks/ (findings)
+==> [java-springboot] semgrep-java
+       -> /Users/pp123/Desktop/proj/multi-tool/langgraph-pipeline/quality/java-springboot/semgrep-java/ (ok)
+==> [java-springboot] semgrep-kotlin
+       -> /Users/pp123/Desktop/proj/multi-tool/langgraph-pipeline/quality/java-springboot/semgrep-kotlin/ (ok)
+==> [java-springboot] shellcheck
+       -> /Users/pp123/Desktop/proj/multi-tool/langgraph-pipeline/quality/java-springboot/shellcheck/ (findings)
+==> [java-springboot] semgrep-js
+       -> /Users/pp123/Desktop/proj/multi-tool/langgraph-pipeline/quality/java-springboot/semgrep-js/ (ok)
+==> [java-springboot] semgrep-ruby
+       -> /Users/pp123/Desktop/proj/multi-tool/langgraph-pipeline/quality/java-springboot/semgrep-ruby/ (ok)
+==> [java-springboot] hadolint
+       -> /Users/pp123/Desktop/proj/multi-tool/langgraph-pipeline/quality/java-springboot/hadolint/ (findings)
+==> [os-nova] gitleaks
+       -> /Users/pp123/Desktop/proj/multi-tool/langgraph-pipeline/quality/os-nova/gitleaks/ (findings)
+==> [os-nova] ruff
+       -> /Users/pp123/Desktop/proj/multi-tool/langgraph-pipeline/quality/os-nova/ruff/ (findings)
+==> [os-nova] bandit
+       -> /Users/pp123/Desktop/proj/multi-tool/langgraph-pipeline/quality/os-nova/bandit/ (findings)
+==> [os-nova] shellcheck
+       -> /Users/pp123/Desktop/proj/multi-tool/langgraph-pipeline/quality/os-nova/shellcheck/ (findings)
+==> [go-gin] no LLM endpoint configured; writing mechanical summary
+==> [go-gin] summary -> /Users/pp123/Desktop/proj/multi-tool/langgraph-pipeline/summary/go-gin.md
+==> [java-springboot] no LLM endpoint configured; writing mechanical summary
+==> [java-springboot] summary -> /Users/pp123/Desktop/proj/multi-tool/langgraph-pipeline/summary/java-springboot.md
+==> [os-nova] no LLM endpoint configured; writing mechanical summary
+==> [os-nova] summary -> /Users/pp123/Desktop/proj/multi-tool/langgraph-pipeline/summary/os-nova.md
+==> Cleaning up temp clones
+
+==> Summary table
+  go-gin               ok
+  java-springboot      ok
+  os-nova              ok
+
+==> Done.

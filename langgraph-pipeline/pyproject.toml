@@ -1,0 +1,17 @@
+[project]
+name = "langgraph-pipeline"
+version = "0.1.0"
+description = "Fully-automated multi-stage repo analysis pipeline orchestrated with LangGraph"
+requires-python = ">=3.11"
+dependencies = [
+    "langgraph>=0.2.60",
+    "langgraph-checkpoint>=2.0.10",
+    "langchain-openai>=0.2.14",
+]
+
+[project.scripts]
+transit-graph = "transit_graph:main"
+internal-graph = "internal_graph:main"
+
+[tool.uv]
+package = false

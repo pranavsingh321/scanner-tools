@@ -1,0 +1,8 @@
+Metadata-Version: 2.4
+Name: langgraph-pipeline
+Version: 0.1.0
+Summary: Fully-automated multi-stage repo analysis pipeline orchestrated with LangGraph
+Requires-Python: >=3.11
+Requires-Dist: langgraph>=0.2.60
+Requires-Dist: langgraph-checkpoint>=2.0.10
+Requires-Dist: langchain-openai>=0.2.14

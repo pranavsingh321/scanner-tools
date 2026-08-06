@@ -1,0 +1,46 @@
+==> Image internal-analyzers:latest already present (use -r/--rebuild to force)
+==> [go-gin] trivy
+       -> /Users/pp123/Desktop/proj/multi-tool/langgraph-pipeline/artifacts/go-gin/trivy/
+==> [go-gin] gitleaks
+       -> /Users/pp123/Desktop/proj/multi-tool/langgraph-pipeline/artifacts/go-gin/gitleaks/
+==> [go-gin] opengrep
+       -> /Users/pp123/Desktop/proj/multi-tool/langgraph-pipeline/artifacts/go-gin/opengrep/
+==> [go-gin] clamav
+       -> /Users/pp123/Desktop/proj/multi-tool/langgraph-pipeline/artifacts/go-gin/clamav/
+==> [java-springboot] trivy
+       [debug] trivy: primary output trivy.json missing
+       [debug] no LLM endpoint; mechanical retry for trivy
+       [debug] re-running trivy with corrected command
+       [debug] attempt 1: primary output trivy.json missing
+       [debug] no LLM endpoint; mechanical retry for trivy
+       [debug] re-running trivy with corrected command
+       [debug] final state for trivy: primary output trivy.json missing
+       -> /Users/pp123/Desktop/proj/multi-tool/langgraph-pipeline/artifacts/java-springboot/trivy/
+==> [java-springboot] gitleaks
+       -> /Users/pp123/Desktop/proj/multi-tool/langgraph-pipeline/artifacts/java-springboot/gitleaks/
+==> [java-springboot] opengrep
+       -> /Users/pp123/Desktop/proj/multi-tool/langgraph-pipeline/artifacts/java-springboot/opengrep/
+==> [java-springboot] clamav
+       -> /Users/pp123/Desktop/proj/multi-tool/langgraph-pipeline/artifacts/java-springboot/clamav/
+==> [os-nova] trivy
+       -> /Users/pp123/Desktop/proj/multi-tool/langgraph-pipeline/artifacts/os-nova/trivy/
+==> [os-nova] gitleaks
+       -> /Users/pp123/Desktop/proj/multi-tool/langgraph-pipeline/artifacts/os-nova/gitleaks/
+==> [os-nova] opengrep
+       -> /Users/pp123/Desktop/proj/multi-tool/langgraph-pipeline/artifacts/os-nova/opengrep/
+==> [os-nova] clamav
+       -> /Users/pp123/Desktop/proj/multi-tool/langgraph-pipeline/artifacts/os-nova/clamav/
+==> [go-gin] no LLM endpoint configured; writing mechanical summary
+==> [go-gin] summary -> /Users/pp123/Desktop/proj/multi-tool/langgraph-pipeline/summary/go-gin.md
+==> [java-springboot] no LLM endpoint configured; writing mechanical summary
+==> [java-springboot] summary -> /Users/pp123/Desktop/proj/multi-tool/langgraph-pipeline/summary/java-springboot.md
+==> [os-nova] no LLM endpoint configured; writing mechanical summary
+==> [os-nova] summary -> /Users/pp123/Desktop/proj/multi-tool/langgraph-pipeline/summary/os-nova.md
+==> Cleaning up temp clones
+
+==> Summary table
+  go-gin               ok
+  java-springboot      trivy failed after debug retries
+  os-nova              ok
+
+==> Done.
