@@ -169,7 +169,32 @@ Gotchas:
   leads nowhere, point it at `finalize` (a node) or `END`.
 - Routing on the *last* write wins; there is no join logic unless you write it.
 
-## 5. Loops (cycles) — the part that's really different
+## 5. Returning control from inside a node: `Command`
+
+Conditional edges decide *between* nodes. Sometimes the decision is **inside**
+the node, right where the data is. `Command` lets a node update state **and**
+pick its own next node in one return value — no router function needed:
+
+```python
+from langgraph.types import Command
+
+def node(state: State) -> Command:
+    ...
+    if state["remaining"] == 0:
+        return Command(update={"status": "clean"}, goto="merge_pr")
+    return Command(update={"status": "dirty"}, goto="remediate")
+```
+
+`Command` also powers interrupts from *inside* agents and lets you inject state
+on resume. The two forms are equivalent in outcome; prefer `Command` when the
+next step is obvious from the node's own result (one node, one fan-in), and
+prefer a conditional edge when several nodes need to route through the same
+decision logic (N → M routing).
+
+The most common bug: mixing the two. If a node returns `Command(goto=...)`,
+the edge you also drew from that node is ignored. Pick one style per node.
+
+## 6. Loops (cycles) — the part that's really different
 
 LangGraph's killer feature: **a graph can cycle**. `remediate -> verify_scan ->
 (remediate | next)` is a genuine loop, not a while-loop in a node. This is how
@@ -209,7 +234,7 @@ g.add_conditional_edges("verify_scan", after_verify, {
 })
 ```
 
-## 6. Agents: `create_react_agent` + tools
+## 7. Agents: `create_react_agent` + tools
 
 ReAct agent = LLM + tools + a loop. LangGraph ships a prebuilt agent:
 `create_react_agent(model, tools)` returns a **compiled graph**. It is exactly
@@ -247,7 +272,7 @@ Nested-agent tip: an agent's message list is its own loop state; the outer
 `PipelineState` should store only the agent's **final message/result**, not the
 whole transcript.
 
-## 7. Parallel fan-out with `Send`
+## 8. Parallel fan-out with `Send`
 
 To process N items in parallel you don't loop in a node — you return a list of
 `Send` objects from a node, and LangGraph fans out to N copies of a sub-node.
@@ -284,7 +309,39 @@ This repo processes repos sequentially per node (a design choice for simple
 routing and log clarity), but any per-item work — scanning many repos, checking
 many services, evaluating many test cases — is a textbook `Send` use case.
 
-## 8. Subgraphs
+## 9. Static parallel branches and joins
+
+`Send` is *dynamic* fan-out (N decided at runtime). For a fixed fan-out —
+e.g. run "lint", "security", and "metrics" at the same time — draw **two edges
+out of one node**. LangGraph runs the two downstream branches concurrently and
+the join node starts only after **both** complete:
+
+```python
+g.add_edge("scan", "lint")
+g.add_edge("scan", "security")
+g.add_edge("scan", "metrics")
+g.add_edge("lint", "review")        # review waits for ALL of
+g.add_edge("security", "review")    # lint, security, metrics
+g.add_edge("metrics", "review")
+```
+
+The join is implicit: a node with several incoming edges only runs once every
+upstream branch feeding it has finished. This is a plain DAG — no reducer
+required, because the branches write *different* keys:
+
+```python
+def lint(state):     return {"lint_report": ...}
+def security(state): return {"security_report": ...}
+def metrics(state):  return {"metrics_report": ...}
+def review(state):   # state has all three reports
+    ...
+```
+
+Common mistake: two branches write the **same key** → last-write-wins and the
+join sees one report. Give each parallel branch its own state key (or use a
+reducer).
+
+## 10. Subgraphs
 
 A compiled graph is just a node to another graph. Reuse a whole pipeline as one
 step:
@@ -303,7 +360,7 @@ Subgraph caveats:
 - For complex cross-graph state, prefer `Send` + shared state channels over
   nesting.
 
-## 9. Persistence & resumability (checkpointing)
+## 11. Persistence & resumability (checkpointing)
 
 The "graph runs to completion" model breaks for long jobs and crashed runs.
 LangGraph checkpoints let you **resume from where it stopped**. Compile with a
@@ -333,7 +390,7 @@ with SqliteSaver.from_conn_string("graph.db") as saver:
     app.invoke(None, config=config)                   # ...resumes exactly where it stopped
 ```
 
-## 10. Interrupts (human-in-the-loop)
+## 12. Interrupts (human-in-the-loop)
 
 `interrupt()` pauses the graph mid-run, hands control to the caller, and
 resumes with the caller's value — with the state exactly as it was:
@@ -356,7 +413,36 @@ Without a checkpointer this does nothing — interrupts *are* checkpoint
 restores. Use for dangerous gates (auto-merge, paying APIs, deleting things)
 that you still want to run unattended most of the time.
 
-## 11. Streaming
+## 13. Long-term memory with a Store
+
+Checkpoints remember *state per thread*. When you want memory that is **shared
+across threads or survives graph runs** (e.g. "which repos did we already scan",
+project conventions, user preferences), use a `Store`. Compiled graphs accept
+a store alongside the checkpointer:
+
+```python
+from langgraph.store.memory import InMemoryStore
+from langgraph.types import Command
+
+store = InMemoryStore()
+
+def recall_node(state: State) -> Command:
+    # namespace: (scope, user_or_team) -> key
+    prior = store.get(("prefs", "team-a"), "lint_rules")
+    ...
+    store.put(("prefs", "team-a"), "lint_rules", {"rules": ["B106", "S101"]})
+
+app = g.compile(checkpointer=MemorySaver(), store=store)
+```
+
+`store.get/put/search` give every node (and every run, on every thread) the
+same memory. In this repo's world: the store is where "we already analyzed
+repos X, Y, Z" lives so you don't rescan them, or where the refactor agent
+persists agreed code conventions across repos. Use `InMemoryStore` for tests,
+`PostgresStore`/`RedisStore`/`UpstashStore` for anything you need to survive a
+restart.
+
+## 14. Streaming
 
 `app.stream(state, stream_mode="updates")` yields `(node_name, updates)` as each
 node finishes; `stream_mode="messages"` (on agent nodes) yields token-level LLM
@@ -367,7 +453,100 @@ for node, update in app.stream(initial_state, stream_mode="updates"):
     print(f"==> {node}: {list(update)}")
 ```
 
-## 12. Common gotchas (from this codebase)
+## 15. Error handling & retries
+
+A node that raises an exception **fails the whole invoke** unless you contain
+it. Three layers, from local to global:
+
+1. **Contain it in the node** — the pattern this repo uses for external
+   services that can fail (a scanner crashing must not kill the run):
+
+```python
+def node_scan(state: State) -> dict:
+    try:
+        result = run_scanner(...)
+    except ScannerError as exc:
+        state["errors"].append(str(exc))     # record and keep going
+        return {"status": "failed"}          # router can decide what to do
+    return {"status": "ok", "findings": result}
+```
+
+2. **Retry with backoff** — attach a `RetryPolicy` to the node so transient
+   errors (rate limits, timeouts) retry automatically:
+
+```python
+from langgraph.pregel import RetryPolicy
+
+g.add_node("scan", node_scan,
+           retry=RetryPolicy(max_attempts=3, initial_interval=1.0,
+                             backoff_factor=2.0, retry_on=TransientError))
+```
+
+3. **Catch it at the graph level** — `invoke`/`stream` raise; wrap the call in
+   `try/except` and decide whether to resume the same thread (checkpointer
+   makes the state recoverable) or fail the run.
+
+Best practice for real pipelines: *nodes never throw for expected failures* —
+they return a status field and let a router branch to a fallback path. Reserve
+exceptions for programmer bugs and unexpected conditions, then let `RetryPolicy`
+absorb transient ones.
+
+## 16. Debugging & testing
+
+- **See the graph.** `app.get_graph().draw_mermaid()` prints a mermaid diagram
+  (paste into mermaid.live); `draw_ascii()` gives a quick text layout. This
+  repo does the same check on every change:
+
+```python
+app.get_graph().print_ascii()
+```
+
+- **Unit-test a node.** A node is just a function: call it with a fake state
+  dict and assert the returned updates. No graph required.
+
+```python
+assert node_scan({"url": "x", "findings": []}) == {"status": "ok", "findings": [...]}
+```
+
+- **Replay / time travel.** With a checkpointer, inspect past states and even
+  re-run from them:
+
+```python
+config = {"configurable": {"thread_id": "t1"}}
+app.invoke(initial, config=config)
+snapshots = list(app.get_state_history(config))     # every checkpoint
+app.get_state(config)                               # latest state
+app.update_state(config, {"status": "clean"})       # force-correct state, then resume
+```
+
+- **Trace token/step usage** via `app.stream(..., stream_mode=["updates", "debug"])`.
+
+## 17. RunnableConfig: passing config into nodes
+
+Nodes receive only `state` — but they can read the runtime config (thread_id,
+tags, recursion limits) with `get_config()`:
+
+```python
+from langgraph.config import get_config
+
+def node(state: State) -> dict:
+    cfg = get_config()
+    thread = cfg["configurable"]["thread_id"]
+    ...
+```
+
+Raise the step cap for legitimately long runs (default is 25) per-invocation,
+not globally:
+
+```python
+app.invoke(initial, config={"configurable": {"thread_id": "t1"},
+                            "recursion_limit": 200})
+```
+
+`tags` on the config are useful to filter traces and logs when one graph is
+shared by many callers.
+
+## 18. Common gotchas (from this codebase)
 
 | Trap | Symptom | Fix |
 |---|---|---|
@@ -388,7 +567,7 @@ Two rules of thumb:
   what changed. It makes graphs testable (`app.invoke({...})` with a fake
   state) and the routing logic decidable by reading one function.
 
-## 14. One complete runnable example: review → repair → verify
+## 19. One complete runnable example: review → repair → verify
 
 Everything above, in one self-contained script you can run as-is (no LLM, no
 containers — the "linter" is simulated). It shows the full toolset in action:
@@ -497,7 +676,7 @@ scan, `repair` for the ReAct agent, and `verify` for the re-run that decides
 `merge | leave | none`. The loop bound (`MAX_ROUNDS`), the reducer, the router
 and the gate are the exact same shape.
 
-## 15. When *not* to use LangGraph
+## 20. When *not* to use LangGraph
 
 - Single linear LLM call → a plain `model.invoke(...)` or LangChain chain.
 - One interactive agent chat session → `create_react_agent` alone (no outer graph).

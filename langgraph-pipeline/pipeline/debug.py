@@ -54,6 +54,25 @@ def _mechanical_retry(tool: str) -> str:
     return "RETRY"
 
 
+# Errors that are upstream/transient: retrying immediately is pointless and the
+# failure is not the repo's fault. Such runs are recorded as "skip", not "failed".
+_TRANSIENT_MARKERS = (
+    "429", "too many requests", "rate limit", "retry-after", "connection reset",
+    "503", "502", "504", "service unavailable", "bad gateway", "temporarily",
+    "timed out", "timeout while fetching", "network is unreachable",
+)
+
+
+def _transient_reason(out_dir: Path) -> str:
+    """Return the first transient marker found in the tool's logs, or ''."""
+    for log in sorted(out_dir.glob("*.log")):
+        content = log.read_text(errors="replace")
+        for marker in _TRANSIENT_MARKERS:
+            if marker in content.lower():
+                return f"{log.name} shows '{marker}'"
+    return ""
+
+
 def diagnose_and_retry(
     cfg: RunConfig,
     image: str,
@@ -63,6 +82,10 @@ def diagnose_and_retry(
     original_cmd: str,
 ) -> str:
     """Fix a failed tool run. Returns a status string: 'ok' | 'failed' | 'skip'."""
+    reason = _transient_reason(out_dir)
+    if reason:
+        print(f"       [debug] {tool}: {reason} -> transient, skipping retries")
+        return "skip"
     for attempt in range(MAX_DEBUG_ATTEMPTS):
         reason = F.looks_failed(tool, out_dir)
         if not reason[0]:
