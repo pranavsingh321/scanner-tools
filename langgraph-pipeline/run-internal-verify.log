@@ -1,0 +1,19 @@
+==> Image internal-analyzers:latest already present (use -r/--rebuild to force)
+==> [java-springboot] trivy
+       [debug] trivy: primary output trivy.json missing
+       [debug] trivy: trivy.log shows '429' -> transient, skipping retries
+       -> /Users/pp123/Desktop/proj/multi-tool/langgraph-pipeline/artifacts/java-springboot/trivy/
+==> [java-springboot] gitleaks
+       -> /Users/pp123/Desktop/proj/multi-tool/langgraph-pipeline/artifacts/java-springboot/gitleaks/
+==> [java-springboot] opengrep
+       -> /Users/pp123/Desktop/proj/multi-tool/langgraph-pipeline/artifacts/java-springboot/opengrep/
+==> [java-springboot] clamav
+       -> /Users/pp123/Desktop/proj/multi-tool/langgraph-pipeline/artifacts/java-springboot/clamav/
+==> [java-springboot] no LLM endpoint configured; writing mechanical summary
+==> [java-springboot] summary -> /Users/pp123/Desktop/proj/multi-tool/langgraph-pipeline/summary/java-springboot.md
+==> Cleaning up temp clones
+
+==> Summary table
+  java-springboot      trivy failed after debug retries
+
+==> Done.

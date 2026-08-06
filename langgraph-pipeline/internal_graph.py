@@ -102,6 +102,10 @@ def node_security_scan(state: PipelineState) -> dict:
             if bad:
                 print(f"       [debug] {tool}: {reason}")
                 debug_status = diagnose_and_retry(cfg, cfg.image, tool, result.repo_dir, out_dir, script)
+                if debug_status == "skip":
+                    print(f"       [debug] {tool}: transient upstream failure -> skipped")
+                    result.tools[tool] = ToolResult(tool=tool, status="skipped", out_dir=str(out_dir), exit_code=str(rc))
+                    continue
                 if debug_status != "ok":
                     status = "failed"
                     result.error = f"{tool} failed after debug retries"
