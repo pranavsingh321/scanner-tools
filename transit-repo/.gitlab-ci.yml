@@ -1,0 +1,59 @@
+# GitLab CI for the TRANSIT graph — lives on the transit repo server only.
+#
+# The internal graph has its own independent CI in internal-repo/.gitlab-ci.yml.
+#
+# Checkout layout expected on the runner:
+#   <repo-root>/langgraph-pipeline/   (shared LangGraph pipeline)
+#   <repo-root>/transit-repo/         (this repo: image build tree + CI)
+#
+# Runner requirements:
+#   - a container engine reachable from jobs (podman or docker). Set `RUNTIME`
+#     below to match your runner. The graph auto-builds its analyzer images via
+#     `ensure_images` (node_ensure_images) on the first run of each job, so no
+#     explicit `build` stage is required.
+#   - a Python 3.11+ runtime (jobs use `image: python:3.12`).
+#
+# Optional: to enable the LLM/remediation stages (fork + self-PR + auto-merge),
+#   - add OPENAI_API_KEY and OPENAI_BASE_URL as masked CI/CD variables
+#     (OPENAI_BASE_URL can point at any OpenAI-compatible endpoint),
+#   - ensure `gh` is authenticated in the runner (fork/PR flow),
+#   - remove `--no-remediate` from ANALYZE_FLAGS below.
+
+stages:
+  - analyze
+
+variables:
+  RUNTIME: podman            # podman | docker — must match the runner's engine
+  LLM_MODEL: gpt-4o-mini
+  MIN_CODE: "50"
+  ANALYZE_FLAGS: --no-remediate
+
+workflow:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "schedule"                # nightly scans
+    - if: $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - if: $CI_PIPELINE_SOURCE == "manual"                  # run: GitLab -> CI/CD -> Run pipeline
+    - if: $CI_PIPELINE_SOURCE == "web"
+
+# One job per repo, in parallel. REPO accepts a bare name (resolved against
+# DEFAULT_REPOS in pipeline/config.py), a URL, a `name:URL` pair, or a local dir
+# path. Add repos by appending to the matrix list below.
+analyze:transit:
+  stage: analyze
+  image: python:3.12
+  parallel:
+    matrix:
+      - REPO: ["go-gin", "java-springboot", "os-nova"]
+  before_script:
+    - python -m pip install --upgrade pip setuptools wheel
+    - pip install -e langgraph-pipeline
+  script:
+    - python langgraph-pipeline/transit_graph.py "$REPO" $ANALYZE_FLAGS
+  artifacts:
+    when: always
+    name: "transit-$REPO"
+    paths:
+      - langgraph-pipeline/summary/
+      - langgraph-pipeline/artifacts/$REPO/
+      - langgraph-pipeline/quality/$REPO/
+    expire_in: 1 week
