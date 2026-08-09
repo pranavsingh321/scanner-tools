@@ -13,3 +13,7 @@ langgraph-pipeline/artifacts/
 langgraph-pipeline/quality/
 langgraph-pipeline/summary/
 langgraph-pipeline/*.pdf
+
+# n8n
+n8n/runs/                 # RUN_ROOT file queue (jobs/done/logs/manifests/summaries)
+n8n/production/.env       # local compose env (see .env.example)

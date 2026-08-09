@@ -1,0 +1,341 @@
+{
+  "id": "6b2054f6-5d56-418f-90af-bb1023d89809",
+  "name": "03 - Aggregator: run report + notifications",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## Aggregator\n\nFinds the newest run manifest, reads per-repo status logs, computes a report\n(done/missing chunks, failed repos), writes `summaries/<runId>.json` and\n`.md`, posts an optional Slack summary and purges runs older than\nPURGE_AFTER_DAYS.\n\nSchedule is a guess: dispatch at 02:00, report at 05:30. Tune the cron to\nmatch how long your fleet takes to drain.",
+        "color": 3,
+        "width": 340,
+        "height": 260
+      },
+      "id": "sticky-overview",
+      "name": "Overview",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        0,
+        520
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "trigger-manual",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "30 5 * * *"
+            }
+          ]
+        }
+      },
+      "id": "trigger-schedule",
+      "name": "Daily Report Schedule",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        220
+      ]
+    },
+    {
+      "parameters": {
+        "executeOnce": false,
+        "command": "RUN_ROOT=\"{{ $env.RUN_ROOT || '' }}\"; if [ -z \"$RUN_ROOT\" ]; then RUN_ROOT=\"{{ $env.MULTITOOL_ROOT || '/opt/multi-tool' }}/n8n/runs\"; fi; MF=$(ls -t \"$RUN_ROOT/manifests/\"*.txt 2>/dev/null | head -n 1); echo \"MF=$MF\"; [ -n \"$MF\" ] && cat \"$MF\""
+      },
+      "id": "find-latest-manifest",
+      "name": "Find Latest Manifest",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        260,
+        110
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const stdout = $json.stdout || '';\nconst lines = stdout.split('\\n').filter(Boolean);\nconst mfLine = lines.find((l) => l.startsWith('MF='));\nif (!mfLine) return [{ json: { noManifest: true } }];\nconst manifestFile = mfLine.slice(3).trim();\nconst runId = (manifestFile.match(/([^/]+)\\.txt$/) || [])[1] || 'unknown';\nconst chunks = [];\nfor (const l of lines.slice(1)) {\n  const m = l.trim().split(/\\s+/);\n  if (m.length >= 2) chunks.push({ id: m[0], count: parseInt(m[1], 10) || 0 });\n}\nreturn [{\n  json: {\n    manifestFile,\n    runId,\n    chunks,\n    expectedChunks: chunks.length,\n    expectedRepos: chunks.reduce((a, c) => a + c.count, 0),\n  },\n}];"
+      },
+      "id": "parse-manifest",
+      "name": "Parse Manifest",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        500,
+        110
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "cond-has-manifest",
+              "leftValue": "={{ $json.manifestFile }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "isNotEmpty"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "has-manifest",
+      "name": "Has Manifest?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        740,
+        110
+      ]
+    },
+    {
+      "parameters": {
+        "executeOnce": false,
+        "command": "RUN_ROOT=\"{{ $env.RUN_ROOT || '' }}\"; if [ -z \"$RUN_ROOT\" ]; then RUN_ROOT=\"{{ $env.MULTITOOL_ROOT || '/opt/multi-tool' }}/n8n/runs\"; fi; echo \"===COUNTS===\"; for p in transit internal; do echo \"$p $(ls \"$RUN_ROOT/done/$p/{{ $json.runId }}/\"*.json 2>/dev/null | grep -v '\\.result\\.json$' | wc -l | tr -d ' ')\"; done; echo \"===LOGS===\"; cat \"$RUN_ROOT/logs/transit/{{ $json.runId }}/\"*.ndjson \"$RUN_ROOT/logs/internal/{{ $json.runId }}/\"*.ndjson 2>/dev/null || true"
+      },
+      "id": "collect-run-state",
+      "name": "Collect Run State",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        980,
+        110
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const manifest = $('Parse Manifest').item.json;\nconst stdout = $json.stdout || '';\nconst [countsPart, logsPart] = stdout.split('===LOGS===');\n\nconst counts = {};\nfor (const line of (countsPart || '').split('\\n')) {\n  const m = line.trim().match(/^(transit|internal)\\s+(\\d+)$/);\n  if (m) counts[m[1]] = parseInt(m[2], 10);\n}\n\nconst logs = [];\nfor (const line of (logsPart || '').split('\\n')) {\n  const t = line.trim();\n  if (!t) continue;\n  try { logs.push(JSON.parse(t)); } catch (e) { /* skip malformed */ }\n}\n\nconst byRepo = {};\nfor (const l of logs) byRepo[l.pipeline + ':' + l.repo] = l;\nconst failedRepos = Object.values(byRepo)\n  .filter((l) => l.status !== 'ok')\n  .map((l) => ({ pipeline: l.pipeline, repo: l.repo }));\n\nconst doneChunks = (counts.transit || 0) + (counts.internal || 0);\n\nreturn [{\n  json: {\n    runId: manifest.runId,\n    expectedChunks: manifest.expectedChunks,\n    expectedRepos: manifest.expectedRepos,\n    counts,\n    doneChunks,\n    missingChunks: Math.max(0, manifest.expectedChunks - doneChunks),\n    failedRepos,\n    processedRepoLogs: logs.length,\n    generatedAt: new Date().toISOString(),\n  },\n}];"
+      },
+      "id": "parse-state",
+      "name": "Parse State",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1220,
+        110
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const st = $json;\nconst rows = [\n  '# Repo scan report',\n  '',\n  '- Run: ' + st.runId,\n  '- Generated: ' + st.generatedAt,\n  '- Expected repos: ' + st.expectedRepos + ' (' + st.expectedChunks + ' chunks)',\n  '- Done chunks: ' + st.doneChunks,\n  '- Missing chunks: ' + st.missingChunks,\n  '- Failed repos: ' + st.failedRepos.length,\n  '',\n];\nif (st.failedRepos.length) {\n  rows.push('## Failed repos', '');\n  for (const f of st.failedRepos.slice(0, 200)) rows.push('- [' + f.pipeline + '] ' + f.repo);\n}\nconst markdown = rows.join('\\n');\nconst summary = { ...st, markdown, status: st.missingChunks === 0 && st.failedRepos.length === 0 ? 'complete' : 'incomplete' };\nreturn [{\n  json: {\n    ...summary,\n    jsonBase64: Buffer.from(JSON.stringify(summary)).toString('base64'),\n    mdBase64: Buffer.from(markdown).toString('base64'),\n  },\n}];"
+      },
+      "id": "build-report",
+      "name": "Build Report",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1460,
+        110
+      ]
+    },
+    {
+      "parameters": {
+        "executeOnce": false,
+        "command": "RUN_ROOT=\"{{ $env.RUN_ROOT || '' }}\"; if [ -z \"$RUN_ROOT\" ]; then RUN_ROOT=\"{{ $env.MULTITOOL_ROOT || '/opt/multi-tool' }}/n8n/runs\"; fi; mkdir -p \"$RUN_ROOT/summaries\"; printf '%s' '{{ $json.jsonBase64 }}' | base64 -d > \"$RUN_ROOT/summaries/{{ $json.runId }}.json\"; printf '%s' '{{ $json.mdBase64 }}' | base64 -d > \"$RUN_ROOT/summaries/{{ $json.runId }}.md\"; echo \"report {{ $json.runId }}\""
+      },
+      "id": "write-report",
+      "name": "Write Report",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        1700,
+        110
+      ]
+    },
+    {
+      "parameters": {
+        "channel": "#repos-scan",
+        "text": "=Repo scan {{ $json.runId }} finished: {{ $json.doneChunks }}/{{ $json.expectedChunks }} chunks done, {{ $json.failedRepos.length }} failed repos, {{ $json.missingChunks }} missing.",
+        "attachments": [],
+        "otherOptions": {}
+      },
+      "id": "notify-slack",
+      "name": "Notify",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.1,
+      "position": [
+        1940,
+        60
+      ],
+      "credentials": {
+        "slackApi": {
+          "id": "slack-cred",
+          "name": "Slack account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "executeOnce": false,
+        "command": "RUN_ROOT=\"{{ $env.RUN_ROOT || '' }}\"; if [ -z \"$RUN_ROOT\" ]; then RUN_ROOT=\"{{ $env.MULTITOOL_ROOT || '/opt/multi-tool' }}/n8n/runs\"; fi; DAYS=\"{{ $env.PURGE_AFTER_DAYS || '14' }}\"; find \"$RUN_ROOT/done\" \"$RUN_ROOT/jobs\" \"$RUN_ROOT/logs\" \"$RUN_ROOT/manifests\" -type f -mtime \"+$DAYS\" -delete 2>/dev/null; find \"$RUN_ROOT/summaries\" -name '*.json' -mtime \"+$DAYS\" -delete 2>/dev/null; echo \"purged >$DAYS days\""
+      },
+      "id": "purge-old-runs",
+      "name": "Purge Old Runs",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        1940,
+        320
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "no-manifest",
+      "name": "No Manifest",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        740,
+        420
+      ]
+    }
+  ],
+  "connections": {
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "Find Latest Manifest",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Daily Report Schedule": {
+      "main": [
+        [
+          {
+            "node": "Find Latest Manifest",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find Latest Manifest": {
+      "main": [
+        [
+          {
+            "node": "Parse Manifest",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Manifest": {
+      "main": [
+        [
+          {
+            "node": "Has Manifest?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Has Manifest?": {
+      "main": [
+        [
+          {
+            "node": "Collect Run State",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No Manifest",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Collect Run State": {
+      "main": [
+        [
+          {
+            "node": "Parse State",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse State": {
+      "main": [
+        [
+          {
+            "node": "Build Report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Report": {
+      "main": [
+        [
+          {
+            "node": "Write Report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Write Report": {
+      "main": [
+        [
+          {
+            "node": "Notify",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Notify": {
+      "main": [
+        [
+          {
+            "node": "Purge Old Runs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "UTC"
+  },
+  "pinData": {},
+  "meta": {
+    "instanceId": "prod-aggregator"
+  },
+  "tags": []
+}

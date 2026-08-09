@@ -1,0 +1,95 @@
+# Queue-mode n8n with N worker replicas for horizontal scan throughput.
+#
+# How workers scale:
+#   * Each scheduled worker execution claims exactly ONE pending job chunk
+#     (atomic mv) and exits. To get N concurrent scan lanes you want N worker
+#     processes that overlap their 2-minute schedules, so we run the n8n queue
+#     mode: every worker container is a separate process, and the scheduler
+#     distributes executions to whichever is free.
+#   * The queue itself is the filesystem (RUN_ROOT/jobs), shared by bind mount.
+#     For multiple hosts, point RUN_ROOT at NFS/EFS instead.
+#
+# The analyzer images must exist on this docker host (or wherever the socket
+# points), because Execute Command shells out to `docker run`.
+
+x-n8n-common: &n8n-common
+  image: multi-tool-n8n:latest
+  build:
+    context: ../..
+    dockerfile: n8n/production/Dockerfile.n8n-worker
+  restart: unless-stopped
+  env_file:
+    - .env
+  environment:
+    - QUEUE_MODE_ENABLED=true
+    - DB_TYPE=postgresdb
+    - DB_POSTGRESDB_HOST=postgres
+    - DB_POSTGRESDB_DATABASE=${POSTGRES_DB:-n8n}
+    - DB_POSTGRESDB_USER=${POSTGRES_USER:-n8n}
+    - DB_POSTGRESDB_PASSWORD=${POSTGRES_PASSWORD:-n8n}
+    - N8N_METRICS=true
+    - GENERIC_TIMEZONE=${GENERIC_TIMEZONE:-UTC}
+    - EXECUTIONS_MODE=queue
+    - N8N_RUNNERS_ENABLED=true
+  volumes:
+    - /var/run/docker.sock:/var/run/docker.sock
+    - n8n_data:/home/node/.n8n
+  depends_on:
+    postgres:
+      condition: service_healthy
+  healthcheck:
+    test: ["CMD", "node", "-e", "fetch('http://localhost:5678/healthz').then(r=>process.exit(r.ok?0:1))"]
+    interval: 30s
+    timeout: 5s
+    retries: 3
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER:-n8n}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-n8n}
+      - POSTGRES_DB=${POSTGRES_DB:-n8n}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-n8n}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  n8n-main:
+    <<: *n8n-common
+    command: ["n8n", "start"]
+    ports:
+      - "${N8N_PORT:-5678}:5678"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  n8n-worker:
+    <<: *n8n-common
+    command: ["n8n", "worker"]
+    # Scale with: docker compose up -d --scale n8n-worker=N
+    deploy:
+      replicas: ${WORKER_REPLICAS:-3}
+
+volumes:
+  n8n_data:
+  postgres_data:
+  redis_data:

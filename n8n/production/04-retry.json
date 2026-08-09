@@ -1,0 +1,207 @@
+{
+  "id": "d4cebe8c-a233-4838-873f-bbcbab7e84f4",
+  "name": "04 - Retry: re-enqueue failed repos",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## Retry (dead-letter → queue)\n\nReads non-ok lines from the run logs and writes them back into the SAME\npending job queue (`jobs/<pipeline>/retry-<pipeline>-<name>.json`), so the\nnext worker poll picks them up automatically.\n\nOnly failures from the last RETRY_WINDOW_HOURS (default 24) are considered;\nRETRY_MAX caps how many are re-enqueued per pass. Already-pending retries are\nskipped (idempotent).",
+        "color": 6,
+        "width": 340,
+        "height": 260
+      },
+      "id": "sticky-overview",
+      "name": "Overview",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        0,
+        520
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "trigger-manual",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "*/10 * * * *"
+            }
+          ]
+        }
+      },
+      "id": "trigger-schedule",
+      "name": "Retry Schedule",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        220
+      ]
+    },
+    {
+      "parameters": {
+        "executeOnce": false,
+        "command": "RUN_ROOT=\"{{ $env.RUN_ROOT || '' }}\"; if [ -z \"$RUN_ROOT\" ]; then RUN_ROOT=\"{{ $env.MULTITOOL_ROOT || '/opt/multi-tool' }}/n8n/runs\"; fi; cat \"$RUN_ROOT/logs/transit/\"*/*.ndjson \"$RUN_ROOT/logs/internal/\"*/*.ndjson 2>/dev/null | grep -v '\"status\":\"ok\"' || true"
+      },
+      "id": "collect-failures",
+      "name": "Collect Failures",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        260,
+        110
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const stdout = $json.stdout || '';\nconst max = parseInt($env.RETRY_MAX, 10) || 200;\nconst windowHours = parseInt($env.RETRY_WINDOW_HOURS, 10) || 24;\nconst cutoff = Date.now() - windowHours * 3600 * 1000;\n\nconst byKey = {};\nfor (const line of stdout.split('\\n')) {\n  const t = line.trim();\n  if (!t) continue;\n  let l;\n  try { l = JSON.parse(t); } catch (e) { continue; }\n  if (!l || !l.repo) continue;\n  const ts = l.ts ? new Date(l.ts).getTime() : Date.now();\n  if (Number.isNaN(ts) || ts < cutoff) continue;\n  byKey[l.pipeline + ':' + l.repo] = l;\n}\n\nconst runId = 'retry-' + Date.now();\nconst items = Object.values(byKey).slice(-max).map((l) => {\n  const safeName = String(l.repo).replace(/[^A-Za-z0-9._-]/g, '-');\n  const pipeline = l.pipeline === 'internal' ? 'internal' : 'transit';\n  const chunkId = 'retry-' + pipeline + '-' + safeName;\n  const chunk = {\n    chunkId,\n    runId,\n    pipeline,\n    repos: [{ name: l.repo, url: l.url || '', target: l.target || '' }],\n  };\n  return { json: { ...chunk, chunkBase64: Buffer.from(JSON.stringify(chunk)).toString('base64') } };\n});\n\nif (items.length === 0) return [{ json: { noRetries: true } }];\nreturn items;"
+      },
+      "id": "parse-failures",
+      "name": "Parse Failures",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        500,
+        110
+      ]
+    },
+    {
+      "parameters": {
+        "batchSize": 1,
+        "options": {}
+      },
+      "id": "split-failures",
+      "name": "Split Failures",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        740,
+        110
+      ]
+    },
+    {
+      "parameters": {
+        "executeOnce": false,
+        "command": "RUN_ROOT=\"{{ $env.RUN_ROOT || '' }}\"; if [ -z \"$RUN_ROOT\" ]; then RUN_ROOT=\"{{ $env.MULTITOOL_ROOT || '/opt/multi-tool' }}/n8n/runs\"; fi; mkdir -p \"$RUN_ROOT/jobs/{{ $json.pipeline }}\"; JOB=\"$RUN_ROOT/jobs/{{ $json.pipeline }}/{{ $json.chunkId }}.json\"; [ -f \"$JOB\" ] || printf '%s' '{{ $json.chunkBase64 }}' | base64 -d > \"$JOB\"; echo \"enqueued $JOB\""
+      },
+      "id": "enqueue-retry",
+      "name": "Enqueue Retry",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        980,
+        60
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\nreturn [{\n  json: {\n    enqueued: items.length,\n    pipelines: [...new Set(items.map((i) => i.json.pipeline))],\n    at: new Date().toISOString(),\n  },\n}];"
+      },
+      "id": "retry-summary",
+      "name": "Retry Summary",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        980,
+        400
+      ]
+    }
+  ],
+  "connections": {
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "Collect Failures",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Retry Schedule": {
+      "main": [
+        [
+          {
+            "node": "Collect Failures",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Collect Failures": {
+      "main": [
+        [
+          {
+            "node": "Parse Failures",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Failures": {
+      "main": [
+        [
+          {
+            "node": "Split Failures",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Failures": {
+      "main": [
+        [
+          {
+            "node": "Retry Summary",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Enqueue Retry",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enqueue Retry": {
+      "main": [
+        [
+          {
+            "node": "Split Failures",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "UTC"
+  },
+  "pinData": {},
+  "meta": {
+    "instanceId": "prod-retry"
+  },
+  "tags": []
+}

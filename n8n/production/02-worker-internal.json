@@ -1,0 +1,419 @@
+{
+  "id": "fc59db8c-019e-4a85-9ca7-05fe0702062f",
+  "name": "02 - Worker: internal (security)",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## Worker: internal\n\nSame contract as `01-worker-transit` but runs `internal-repo/run-tools.sh`\nper repo (and `target:HOST` entries against live network targets).\n\nPolls the shared run volume, claims one internal chunk, logs each repo to\n`logs/internal/<chunk>.ndjson`, then moves the chunk to `done/internal/`.",
+        "color": 4,
+        "width": 340,
+        "height": 240
+      },
+      "id": "sticky-overview",
+      "name": "Overview",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        0,
+        560
+      ]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "*/2 * * * *"
+            }
+          ]
+        }
+      },
+      "id": "worker-poll",
+      "name": "Worker Poll",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "executeOnce": false,
+        "command": "RUN_ROOT=\"{{ $env.RUN_ROOT || '' }}\"; if [ -z \"$RUN_ROOT\" ]; then RUN_ROOT=\"{{ $env.MULTITOOL_ROOT || '/opt/multi-tool' }}/n8n/runs\"; fi; STALE=\"{{ $env.STALE_MIN || '15' }}\"; find \"$RUN_ROOT/jobs/internal\" -name '*.processing.json' -mmin \"+$STALE\" -exec bash -c 'f=\"$1\"; mv \"$f\" \"${f%.processing.json}.json\"' _ {} \\; 2>/dev/null; ls \"$RUN_ROOT/jobs/internal/\"*.json 2>/dev/null | sort | head -n 1"
+      },
+      "id": "find-pending-job",
+      "name": "Find Pending Job",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        240,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const stdout = ($json.stdout || '').trim();\nif (!stdout) return [{ json: { noJob: true } }];\nconst jobFile = stdout;\nreturn [{ json: { jobFile, processingFile: jobFile.replace(/\\.json$/, '') + '.processing.json' } }];"
+      },
+      "id": "parse-job-file",
+      "name": "Parse Job File",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        480,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "cond-has-job",
+              "leftValue": "={{ $json.jobFile }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "isNotEmpty"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "has-job",
+      "name": "Has Job?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        720,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "executeOnce": false,
+        "command": "[ -f \"{{ $json.jobFile }}\" ] && mv \"{{ $json.jobFile }}\" \"{{ $json.processingFile }}\" && cat \"{{ $json.processingFile }}\""
+      },
+      "id": "claim-job",
+      "name": "Claim Job",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        960,
+        -60
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const text = ($json.stdout || '').trim();\nif (!text) return [{ json: { noJob: true } }];\nlet chunk;\ntry {\n  chunk = JSON.parse(text);\n} catch (e) {\n  return [{ json: { noJob: true } }];\n}\nconst root = $env.RUN_ROOT || ($env.MULTITOOL_ROOT || '/opt/multi-tool') + '/n8n/runs';\nconst pipeline = chunk.pipeline || 'internal';\nconst runDir = chunk.runId || 'unknown';\nconst logDir = root + '/logs/' + pipeline + '/' + runDir;\nreturn (chunk.repos || []).map((r) => ({\n  json: {\n    chunkId: chunk.chunkId,\n    runId: chunk.runId,\n    pipeline,\n    processingFile: $json.processingFile,\n    logDir,\n    logFile: logDir + '/' + chunk.chunkId + '.ndjson',\n    doneDir: root + '/done/' + pipeline + '/' + runDir,\n    repo: r.name,\n    name: r.name,\n    url: r.url || '',\n    target: r.target || '',\n  },\n}));"
+      },
+      "id": "parse-chunk",
+      "name": "Parse Chunk",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1200,
+        -60
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "cond-has-repo",
+              "leftValue": "={{ $json.repo }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "isNotEmpty"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "has-repos",
+      "name": "Has Repos?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        1440,
+        -60
+      ]
+    },
+    {
+      "parameters": {
+        "batchSize": 1,
+        "options": {}
+      },
+      "id": "split-repos",
+      "name": "Split Repos",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        1680,
+        -60
+      ]
+    },
+    {
+      "parameters": {
+        "executeOnce": false,
+        "command": "ROOT=\"{{ $env.MULTITOOL_ROOT || '/opt/multi-tool' }}\"; ARG=\"{{ $json.target ? 'target:' + $json.target : $json.name + ':' + $json.url }}\"; bash \"$ROOT/internal-repo/run-tools.sh\" \"$ARG\""
+      },
+      "id": "run-internal",
+      "name": "Run Internal",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        1920,
+        -120
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const out = $('Run Internal').item.json;\nconst ok = out && !out.error && out.exitCode === 0;\nconst status = ok ? 'ok' : 'failed';\nconst line = {\n  ts: new Date().toISOString(),\n  chunkId: $json.chunkId,\n  repo: $json.name,\n  url: $json.url,\n  target: $json.target,\n  pipeline: 'internal',\n  stage: 'security',\n  status,\n  exit: out ? (out.exitCode ?? out.error ?? '') : 'missing',\n};\nreturn [{ json: { ...$json, status, logBase64: Buffer.from(JSON.stringify(line)).toString('base64') } }];"
+      },
+      "id": "record-status",
+      "name": "Record Status",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2160,
+        -120
+      ]
+    },
+    {
+      "parameters": {
+        "executeOnce": false,
+        "command": "mkdir -p \"{{ $json.logDir }}\"; { printf '%s' '{{ $json.logBase64 }}' | base64 -d; echo; } >> \"{{ $json.logFile }}\""
+      },
+      "id": "append-log",
+      "name": "Append Log",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        2400,
+        -120
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\nconst counts = { total: items.length, ok: 0, failed: 0 };\nconst failedRepos = [];\nfor (const it of items) {\n  if (it.json.status === 'ok') counts.ok++;\n  else {\n    counts.failed++;\n    failedRepos.push(it.json.name);\n  }\n}\nconst first = (items[0] && items[0].json) || {};\nconst root = $env.RUN_ROOT || ($env.MULTITOOL_ROOT || '/opt/multi-tool') + '/n8n/runs';\nconst pipeline = first.pipeline || 'internal';\nconst runId = first.runId || 'unknown';\nconst result = { ...counts, failedRepos };\nreturn [{ json: {\n  chunkId: first.chunkId,\n  runId: first.runId,\n  pipeline,\n  doneDir: root + '/done/' + pipeline + '/' + runId,\n  resultFile: root + '/done/' + pipeline + '/' + runId + '/' + first.chunkId + '.result.json',\n  resultBase64: Buffer.from(JSON.stringify(result)).toString('base64'),\n} }];"
+      },
+      "id": "build-chunk-result",
+      "name": "Build Chunk Result",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1920,
+        340
+      ]
+    },
+    {
+      "parameters": {
+        "executeOnce": false,
+        "command": "mkdir -p \"{{ $json.doneDir }}\"; mv \"{{ $json.processingFile }}\" \"{{ $json.doneDir }}/{{ $json.chunkId }}.json\" && printf '%s' '{{ $json.resultBase64 }}' | base64 -d > \"{{ $json.resultFile }}\"; echo \"done {{ $json.chunkId }}\""
+      },
+      "id": "mark-chunk-done",
+      "name": "Mark Chunk Done",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        2160,
+        340
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "no-job",
+      "name": "No Job",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        960,
+        400
+      ]
+    }
+  ],
+  "connections": {
+    "Worker Poll": {
+      "main": [
+        [
+          {
+            "node": "Find Pending Job",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find Pending Job": {
+      "main": [
+        [
+          {
+            "node": "Parse Job File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Job File": {
+      "main": [
+        [
+          {
+            "node": "Has Job?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Has Job?": {
+      "main": [
+        [
+          {
+            "node": "Claim Job",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No Job",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Claim Job": {
+      "main": [
+        [
+          {
+            "node": "Parse Chunk",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Chunk": {
+      "main": [
+        [
+          {
+            "node": "Has Repos?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Has Repos?": {
+      "main": [
+        [
+          {
+            "node": "Split Repos",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No Job",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Repos": {
+      "main": [
+        [
+          {
+            "node": "Build Chunk Result",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Run Internal",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Run Internal": {
+      "main": [
+        [
+          {
+            "node": "Record Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Record Status": {
+      "main": [
+        [
+          {
+            "node": "Append Log",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append Log": {
+      "main": [
+        [
+          {
+            "node": "Split Repos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Chunk Result": {
+      "main": [
+        [
+          {
+            "node": "Mark Chunk Done",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "UTC"
+  },
+  "pinData": {},
+  "meta": {
+    "instanceId": "prod-worker-internal"
+  },
+  "tags": []
+}

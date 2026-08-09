@@ -1,0 +1,204 @@
+{
+  "id": "ad553fc4-a718-4166-8c55-56331a37c789",
+  "name": "00 - Dispatcher: repo inventory -> chunked jobs",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## Dispatcher (scalable)\n\nFetches the repo inventory (GitHub org, internal URL, or static list) and\nwrites **chunked job files** to a shared run volume (`RUN_ROOT`).\n\nWorkers (`01-worker-*`) pull chunks from the same volume, so any number of\nworker instances can run in parallel (queue mode, replicas, multiple hosts on\nNFS). This decouples 'fetch the list' from 'do the work'.\n\nEnv knobs: GITHUB_ORG, GITHUB_TOKEN, REPO_LIST_URL, PIPELINES, CHUNK_SIZE,\nMULTITOOL_ROOT, RUN_ROOT.",
+        "color": 6,
+        "width": 340,
+        "height": 300
+      },
+      "id": "sticky-overview",
+      "name": "Overview",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        0,
+        500
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "trigger-manual",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 2 * * *"
+            }
+          ]
+        }
+      },
+      "id": "trigger-schedule",
+      "name": "Nightly Schedule",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        220
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Sources, in priority order:\n//   1. GITHUB_ORG        - paginate the GitHub org repos API (all pages)\n//   2. REPO_LIST_URL     - JSON array of { name, url, target?, pipelines? }\n//   3. static list below - mirrors pipeline/config.py DEFAULT_REPOS\n//\n// Every emitted item carries a runId (one batch) so workers + aggregator can\n// group results, plus the pipelines it should be scanned by.\nconst pipelines = ($env.PIPELINES || 'transit,internal')\n  .split(',').map((s) => s.trim()).filter(Boolean);\n\nconst items = [];\n\nif ($env.GITHUB_ORG) {\n  const token = $env.GITHUB_TOKEN || '';\n  const headers = token ? { Authorization: 'Bearer ' + token } : {};\n  const maxPages = parseInt($env.GITHUB_MAX_PAGES, 10) || 50;\n  for (let page = 1; page <= maxPages; page++) {\n    const repos = await this.helpers.httpRequest({\n      url: 'https://api.github.com/orgs/' + $env.GITHUB_ORG + '/repos?per_page=100&page=' + page,\n      method: 'GET',\n      headers,\n      json: true,\n    });\n    if (!Array.isArray(repos) || repos.length === 0) break;\n    for (const r of repos) items.push({ name: r.name, url: r.clone_url, pipelines });\n    if (repos.length < 100) break;\n  }\n} else if ($env.REPO_LIST_URL) {\n  const list = await this.helpers.httpRequest({\n    url: $env.REPO_LIST_URL,\n    method: 'GET',\n    json: true,\n  });\n  for (const r of Array.isArray(list) ? list : (list.repos || [])) {\n    items.push({\n      name: r.name,\n      url: r.url || '',\n      target: r.target || '',\n      pipelines: r.pipelines || pipelines,\n    });\n  }\n} else {\n  const defaults = [\n    { name: 'go-gin', url: 'https://github.com/gin-gonic/gin' },\n    { name: 'java-springboot', url: 'https://github.com/spring-projects/spring-boot' },\n    { name: 'os-nova', url: 'https://github.com/openstack/nova' },\n  ];\n  for (const r of defaults) items.push({ name: r.name, url: r.url, pipelines });\n}\n\nconst runId = 'run-' + new Date().toISOString().replace(/[:.]/g, '-');\nconst enqueuedAt = Date.now();\n\nreturn items\n  .filter((r) => r.name && (r.url || r.target))\n  .map((r) => ({ json: { ...r, runId, enqueuedAt } }));"
+      },
+      "id": "fetch-inventory",
+      "name": "Fetch Repo Inventory",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        260,
+        110
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Group repos by pipeline first, then chunk each pipeline separately so a\n// worker execution never handles mixed pipelines. Chunks are exchanged as\n// files on the shared run volume, so N worker instances pull from one queue.\nconst CHUNK = parseInt($env.CHUNK_SIZE, 10) || 50;\nconst root = $env.RUN_ROOT || ($env.MULTITOOL_ROOT || '/opt/multi-tool') + '/n8n/runs';\n\nconst items = $input.all();\nconst runId = items[0] && items[0].json.runId ? items[0].json.runId : ('run-' + Date.now());\n\nconst byPipeline = {};\nfor (const it of items) {\n  const r = it.json;\n  const ps = r.pipelines && r.pipelines.length ? r.pipelines : ['transit'];\n  for (const p of ps) {\n    (byPipeline[p] = byPipeline[p] || []).push({\n      name: r.name,\n      url: r.url || '',\n      target: r.target || '',\n    });\n  }\n}\n\nconst chunks = [];\nfor (const pipeline of Object.keys(byPipeline)) {\n  const list = byPipeline[pipeline];\n  for (let i = 0; i < list.length; i += CHUNK) {\n    const slice = list.slice(i, i + CHUNK);\n    const chunkId = pipeline + '-' + String(Math.floor(i / CHUNK)).padStart(4, '0');\n    const payload = { chunkId, runId, pipeline, repos: slice };\n    const jobDir = root + '/jobs/' + pipeline;\n    chunks.push({\n      json: {\n        chunkId,\n        runId,\n        pipeline,\n        repoCount: slice.length,\n        jobDir,\n        jobFile: jobDir + '/' + chunkId + '.json',\n        jobBase64: Buffer.from(JSON.stringify(payload)).toString('base64'),\n        manifestFile: root + '/manifests/' + runId + '.txt',\n      },\n    });\n  }\n}\n\nreturn chunks;"
+      },
+      "id": "build-chunks",
+      "name": "Build Chunks",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        500,
+        110
+      ]
+    },
+    {
+      "parameters": {
+        "batchSize": 1,
+        "options": {}
+      },
+      "id": "split-chunks",
+      "name": "Split Chunks",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        740,
+        110
+      ]
+    },
+    {
+      "parameters": {
+        "executeOnce": false,
+        "command": "RUN_ROOT=\"{{ $env.RUN_ROOT || '' }}\"; if [ -z \"$RUN_ROOT\" ]; then RUN_ROOT=\"{{ $env.MULTITOOL_ROOT || '/opt/multi-tool' }}/n8n/runs\"; fi; mkdir -p \"{{ $json.jobDir }}\" \"$RUN_ROOT/manifests\"; echo '{{ $json.jobBase64 }}' | base64 -d > \"{{ $json.jobFile }}\"; echo \"{{ $json.chunkId }} {{ $json.repoCount }}\" >> \"{{ $json.manifestFile }}\"; echo \"dispatched {{ $json.chunkId }}\""
+      },
+      "id": "dispatch-chunk",
+      "name": "Dispatch Chunk",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        980,
+        60
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {},
+      "id": "dispatch-complete",
+      "name": "Dispatch Complete",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        980,
+        420
+      ]
+    }
+  ],
+  "connections": {
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "Fetch Repo Inventory",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Nightly Schedule": {
+      "main": [
+        [
+          {
+            "node": "Fetch Repo Inventory",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Repo Inventory": {
+      "main": [
+        [
+          {
+            "node": "Build Chunks",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Chunks": {
+      "main": [
+        [
+          {
+            "node": "Split Chunks",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Chunks": {
+      "main": [
+        [
+          {
+            "node": "Dispatch Complete",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Dispatch Chunk",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Dispatch Chunk": {
+      "main": [
+        [
+          {
+            "node": "Split Chunks",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "UTC"
+  },
+  "pinData": {},
+  "meta": {
+    "instanceId": "prod-dispatcher"
+  },
+  "tags": []
+}

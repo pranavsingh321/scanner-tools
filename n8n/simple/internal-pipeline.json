@@ -1,0 +1,207 @@
+{
+  "id": "b0bc1cbf-2ce5-48a9-95f6-a8e216311eaa",
+  "name": "Internal Repo Pipeline (simple)",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## Internal security pipeline (simple)\n\n1. Pick the repo/target list (REPO_LIST_URL env, or the static list below)\n2. For each repo run: `internal-repo/run-tools.sh <arg>`\n3. Summarise what was produced.\n\n`target:HOST` entries run the network tools (nuclei/naabu/httpx); everything\nelse is cloned and scanned. Same shape as the simple transit workflow.",
+        "color": 4,
+        "width": 300,
+        "height": 260
+      },
+      "id": "sticky-1",
+      "name": "How this works",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        0,
+        380
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "trigger-manual",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 2 * * *"
+            }
+          ]
+        }
+      },
+      "id": "trigger-schedule",
+      "name": "Nightly Schedule",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        220
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// The repo/target list. If REPO_LIST_URL is set it must return a JSON array of\n// { name, url, target? } entries; otherwise the static list below is used.\nconst repos = [];\n\nif ($env.REPO_LIST_URL) {\n  const list = await this.helpers.httpRequest({\n    url: $env.REPO_LIST_URL,\n    method: 'GET',\n    json: true,\n  });\n  for (const r of Array.isArray(list) ? list : (list.repos || [])) {\n    repos.push({ name: r.name, url: r.url || '', target: r.target || '' });\n  }\n} else {\n  repos.push(\n    { name: 'go-gin', url: 'https://github.com/gin-gonic/gin' },\n    { name: 'java-springboot', url: 'https://github.com/spring-projects/spring-boot' },\n    { name: 'os-nova', url: 'https://github.com/openstack/nova' },\n  );\n}\n\nreturn repos.filter((r) => r.name && (r.url || r.target)).map((r) => ({ json: r }));"
+      },
+      "id": "repo-list",
+      "name": "Repo List",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        240,
+        110
+      ]
+    },
+    {
+      "parameters": {
+        "batchSize": 1,
+        "options": {}
+      },
+      "id": "split-repos",
+      "name": "Split Repos",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        480,
+        110
+      ]
+    },
+    {
+      "parameters": {
+        "executeOnce": false,
+        "command": "ROOT=\"{{ $env.MULTITOOL_ROOT || '/opt/multi-tool' }}\"; ARG=\"{{ $json.target ? 'target:' + $json.target : $json.name + ':' + $json.url }}\"; bash \"$ROOT/internal-repo/run-tools.sh\" \"$ARG\""
+      },
+      "id": "run-internal",
+      "name": "Run Internal Pipeline",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        720,
+        60
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "executeOnce": false,
+        "command": "ROOT=\"{{ $env.MULTITOOL_ROOT || '/opt/multi-tool' }}\"; echo \"=== SUMMARY ===\"; ls \"$ROOT/internal-repo/summary\" 2>/dev/null; echo \"=== ARTIFACT DIRS ===\"; find \"$ROOT/internal-repo/artifacts\" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | wc -l | tr -d ' '"
+      },
+      "id": "collect-outputs",
+      "name": "Collect Outputs",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        720,
+        420
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const stdout = $json.stdout || '';\n\nconst extract = (label) => {\n  const m = stdout.match(new RegExp('=== ' + label + ' ===\\\\n([\\\\s\\\\S]*?)(?=====)'));\n  return m ? m[1].split('\\n').map((s) => s.trim()).filter(Boolean) : [];\n};\n\nconst summaryFiles = extract('SUMMARY');\nconst artifactDirs = parseInt((stdout.match(/=== ARTIFACT DIRS ===\\n(\\d+)/) || [])[1] || '0', 10);\n\nreturn [{\n  json: {\n    summaryFiles,\n    artifactDirs,\n    finishedAt: new Date().toISOString(),\n  },\n}];"
+      },
+      "id": "build-summary",
+      "name": "Build Summary",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        960,
+        420
+      ]
+    }
+  ],
+  "connections": {
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "Repo List",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Nightly Schedule": {
+      "main": [
+        [
+          {
+            "node": "Repo List",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Repo List": {
+      "main": [
+        [
+          {
+            "node": "Split Repos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Repos": {
+      "main": [
+        [
+          {
+            "node": "Collect Outputs",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Run Internal Pipeline",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Run Internal Pipeline": {
+      "main": [
+        [
+          {
+            "node": "Split Repos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Collect Outputs": {
+      "main": [
+        [
+          {
+            "node": "Build Summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "UTC"
+  },
+  "pinData": {},
+  "meta": {
+    "instanceId": "simple-internal"
+  },
+  "tags": []
+}
