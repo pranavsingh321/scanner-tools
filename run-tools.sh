@@ -8,13 +8,18 @@ WORK_DIR="${SCRIPT_DIR}/.multi-work"
 REBUILD="${REBUILD:-0}"
 KEEP_WORK="${KEEP_WORK:-0}"
 SKIP_EXISTING="${SKIP_EXISTING:-1}"
+LANGS="${LANGS:-java}"
 
 # Tool -> primary output file that indicates "already scanned"
-TOOL_OUTPUTS="pmd|cpd-report.xml
+JAVA_TOOLS="pmd|cpd-report.xml
 checkstyle|checkstyle-report.xml
 spotbugs|spotbugs-report.xml
-depcheck|dependency-check-report.json
-kg|knowledge-graph.json
+kg|knowledge-graph.json"
+PY_TOOLS="py-ruff|ruff.json
+py-bandit|bandit.json
+py-radon|radon-cc.json
+py-kg|py-knowledge-graph.json"
+SHARED_TOOLS="depcheck|dependency-check-report.json
 scc|scc.json
 repomix|repomix.txt"
 
@@ -35,6 +40,7 @@ Raw output is saved under artifacts/<repo>/<tool>/.
 
 Options:
   -o, --out DIR     Output directory (default: <script_dir>/artifacts)
+  -l, --lang X      Language scan set: java|python|all (default: java)
   -r, --rebuild     Force rebuild of the container image
   -R, --runtime X   Container runtime: podman|docker (default: auto-detect)
   -k, --keep        Keep temporary clones of remote repos
@@ -48,6 +54,11 @@ Arguments (one or more):
 
 With no arguments, Java-facing default repos are used.
 
+Language sets:
+  java    PMD+CPD, checkstyle, spotbugs, kg, depcheck, scc, repomix
+  python  ruff, bandit, radon, py-kg, depcheck, scc, repomix
+  all     both of the above (language-matched tools skip repos they cannot scan)
+
 Offline note: the image analyzers-java:latest bundles every tool. Build it on a
 connected machine, then `docker save` / `docker load` it onto air-gapped hosts.
 At scan time no network access is required (dependency-check reports CVEs only
@@ -58,6 +69,7 @@ EOF
 while [[ $# -gt 0 ]]; do
     case "$1" in
         -o|--out) OUT_DIR="$2"; shift 2 ;;
+        -l|--lang) LANGS="$2"; shift 2 ;;
         -r|--rebuild) REBUILD=1; shift ;;
         -R|--runtime) RUNTIME="$2"; shift 2 ;;
         -k|--keep) KEEP_WORK=1; shift ;;
@@ -66,6 +78,24 @@ while [[ $# -gt 0 ]]; do
         *) break ;;
     esac
 done
+
+case "$LANGS" in
+    java)   TOOL_OUTPUTS="$JAVA_TOOLS
+$SHARED_TOOLS" ;;
+    python) TOOL_OUTPUTS="$PY_TOOLS
+$SHARED_TOOLS" ;;
+    all)    TOOL_OUTPUTS="$JAVA_TOOLS
+$PY_TOOLS
+$SHARED_TOOLS" ;;
+    *) echo "error: unknown --lang '$LANGS' (use java|python|all)" >&2; exit 1 ;;
+esac
+
+has_files() { # <dir> <glob> — true if the repo contains matching source files
+    [[ -d "$1" ]] && find "$1" -type f -name "$2" \
+        -not -path "*/.git/*" -not -path "*/node_modules/*" \
+        -not -path "*/__pycache__/*" -not -path "*/.venv/*" \
+        -print -quit 2>/dev/null | grep -q .
+}
 
 RUNTIME="${RUNTIME:-}"
 if [[ -z "$RUNTIME" ]]; then
@@ -189,6 +219,34 @@ run_tool() {
                 'cd /out && repomix /repo --output repomix.txt --style plain' \
                 > "$td/repomix.log" 2>&1 || true
             ;;
+        py-ruff)
+            # Python lint/quality (ruff); exit 1 = violations found, tolerated
+            "${base[@]}" sh -c \
+                'cd /out && ruff check /repo --no-cache \
+                    --output-format json --output-file ruff.json || true' \
+                > "$td/ruff.log" 2>&1 || true
+            ;;
+        py-bandit)
+            # Python security scanner; exit 1 = issues found, tolerated
+            "${base[@]}" sh -c \
+                'cd /out && bandit -r /repo -f json -o bandit.json -q || true' \
+                > "$td/bandit.log" 2>&1 || true
+            ;;
+        py-radon)
+            # Cyclomatic complexity (cc), raw LOC and maintainability index
+            "${base[@]}" sh -c \
+                'cd /out && radon cc /repo -j > radon-cc.json; \
+                 radon raw /repo -j > radon-raw.json; \
+                 radon mi /repo -j > radon-mi.json' \
+                > "$td/radon.log" 2>&1 || true
+            ;;
+        py-kg)
+            # Python knowledge graph + complexity (stdlib ast, source only)
+            "${base[@]}" sh -c \
+                'python3 /opt/kgextractor/py-kg-extractor.py \
+                    -i /repo -o /out/py-knowledge-graph.json -r "'"$name"'"' \
+                > "$td/py-kg.log" 2>&1 || true
+            ;;
     esac
     if [[ ! -f "$td/$outfile" ]]; then
         echo "!! [$name] $tool produced no $outfile" >&2
@@ -246,6 +304,18 @@ for entry in "${REPOS[@]}"; do
     while read -r line; do
         [[ -z "$line" ]] && continue
         tool="${line%%|*}"; outfile="${line#*|}"
+        case "$tool" in
+            pmd|checkstyle|spotbugs|kg)
+                if ! has_files "$repo_dir" "*.java"; then
+                    echo "==> [$name] $tool skipped (no .java files)"
+                    continue
+                fi ;;
+            py-ruff|py-bandit|py-radon|py-kg)
+                if ! has_files "$repo_dir" "*.py"; then
+                    echo "==> [$name] $tool skipped (no .py files)"
+                    continue
+                fi ;;
+        esac
         if [[ "$SKIP_EXISTING" -eq 1 && -f "$OUT_DIR/$name/$tool/$outfile" ]]; then
             echo "==> [$name] $tool already has output, skipping (-f to force)"
             continue

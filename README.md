@@ -26,11 +26,32 @@ Per `run_tool()` in `run-tools.sh`:
 | `checkstyle` | Google Java style conventions | `checkstyle/checkstyle-report.xml` |
 | `spotbugs` | Bug patterns + FindSecBugs security detectors (needs compiled classes/jars; empty report otherwise) | `spotbugs/spotbugs-report.xml` |
 | `depcheck` | OWASP dependency-check — CVEs in dependencies | `depcheck/dependency-check-report.json` |
-| `kg` | Knowledge graph: packages/types/methods/fields + CONTAINS/EXTENDS/IMPLEMENTS/DEPENDS_ON/INVOKES edges + cyclomatic complexity, hub types, package deps, cycles | `kg/knowledge-graph.json` |
+| `kg` | Java knowledge graph: packages/types/methods/fields + CONTAINS/EXTENDS/IMPLEMENTS/DEPENDS_ON/INVOKES edges + cyclomatic complexity, hub types, package deps, cycles | `kg/knowledge-graph.json` |
+| `py-ruff` | Python lint/quality (ruff: E/P rules) | `py-ruff/ruff.json` |
+| `py-bandit` | Python security scanner (bandit) | `py-bandit/bandit.json` |
+| `py-radon` | Python cyclomatic complexity, raw LOC, maintainability index (radon) | `py-radon/radon-cc.json` (+ `radon-raw.json`, `radon-mi.json`) |
+| `py-kg` | Python knowledge graph (stdlib `ast`, no deps): modules/classes/functions + CONTAINS/IMPORTS/EXTENDS/CALLS edges, complexity, hubs, package deps, cycles | `py-kg/py-knowledge-graph.json` |
 | `scc` | LOC/complexity by language | `scc/scc.json` |
 | `repomix` | Full-codebase LLM pack (tree, contents, token counts) | `repomix/repomix.txt`, `repomix.log` |
 
-`kg` (JavaParser, source-only) requires **no compilation and no network** — this is what makes offline knowledge-graph extraction possible. `spotbugs` is the one analyzer that wants bytecode; provide a repo that already contains `*.class`/`*.jar` output or vendored `lib/*.jar`, otherwise it emits an explicit "no bytecode" report.
+`kg` (JavaParser, source-only) requires **no compilation and no network** — this is what makes offline knowledge-graph extraction possible. `spotbugs` is the one analyzer that wants bytecode; provide a repo that already contains `*.class`/`*.jar` output or vendored `lib/*.jar`, otherwise it emits an explicit "no bytecode" report. The Python set (`py-ruff`, `py-bandit`, `py-radon`, `py-kg`) is 100% source-level and fully offline by construction.
+
+## Language selection
+
+`run-tools.sh -l/--lang java|python|all` picks the analyzer set (default `java`):
+
+| `--lang` | Tools that run |
+|---|---|
+| `java` | pmd/cpd, checkstyle, spotbugs, kg, depcheck, scc, repomix |
+| `python` | py-ruff, py-bandit, py-radon, py-kg, depcheck, scc, repomix |
+| `all` | both sets — language-matched tools auto-skip repos they cannot scan |
+
+Tool applicability is detected per repo (`*.java` / `*.py` presence), so `--lang all` against a mixed codebase runs each analyzer only where it makes sense. `scc` (multi-language), `repomix` (any codebase) and `depcheck` (Python deps via pip/poetry as well as Maven) always run.
+
+```bash
+./run-tools.sh --lang python /path/to/python/repo
+./run-tools.sh --lang all  /path/to/mixed/repo
+```
 
 ## Offline workflow
 
@@ -68,7 +89,7 @@ Without it, `depcheck` writes a stub report noting that no offline NVD snapshot 
 ./agent-summarize.sh -m anthropic/claude-sonnet-4        # pick the LLM model (default: OPENCODE_MODEL env)
 ```
 
-Options (`run-tools.sh`): `-o/--out DIR`, `-r/--rebuild`, `-R/--runtime podman|docker`, `-k/--keep` (keep temp clones), `-f/--force`, `-h/--help`.
+Options (`run-tools.sh`): `-o/--out DIR`, `-l/--lang java|python|all`, `-r/--rebuild`, `-R/--runtime podman|docker`, `-k/--keep` (keep temp clones), `-f/--force`, `-h/--help`.
 
 Options (`agent-summarize.sh`): `-o/--out DIR`, `-m/--model`, `-f/--force`, `-h/--help`. Set `OPENCODE_MODEL` to avoid passing `-m` every time.
 
@@ -95,9 +116,30 @@ Requires `opencode` installed and a configured model. Non-interactive `opencode 
 - **Stage 1 (`maven:eclipse-temurin-21`)** compiles `kg-extractor` (JavaParser 3.26.4, shaded into one jar → `/opt/kgextractor/kg-extractor.jar`).
 - **Stage 2 (`golang:1.24-alpine`)** builds `scc`.
 - **Stage 3 (`eclipse-temurin:21-jdk-alpine`)** downloads PMD 7.27, Checkstyle 14.1 (incl. extracted `google_checks.xml`), SpotBugs 4.10.4 + FindSecBugs 1.14.0, OWASP dependency-check 13.0, and optionally pre-seeds NVD data (`PRESEED_NVD=1`).
-- **Final stage** = same JDK base + `git`, `nodejs`/`npm` (for `repomix`), all copied tools, `scc` binary, `kg-extractor.jar`.
+- **Final stage** = same JDK base + `git`, `nodejs`/`npm` (for `repomix`), `python3` + `ruff`/`bandit`/`radon` (via pip), all copied tools, `scc` binary, `kg-extractor.jar`, and the stdlib-only `py-kg-extractor.py`.
 
 Versions are pinned via build args (`PMD_VERSION`, `CHECKSTYLE_VERSION`, `SPOTBUGS_VERSION`, `FINDSECBUGS_VERSION`, `DEPCHECK_VERSION`, `PRESEED_NVD`).
+
+## Python knowledge graph format
+
+`py-knowledge-graph.json` mirrors the Java format:
+
+```
+meta       → repo name, tool, timestamp
+summaries  → files/modules/classes/functions/LOC, avg & max cyclomatic complexity,
+             top-complexity & top-LOC functions, hub modules (deps/dependents),
+             package-dependency edges (weighted: imports+calls+extends),
+             isolated modules, module-level import cycles
+nodes      → {id, label: module|class|function, name, fqn, kind, loc, file, isAbstract}
+edges      → {from, to, type: CONTAINS|IMPORTS|EXTENDS|CALLS, label, weight}
+```
+
+Type/function references are resolved from `import`/`from ... import`/`import ... as`
+statements plus same-module names, with walk-of-the-AST cyclomatic counting
+(`if/for/while/except/with/match/comprehensions/and/or/ternary`). Resolution is
+best-effort and two-phase (parse everything, then resolve cross-module) so
+edges only link nodes that actually exist in the repo; unresolved references
+are counted as `external_type_references`.
 
 ## Knowledge graph format
 

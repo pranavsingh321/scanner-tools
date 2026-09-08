@@ -81,7 +81,7 @@ RUN if [ "$PRESEED_NVD" = "1" ]; then \
 # Final image: fully self-contained, works with zero network access.
 # ---------------------------------------------------------------------------
 FROM eclipse-temurin:21-jdk-alpine
-LABEL org.opencontainers.image.description="Offline Java static analysis toolkit: PMD, Checkstyle, SpotBugs+FindSecBugs, OWASP dependency-check, scc, repomix, kg-extractor"
+LABEL org.opencontainers.image.description="Offline static analysis toolkit: PMD, Checkstyle, SpotBugs+FindSecBugs, OWASP dependency-check, scc, repomix, kg-extractor (Java + Python)"
 ENV JAVA_TOOL_OPTIONS="-Dfile.encoding=UTF-8"
 ENV PATH="/opt/pmd/bin:$PATH"
 ENV SPOTBUGS_HOME="/opt/spotbugs"
@@ -89,10 +89,18 @@ ENV DEPENDENCY_CHECK_HOME="/opt/dependency-check"
 RUN apk add --no-cache git ca-certificates nodejs npm \
     && npm install -g repomix --silent \
     && rm -rf /root/.npm
+# Python analyzers (ruff lint/quality, bandit security, radon complexity)
+# plus the stdlib-only Python knowledge-graph extractor, bundled offline.
+RUN apk add --no-cache python3 py3-pip \
+    && python3 -m pip install --no-cache-dir --break-system-packages \
+        ruff bandit radon \
+    && rm -rf /root/.cache/pip \
+    && python3 --version && ruff --version && bandit --version && radon --version
 COPY --from=tools   /opt/pmd              /opt/pmd
 COPY --from=tools   /opt/checkstyle       /opt/checkstyle
 COPY --from=tools   /opt/spotbugs         /opt/spotbugs
 COPY --from=tools   /opt/dependency-check /opt/dependency-check
 COPY --from=scc     /go/bin/scc           /usr/local/bin/scc
 COPY --from=kgextractor /kg-extractor.jar /opt/kgextractor/kg-extractor.jar
+COPY py-kg-extractor/py_kg_extractor.py /opt/kgextractor/py-kg-extractor.py
 WORKDIR /repo

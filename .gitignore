@@ -4,3 +4,5 @@ summary/*.opencode.log
 .multi-work/
 run-batch.log
 *.tar.gz
+__pycache__/
+*.pyc
