@@ -2,21 +2,36 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-IMAGE="${IMAGE:-analyzers:latest}"
+IMAGE="${IMAGE:-analyzers-java:latest}"
 OUT_DIR="${SCRIPT_DIR}/artifacts"
 WORK_DIR="${SCRIPT_DIR}/.multi-work"
 REBUILD="${REBUILD:-0}"
 KEEP_WORK="${KEEP_WORK:-0}"
 SKIP_EXISTING="${SKIP_EXISTING:-1}"
 
-TOOLS=(tokei scc repomix gitingest files-to-prompt)
+# Tool -> primary output file that indicates "already scanned"
+TOOL_OUTPUTS="pmd|cpd-report.xml
+checkstyle|checkstyle-report.xml
+spotbugs|spotbugs-report.xml
+depcheck|dependency-check-report.json
+kg|knowledge-graph.json
+scc|scc.json
+repomix|repomix.txt"
 
 usage() {
     cat <<'EOF'
 Usage: run-tools.sh [options] [repo ...]
 
-Runs 5 repo-analysis tools (tokei, scc, repomix, gitingest, files-to-prompt)
-in a container on each repo and saves raw output under artifacts/<repo>/<tool>/.
+Offline Java static analysis pipeline. Runs 7 analyzers in a container per repo:
+  pmd / cpd  (code quality, security, design, duplication)
+  checkstyle (Google Java style conventions)
+  spotbugs   (bug patterns + FindSecBugs security, requires compiled classes)
+  depcheck   (OWASP dependency-check: CVE scan of dependencies)
+  kg         (knowledge graph + complexity extractor, JavaParser source-only)
+  scc        (LOC / complexity metrics)
+  repomix    (full-codebase LLM pack)
+
+Raw output is saved under artifacts/<repo>/<tool>/.
 
 Options:
   -o, --out DIR     Output directory (default: <script_dir>/artifacts)
@@ -31,7 +46,12 @@ Arguments (one or more):
   https://.../repo       Remote repository URL (shallow-cloned to a temp dir)
   name:https://.../repo  Remote URL with an explicit artifact name
 
-With no arguments, the 10 repos previously analyzed with whatsun are used.
+With no arguments, Java-facing default repos are used.
+
+Offline note: the image analyzers-java:latest bundles every tool. Build it on a
+connected machine, then `docker save` / `docker load` it onto air-gapped hosts.
+At scan time no network access is required (dependency-check reports CVEs only
+as current as its bundled NVD snapshot).
 EOF
 }
 
@@ -62,7 +82,7 @@ fi
 image_exists() { "$RUNTIME" image exists "$IMAGE" 2>/dev/null; }
 
 if [[ "$REBUILD" -eq 1 ]] || ! image_exists; then
-    echo "==> Building image $IMAGE"
+    echo "==> Building image $IMAGE (requires network; first build only)"
     "$RUNTIME" build -t "$IMAGE" "$SCRIPT_DIR"
 else
     echo "==> Image $IMAGE already present (use -r/--rebuild to force)"
@@ -79,44 +99,118 @@ cleanup() {
 trap cleanup EXIT
 
 run_tool() {
-    local repo_dir="$1" name="$2" tool="$3"
+    local repo_dir="$1" name="$2" tool="$3" outfile="$4"
     local td="$OUT_DIR/$name/$tool"
     mkdir -p "$td"
     local base=("$RUNTIME" run --rm -v "$repo_dir:/repo:ro" -v "$td:/out" "$IMAGE")
     echo "==> [$name] $tool"
     case "$tool" in
-        tokei)
-            "${base[@]}" sh -c 'tokei /repo --output json > /out/tokei.json'
+        pmd)
+            # code quality + security + design + performance rulesets, then CPD duplication
+            "${base[@]}" sh -c \
+                'cd /out && /opt/pmd/bin/pmd check -d /repo -f xml \
+                    -R category/java/errorprone.xml \
+                    -R category/java/bestpractices.xml \
+                    -R category/java/design.xml \
+                    -R category/java/codestyle.xml \
+                    -R category/java/performance.xml \
+                    -R category/java/security.xml \
+                    --report-file pmd-report.xml \
+                    --no-cache || true' \
+                > "$td/pmd.log" 2>&1 || true
+            "${base[@]}" sh -c \
+                'cd /out && /opt/pmd/bin/pmd cpd --minimum-tokens 100 --dir /repo \
+                    --language java --format xml -r cpd-report.xml \
+                    --no-fail-on-violation --no-fail-on-error || true' \
+                > "$td/cpd.log" 2>&1 || true
+            ;;
+        checkstyle)
+            "${base[@]}" sh -c \
+                'java -Xmx4g -jar /opt/checkstyle/checkstyle.jar \
+                    -c /opt/checkstyle/google_checks.xml \
+                    -f xml -o /out/checkstyle-report.xml /repo || true' \
+                > "$td/checkstyle.log" 2>&1 || true
+            ;;
+        spotbugs)
+            # requires compiled classes/jars in the repo (e.g. vendored lib/*.jar
+            # or prior build output); reports an empty result otherwise.
+            "${base[@]}" sh -c '
+                find /repo -type f \( -name "*.jar" -o -name "*.class" \) \
+                    ! -path "*/test/*" ! -path "*/test-classes/*" \
+                    ! -name "*sources.jar" ! -name "*javadoc.jar" 2>/dev/null \
+                    > /tmp/sb-targets.txt
+                if [ -s /tmp/sb-targets.txt ]; then
+                    java -Xmx4g -jar /opt/spotbugs/lib/spotbugs.jar -textui \
+                        -effort:max \
+                        -pluginList /opt/spotbugs/plugin/findsecbugs-plugin.jar \
+                        -xml:withMessages -output /out/spotbugs-report.xml \
+                        -analyzeFromFile /tmp/sb-targets.txt || true
+                else
+                    printf '"'"'%s\n'"'"' \
+                        "<?xml version=\"1.0\"?><BugCollection version=\"4.0\"><BugInstance><ShortMessage>No compiled classes or jars found; SpotBugs requires bytecode. Run a build or vendor dependencies first.</ShortMessage></BugInstance></BugCollection>" \
+                        > /out/spotbugs-report.xml
+                    echo "no compiled classes/jars found — SpotBugs empty result" >&2
+                fi' \
+                > "$td/spotbugs.log" 2>&1 || true
+            ;;
+        depcheck)
+            # OWASP dependency-check. Offline: uses bundled NVD snapshot if
+            # PRESEED_NVD was used at build; otherwise reports a warning and
+            # exits non-zero (tolerated). Exit code 1 just means "CVEs found".
+            "${base[@]}" sh -c \
+                'cd /out && timeout 1800 /opt/dependency-check/bin/dependency-check.sh \
+                    --scan /repo --project "'"$name"'" --format JSON --out /out \
+                    --data /opt/dependency-check/data \
+                    --noupdate --disableCentral --disableRetireJs \
+                    --disableHostedSuppressions 2>&1 || true' \
+                > "$td/depcheck.log" 2>&1 || true
+            # Offline without a pre-seeded NVD snapshot yields no report; stub it.
+            if [[ ! -f "$td/dependency-check-report.json" ]]; then
+                {
+                    echo '{"project":{"name":"'"$name"'"},"reportSchema":"1.0",'
+                    echo '"scanInfo":{"engineVersion":"offline-stub"},'
+                    echo '"dependencies":[],"warnings":["NVD database unavailable offline; pre-seed via: docker build --build-arg PRESEED_NVD=1"]}'
+                } > "$td/dependency-check-report.json"
+            fi
+            ;;
+        kg)
+            # knowledge graph + complexity (JavaParser, source only)
+            "${base[@]}" sh -c \
+                'java -Xmx4g -jar /opt/kgextractor/kg-extractor.jar \
+                    -i /repo -o /out/knowledge-graph.json -r "'"$name"'"' \
+                > "$td/kg.log" 2>&1 || true
             ;;
         scc)
-            "${base[@]}" sh -c 'scc /repo --format json > /out/scc.json'
+            "${base[@]}" sh -c 'scc /repo --format json > /out/scc.json' \
+                > "$td/scc.log" 2>&1 || true
             ;;
         repomix)
-            "${base[@]}" sh -c 'cd /out && repomix /repo --output repomix.txt --style plain' > "$td/repomix.log" 2>&1
-            ;;
-        gitingest)
-            "${base[@]}" sh -c 'cd /out && gitingest /repo' > "$td/gitingest.log" 2>&1
-            ;;
-        files-to-prompt)
-            "${base[@]}" sh -c 'files-to-prompt /repo > /out/prompt.txt'
+            "${base[@]}" sh -c \
+                'cd /out && repomix /repo --output repomix.txt --style plain' \
+                > "$td/repomix.log" 2>&1 || true
             ;;
     esac
+    if [[ ! -f "$td/$outfile" ]]; then
+        echo "!! [$name] $tool produced no $outfile" >&2
+        return 1
+    fi
     echo "       -> $td/"
 }
 
+# Default Java-facing repo set (name|URL).
 REPOS=("$@")
 if [[ ${#REPOS[@]} -eq 0 ]]; then
     REPOS=(
-        "go-gin|https://github.com/gin-gonic/gin"
-        "gin|https://github.com/gin-gonic/gin"
-        "go-mux|https://github.com/gorilla/mux"
         "java-gson|https://github.com/google/gson"
+        "java-guava|https://github.com/google/guava"
+        "java-commons-lang|https://github.com/apache/commons-lang"
+        "java-caffeine|https://github.com/ben-manes/caffeine"
+        "java-junit5|https://github.com/junit-team/junit5"
+        "java-netty|https://github.com/netty/netty"
         "java-springboot|https://github.com/spring-projects/spring-boot"
-        "k8s-kubernetes|https://github.com/kubernetes/kubernetes"
-        "os-nova|https://github.com/openstack/nova"
-        "os-neutron|https://github.com/openstack/neutron"
-        "py-flask|https://github.com/pallets/flask"
-        "glance|https://github.com/openstack/glance"
+        "java-kafka|https://github.com/apache/kafka"
+        "java-tomcat|https://github.com/apache/tomcat"
+        "java-elasticsearch|https://github.com/elastic/elasticsearch"
     )
 fi
 
@@ -137,7 +231,7 @@ for entry in "${REPOS[@]}"; do
         clone_dir="$WORK_DIR/$name"
         if [[ ! -d "$clone_dir/.git" ]]; then
             rm -rf "$clone_dir"
-            echo "==> Cloning $name (shallow)"
+            echo "==> Cloning $name (shallow; requires network)"
             git clone --depth 1 --quiet "$url" "$clone_dir"
         fi
         repo_dir="$clone_dir"
@@ -149,20 +243,18 @@ for entry in "${REPOS[@]}"; do
         repo_dir="$(cd "$localdir" && pwd)"
     fi
 
-    for tool in "${TOOLS[@]}"; do
-        if [[ "$SKIP_EXISTING" -eq 1 ]]; then
-            if [[ -f "$OUT_DIR/$name/$tool/tokei.json" || -f "$OUT_DIR/$name/$tool/scc.json" \
-                  || -f "$OUT_DIR/$name/$tool/repomix.txt" || -f "$OUT_DIR/$name/$tool/digest.txt" \
-                  || -f "$OUT_DIR/$name/$tool/prompt.txt" ]]; then
-                echo "==> [$name] $tool already has output, skipping (-f to force)"
-                continue
-            fi
+    while read -r line; do
+        [[ -z "$line" ]] && continue
+        tool="${line%%|*}"; outfile="${line#*|}"
+        if [[ "$SKIP_EXISTING" -eq 1 && -f "$OUT_DIR/$name/$tool/$outfile" ]]; then
+            echo "==> [$name] $tool already has output, skipping (-f to force)"
+            continue
         fi
-        if ! run_tool "$repo_dir" "$name" "$tool"; then
+        if ! run_tool "$repo_dir" "$name" "$tool" "$outfile"; then
             echo "!! [$name] $tool FAILED" >&2
             fail=1
         fi
-    done
+    done <<< "$TOOL_OUTPUTS"
 done
 
 if [[ "$fail" -eq 1 ]]; then

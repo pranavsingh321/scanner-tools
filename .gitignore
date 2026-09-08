@@ -1,0 +1,6 @@
+artifacts/
+summary/_digests/
+summary/*.opencode.log
+.multi-work/
+run-batch.log
+*.tar.gz

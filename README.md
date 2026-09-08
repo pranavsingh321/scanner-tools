@@ -1,98 +1,116 @@
-# multi-tool
+# scanner-tools — offline Java static analysis + agentic reporting
 
-Batch repository analysis using 5 repo-analysis tools, each run in a container against one or more repositories, producing raw artifacts and per-repo markdown summaries.
+Batch Java code analysis with static-analysis tools (PMD, Checkstyle, SpotBugs/FindSecBugs, OWASP dependency-check, a knowledge-graph/complexity extractor, scc, repomix), each run in a container per repository, producing raw artifacts and an LLM-agent-generated markdown summary per repo.
+
+Fully **offline at scan time**: every tool is bundled into a single Docker image. Build the image once on a connected machine, transfer it, and scan air-gapped clones with zero internet access.
 
 ## Layout
 
 | Path | What it is |
 |---|---|
-| `run-tools.sh` | Driver script: clones/loads repos, runs each tool in a container, saves output |
-| `Dockerfile` | Builds the `analyzers:latest` image containing all 5 tools |
-| `run-batch.log` | Console output of the most recent batch run |
-| `artifacts/<repo>/<tool>/` | Raw output files, one directory per tool and repo |
-| `summary/<repo>.md` | Hand-written analysis summary per repo (metrics + notes) |
+| `Dockerfile` | Multi-stage build → `analyzers-java:latest`, all tools self-contained |
+| `run-tools.sh` | Scan driver: runs all 7 analyzers per repo in a container |
+| `agent-summarize.sh` | Agentic summarizer: reads artifacts + drives `opencode run` → `summary/<repo>.md` |
+| `kg-extractor/` | JavaParser-based knowledge-graph & complexity extractor (built by the Dockerfile) |
+| `artifacts/<repo>/<tool>/` | Raw output, one dir per tool per repo |
+| `summary/<repo>.md` | LLM-generated code-quality/security/complexity/graph report |
 
-## Tool → output file mapping
+## Tool → output mapping
 
-Each tool runs inside the container with the repo mounted read-only at `/repo` and its output directory mounted at `/out`. Per `run_tool()` in `run-tools.sh:81`:
+Per `run_tool()` in `run-tools.sh`:
 
-| Tool | Language | GitHub stars | Output file(s) | What it produces |
-|---|---|---|---|---|
-| `tokei` | Rust | 14.8k | `tokei/tokei.json` | LOC, comment, blank counts per language (JSON) |
-| `scc` | Go | 8.6k | `scc/scc.json` | Same style LOC metrics per language (JSON), alternative to tokei |
-| `repomix` | Node | 27.6k | `repomix/repomix.txt` | Whole-repo packed into one file: summary, tree, all file contents (LLM prompt) |
-| `gitingest` | Python | 15.3k | `gitingest/digest.txt`, `gitingest/gitingest.log` | `digest.txt` = directory tree + file contents + token estimate; `.log` = ingestion stats (files, size, tokens) |
-| `files-to-prompt` | Python | 2.8k | `files-to-prompt/prompt.txt` | All text files concatenated in prompt-friendly form (skips binaries with warnings) |
-
-Stars as of 2026-08-02: `XAMPPRocky/tokei`, `boyter/scc`, `yamadashy/repomix`, `coderamp-labs/gitingest`, `simonw/files-to-prompt`.
-
-A `*.log` beside a tool's primary output is the tool's own console output, not a separate analysis.
-
-## Tool comparison
-
-### Redundancy
-The 5 tools fall into two near-duplicate groups:
-
-| Group | Tools | Notes |
+| Tool | Objective | Output file(s) |
 |---|---|---|
-| LOC metrics | `tokei` ↔ `scc` | Same per-language code/comment/blank counts. tokei adds per-file reports; scc adds a complexity metric. Keep one. |
-| Full-content dumps | `repomix` ↔ `gitingest` ↔ `files-to-prompt` | All emit the repo's file contents (~95% overlap, ~36–38k lines for py-flask). repomix = richest (tree, security check, token metrics); gitingest = token estimate; files-to-prompt = bare concat, skips binaries. Keep one. |
+| `pmd` | Code quality, security, design, performance, error-prone (6 PMD category rulesets) | `pmd/pmd-report.xml`, `pmd.log` |
+| `cpd` (bundled with PMD) | Copy-paste duplication | `pmd/cpd-report.xml` |
+| `checkstyle` | Google Java style conventions | `checkstyle/checkstyle-report.xml` |
+| `spotbugs` | Bug patterns + FindSecBugs security detectors (needs compiled classes/jars; empty report otherwise) | `spotbugs/spotbugs-report.xml` |
+| `depcheck` | OWASP dependency-check — CVEs in dependencies | `depcheck/dependency-check-report.json` |
+| `kg` | Knowledge graph: packages/types/methods/fields + CONTAINS/EXTENDS/IMPLEMENTS/DEPENDS_ON/INVOKES edges + cyclomatic complexity, hub types, package deps, cycles | `kg/knowledge-graph.json` |
+| `scc` | LOC/complexity by language | `scc/scc.json` |
+| `repomix` | Full-codebase LLM pack (tree, contents, token counts) | `repomix/repomix.txt`, `repomix.log` |
 
-Effective minimal set: **`tokei` (metrics) + `repomix` (content)** — the other three add nothing unique.
+`kg` (JavaParser, source-only) requires **no compilation and no network** — this is what makes offline knowledge-graph extraction possible. `spotbugs` is the one analyzer that wants bytecode; provide a repo that already contains `*.class`/`*.jar` output or vendored `lib/*.jar`, otherwise it emits an explicit "no bytecode" report.
 
-### Suitability for LLM input/processing
-| Rank | Tool | Why |
-|---|---|---|
-| 1 | `repomix` | Purpose-built for LLMs: summary header, directory tree, per-file separators, security scan, token counts |
-| 2 | `gitingest` | Lighter alternative, plain tree + token estimate |
-| 3 | `files-to-prompt` | Bare concatenation, no structure, drops binaries |
-| — | `tokei` / `scc` | Not code content — use as a small numeric context block only |
+## Offline workflow
 
-For huge repos (e.g. kubernetes ≈ 225 MB packed) full packing is impractical regardless of tool — prefer `digest.txt` or scope to a subtree.
+```bash
+# 1. On a machine WITH internet: build and export the image
+docker build -t analyzers-java:latest .
+docker save analyzers-java:latest | gzip > analyzers-java.tar.gz
 
-### Internet access
-All 5 tools scan local repos **offline**. Network is only needed for `git clone` (`run-tools.sh:141`) and the image build/tool installs. Optional: `repomix`/`gitingest` can fetch remote repos by URL when invoked that way.
+# 2. Transfer the tarball to the air-gapped machine
 
-### Language coverage
-| Tool | Coverage |
-|---|---|
-| `tokei` | Broadest explicit database (~200+ languages incl. HCL/Terraform, Go, Java, Python, Rust) |
-| `scc` | ~100+ languages, same majors incl. HCL/Terraform, smaller list |
-| `repomix` / `gitingest` / `files-to-prompt` | Language-agnostic (pack any text file) — limited only by their ignore/config rules |
+# 3. On the OFFLINE machine: load, then scan (no network needed)
+gunzip -c analyzers-java.tar.gz | docker load
+./run-tools.sh /path/to/cloned/repo
+./agent-summarize.sh /path/to/cloned/repo      # requires opencode + a model
+```
 
-## Repos analyzed (default list, `run-tools.sh:108`)
+For full dependency-CVE coverage offline, pre-seed the NVD database **at build time** on the connected machine (~400 MB extra):
 
-`go-gin` / `gin` (gin-gonic/gin), `go-mux` (gorilla/mux), `java-gson` (google/gson), `java-springboot` (spring-projects/spring-boot), `k8s-kubernetes` (kubernetes/kubernetes), `os-nova` / `os-neutron` / `glance` (openstack/*), `py-flask` (pallets/flask).
+```bash
+docker build --build-arg PRESEED_NVD=1 -t analyzers-java:latest .
+```
+
+Without it, `depcheck` writes a stub report noting that no offline NVD snapshot is available. All other tools are unaffected.
+
+`docker save`/`load` also works with podman (`podman save`/`podman load`).
 
 ## Usage
 
 ```bash
-./run-tools.sh                      # analyze the 10 default repos
-./run-tools.sh /path/to/local/repo  # analyze a local directory
-./run-tools.sh https://github.com/user/repo   # shallow-clone a remote repo
-./run-tools.sh myname:https://github.com/user/repo   # remote with explicit artifact name
+./run-tools.sh                       # scan the default Java repo set (see below)
+./run-tools.sh /path/to/local/repo   # scan a local directory
+./run-tools.sh https://github.com/user/repo              # shallow-clone a remote repo (needs network)
+./run-tools.sh myname:https://github.com/user/repo       # remote with explicit artifact name
+./agent-summarize.sh java-gson       # generate/refresh one markdown summary
+./agent-summarize.sh -m anthropic/claude-sonnet-4        # pick the LLM model (default: OPENCODE_MODEL env)
 ```
 
-Options: `-o/--out DIR`, `-r/--rebuild` (force image rebuild), `-R/--runtime podman|docker`, `-k/--keep` (keep temp clones), `-f/--force` (re-run even if output exists), `-h/--help`.
+Options (`run-tools.sh`): `-o/--out DIR`, `-r/--rebuild`, `-R/--runtime podman|docker`, `-k/--keep` (keep temp clones), `-f/--force`, `-h/--help`.
 
-Behavior: requires `podman` or `docker`. Builds `analyzers:latest` on first run, then reuses it. Remote repos are shallow-cloned to `.multi-work/` (cleaned up on exit unless `-k`). Existing outputs are skipped by default (`-f` to override).
+Options (`agent-summarize.sh`): `-o/--out DIR`, `-m/--model`, `-f/--force`, `-h/--help`. Set `OPENCODE_MODEL` to avoid passing `-m` every time.
 
-## Build note
+Behavior: requires `podman` or `docker`. Builds `analyzers-java:latest` on first run, then reuses it. Remote repos are shallow-cloned to `.multi-work/` (cleaned on exit unless `-k`). Existing outputs are skipped by default (`-f` to override). Tool exit codes are tolerated on purpose — static analyzers exit non-zero when they *find* violations, and the report files are still written.
 
-The image is built in two stages (`Dockerfile`): a `rust:alpine` stage compiles `tokei` (cargo) and `scc` (go install), then an `alpine:3.21` runtime stage adds `git`, `nodejs`/`npm` (for `repomix`), and `python3`/`pip` (for `gitingest`, `files-to-prompt`).
+## Default repos (Java-facing, `run-tools.sh`)
 
-## Current results (2026-08-02 run)
+`java-gson` (google/gson), `java-guava` (google/guava), `java-commons-lang` (apache/commons-lang), `java-caffeine` (ben-manes/caffeine), `java-junit5` (junit-team/junit5), `java-netty` (netty/netty), `java-springboot` (spring-projects/spring-boot), `java-kafka` (apache/kafka), `java-tomcat` (apache/tomcat), `java-elasticsearch` (elastic/elasticsearch).
 
-| Repo | LOC (tokei) | LLM token estimate | repomix pack size |
-|---|---|---|---|
-| go-gin / gin | 19,341 | 250.5k | 872 KB |
-| go-mux | ~3k | — | 260 KB |
-| java-gson | ~70k | — | 2.3 MB |
-| java-springboot | ~4.0M | — | 41 MB |
-| k8s-kubernetes | 5,627,707 | 11.3M | 225 MB |
-| os-nova | ~700k | — | 27 MB |
-| os-neutron | ~700k | — | 28 MB |
-| glance | ~180k | — | 7.3 MB |
-| py-flask | 25,703 | 444.0k | 4.1 MB |
+## Agentic summary pipeline
 
-Cross-tool notes: tokei and scc agree closely on code LOC; they diverge on YAML/Markdown because scc counts embedded code blocks. For huge repos (e.g. kubernetes) full packing is impractical — prefer `digest.txt` or scope to a subtree.
+`agent-summarize.sh` is the "agentic" layer. For each repo it:
+
+1. Builds a **machine digest** (`summary/_digests/<repo>.md`) by counting violations/priorities/rules/CVEs/graph totals directly from the XML/JSON artifacts (grep/awk only — no host tooling needed).
+2. Invokes `opencode run` (non-interactive) with a detailed analyst prompt that references every raw artifact path (`-f <digest>` attaches the digest).
+3. Instructs the model to **open the raw reports itself** and write `summary/<repo>.md` with fixed sections: Overview, Code Quality, Security, Complexity, Knowledge Graph, Recommendations.
+
+The agent reads the full PMD/Checkstyle/SpotBugs/DepCheck/KG data, so the digest only anchors totals — specific findings (file:line, rule ids, CVEs, graph edges) come from the raw evidence the model inspects.
+
+Requires `opencode` installed and a configured model. Non-interactive `opencode run` auto-rejects permission prompts, so run it from a directory the model may read freely (i.e. this repo, where `artifacts/` lives) — you may need a permissive `opencode.json` permission block in an automation context.
+
+## Build notes
+
+- **Stage 1 (`maven:eclipse-temurin-21`)** compiles `kg-extractor` (JavaParser 3.26.4, shaded into one jar → `/opt/kgextractor/kg-extractor.jar`).
+- **Stage 2 (`golang:1.24-alpine`)** builds `scc`.
+- **Stage 3 (`eclipse-temurin:21-jdk-alpine`)** downloads PMD 7.27, Checkstyle 14.1 (incl. extracted `google_checks.xml`), SpotBugs 4.10.4 + FindSecBugs 1.14.0, OWASP dependency-check 13.0, and optionally pre-seeds NVD data (`PRESEED_NVD=1`).
+- **Final stage** = same JDK base + `git`, `nodejs`/`npm` (for `repomix`), all copied tools, `scc` binary, `kg-extractor.jar`.
+
+Versions are pinned via build args (`PMD_VERSION`, `CHECKSTYLE_VERSION`, `SPOTBUGS_VERSION`, `FINDSECBUGS_VERSION`, `DEPCHECK_VERSION`, `PRESEED_NVD`).
+
+## Knowledge graph format
+
+`knowledge-graph.json`:
+
+```
+meta       → repo name, tool, timestamp
+summaries  → files/types/methods/fields/LOC, avg & max cyclomatic complexity,
+             top-complexity & top-LOC methods, hub types (deps/dependents),
+             package-dependency edges (weighted), isolated packages, dependency cycles
+nodes      → {id, label: package|type, name, fqn, kind, file, loc, ...}
+edges      → {from, to, type: CONTAINS|CONTAINS_NESTED|EXTENDS|IMPLEMENTS|DEPENDS_ON|INVOKES,
+             label (method for INVOKES), weight}
+```
+
+Type references are resolved from imports/package/nested-names; edges only link types that exist inside the scanned repo (external/JDK references are counted as `external_type_references` rather than graph edges).
