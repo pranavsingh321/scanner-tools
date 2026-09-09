@@ -1,0 +1,46 @@
+# scanner-tools — offline Java/Python static-analysis + knowledge-graph image.
+#
+# Compose wraps the multi-arch build and gives a one-off scan container. The
+# batch driver stays host-side (./run-tools.sh drives `docker run` per tool).
+#
+# Usage:
+#   docker compose build                          # build analyzers-java:latest
+#   docker compose build --platform linux/amd64   # amd64 variant (default is arm64)
+#   docker compose run --rm analyzer              # inspect repo / run a single tool
+#
+# Save/transfer for offline machines (done on the host):
+#   docker save analyzers-java:latest | gzip > analyzer-java-<arch>.tar.gz
+
+# Target CPU architecture (default: linux/arm64). On an x86 host, arm64 builds
+# run under QEMU (docker run --privileged --rm tonistiigi/binfmt --install arm64).
+x-arch: &arch
+  platform: ${PLATFORM:-linux/arm64}
+
+services:
+  analyzer:
+    <<: *arch
+    build:
+      context: .
+      args:
+        TARGETARCH: ${TARGETARCH:-arm64}
+        # Optionally pre-seed the OWASP NVD database at build time (needs a free
+        # key: https://nvd.nist.gov/developers/request-an-api-key, ~400 MB).
+        PRESEED_NVD: ${PRESEED_NVD:-0}
+        NVD_API_KEY: ${NVD_API_KEY:-}
+    image: analyzers-java:latest
+    environment:
+      JAVA_TOOL_OPTIONS: "-Dfile.encoding=UTF-8"
+    volumes:
+      # Repo to scan (read-only) — set SCAN_REPO in .env or inline:
+      #   SCAN_REPO=/path/to/code docker compose run --rm analyzer ...
+      - ${SCAN_REPO:-/nonexistent}:/repo:ro
+      # Where analyzer output lands (./artifacts/<repo>/<tool>/)
+      - ${OUT_DIR:-./artifacts}:/out
+    working_dir: /out
+    # Default: verify the mount and list the repo. Override to run a single
+    # analyzer, e.g.:
+    #   docker compose run --rm analyzer sh -c \
+    #     'cd /out && /opt/pmd/bin/pmd check -d /repo -f xml \
+    #        -R category/java/errorprone.xml --no-cache || true'
+    command: ["sh", "-c", "test -d /repo && echo 'Repo mounted at /repo:' && ls /repo | head || { echo 'Set SCAN_REPO to a repo dir (see docker-compose.yml).' >&2; exit 1; }"]
+    restart: "no"
