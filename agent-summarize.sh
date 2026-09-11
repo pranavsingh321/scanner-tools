@@ -143,32 +143,6 @@ build_digest() { # <repoName> -> path of digest file
         } >> "$d"
     fi
 
-    # Knowledge graph / complexity
-    f="$dir/kg/knowledge-graph.json"
-    if [[ -f "$f" ]]; then
-        {
-            echo -e "\n## Knowledge graph (kg-extractor, JavaParser source-only)"
-            echo ""
-            echo "- files: $(first_int '"files":' "$f")"
-            echo "- packages: $(first_int '"packages":' "$f")"
-            echo "- types: $(first_int '"types":' "$f")"
-            echo "- methods: $(first_int '"methods":' "$f")"
-            echo "- fields: $(first_int '"fields":' "$f")"
-            echo "- total LOC: $(first_int '"total_loc":' "$f")"
-            echo "- avg method complexity: $(first_float '"avg_method_complexity":' "$f")"
-            echo "- avg method LOC: $(first_float '"avg_method_loc":' "$f")"
-            echo ""
-            echo "Top complexity methods:"
-            grep -oE '"type":"[^"]+","method":"[^"]+","complexity":[0-9]+' "$f" 2>/dev/null \
-                | sed -E 's/"type":"([^"]+)","method":"([^"]+)","complexity":([0-9]+)/- cc=\3 \1::\2/' | sort -t= -k2 -rn | head -10
-            echo ""
-            echo "Hub types:"
-            grep -oE '"type":"[^"]+","deps":[0-9]+,"dependents":[0-9]+' "$f" 2>/dev/null \
-                | sed -E 's/"type":"([^"]+)","deps":([0-9]+),"dependents":([0-9]+)/- deps=\2 dependents=\3 \1/' \
-                | sort -k2 -t= -rn | head -10
-        } >> "$d"
-    fi
-
     # Python analyzers ----------------------------------------------------
     f="$dir/py-ruff/ruff.json"
     if [[ -f "$f" ]]; then
@@ -225,34 +199,7 @@ build_digest() { # <repoName> -> path of digest file
         } >> "$d"
     fi
 
-    f="$dir/py-kg/py-knowledge-graph.json"
-    if [[ -f "$f" ]]; then
-        {
-            echo -e "\n## Knowledge graph (py-kg-extractor, stdlib ast)"
-            echo ""
-            echo "- files: $(first_int '"files":' "$f")"
-            echo "- modules: $(first_int '"modules":' "$f")"
-            echo "- classes: $(first_int '"classes":' "$f")"
-            echo "- functions: $(first_int '"functions":' "$f")"
-            echo "- total LOC: $(first_int '"total_loc":' "$f")"
-            echo "- avg function complexity: $(first_float '"avg_function_complexity":' "$f")"
-            echo "- avg function LOC: $(first_float '"avg_function_loc":' "$f")"
-            echo -n "- edges: "; grep -oE '"(CONTAINS|IMPORTS|EXTENDS|CALLS)": ?[0-9]+' \
-                "$f" 2>/dev/null | tr '\n' ' '; echo ""
-            echo ""
-            echo "Top complexity functions (name / cc):"
-            sed -n '/"top_complexity_functions": \[/,/^ *\],\?$/p' "$f" 2>/dev/null \
-                | grep -oE '"function": "[^"]+"|"complexity": [0-9]+' \
-                | sed -E 's/"function": "([^"]+)"/\1/; s/"complexity": ([0-9]+)/(cc=\1)/' \
-                | head -20
-            echo ""
-            echo "Hub modules (module / deps / dependents):"
-            sed -n '/"hub_modules": \[/,/^ *\],\?$/p' "$f" 2>/dev/null \
-                | grep -oE '"module": "[^"]+"|"deps": [0-9]+|"dependents": [0-9]+' \
-                | sed -E 's/"module": "([^"]+)"/\1/; s/"deps": ([0-9]+)/(deps=\1)/; s/"dependents": ([0-9]+)/(dependents=\1)/' \
-                | head -24
-        } >> "$d"
-    fi
+
 
     echo "$d"
 }
@@ -267,19 +214,17 @@ Java toolchain (present when the repo has .java files):
 - artifacts/$name/pmd/pmd-report.xml and pmd/cpd-report.xml     (PMD rules + copy-paste duplication; includes security.xml, errorprone, bestpractices, design, codestyle, performance)
 - artifacts/$name/checkstyle/checkstyle-report.xml               (Google Java style violations)
 - artifacts/$name/spotbugs/spotbugs-report.xml                   (SpotBugs + FindSecBugs security bug patterns; note if it says no bytecode found)
-- artifacts/$name/kg/knowledge-graph.json                        (Java knowledge graph: packages, types, edges, complexity, hubs, package deps, cycles; read the "summaries" block)
 Python toolchain (present when the repo has .py files):
 - artifacts/$name/py-ruff/ruff.json                              (ruff lint violations, E/P rules, severity)
 - artifacts/$name/py-bandit/bandit.json                          (bandit security findings)
 - artifacts/$name/py-radon/radon-cc.json                         (radon cyclomatic complexity; radon-raw.json LOC; radon-mi.json maintainability)
-- artifacts/$name/py-kg/py-knowledge-graph.json                  (Python knowledge graph: modules/classes/functions, CONTAINS/IMPORTS/EXTENDS/CALLS edges, hubs, package deps, cycles; read the "summaries" block)
 Both toolchains:
 - artifacts/$name/depcheck/dependency-check-report.json          (OWASP dependency-check CVEs of dependencies)
 - artifacts/$name/scc/scc.json                                   (LOC and complexity by language)
 - artifacts/$name/repomix/repomix.log                            (LLM pack totals)
 
 A machine-built digest is attached for orientation: $digest_path
-Trust the digest numbers for totals, but open the raw XML/JSON when you need specific file/rule/class names. The edge data in knowledge-graph.json is authoritative for the graph section.
+Trust the digest numbers for totals, but open the raw XML/JSON when you need specific file/rule/class names.
 
 OUTPUT FORMAT — write strictly as GitHub-flavored markdown with exactly these sections:
 
@@ -287,7 +232,7 @@ OUTPUT FORMAT — write strictly as GitHub-flavored markdown with exactly these 
 \`\`\`header row with source repo (if known: derive from artifacts path/user input), scan date, tool versions, language mixed (say explicitly which of Java/Python toolchains produced data and which were skipped)\`\`\`
 
 ## Overview
-Leading paragraph + a metrics table (files, LOC, types, methods, LLM pack size). Be truthful to the artifacts; mark anything missing/inconclusive.
+Leading paragraph + a metrics table (files, LOC, LLM pack size). Be truthful to the artifacts; mark anything missing/inconclusive.
 
 ## Code Quality
 - PMD violation totals split by priority and ruleset; top 5-10 rules with the clearest examples (class/file:line). 
@@ -303,12 +248,6 @@ Leading paragraph + a metrics table (files, LOC, types, methods, LLM pack size).
 ## Complexity
 - Cyclomatic complexity: average, max, top-10 worst methods (name + cc + file). Correlate with CPD duplication if relevant.
 - Methods/classes with unusual LOC.
-
-## Knowledge graph
-- Package count and biggest/most-connected packages (hub types with deps/dependents).
-- Strongest package dependency edges (from/to/weight).
-- Isolated packages and any dependency cycles.
-- 3-5 key architectural takeaways the graph reveals.
 
 ## Recommendations
 Prioritized, actionable, concrete list (file-level where possible). Distinguish quick wins vs structural work.

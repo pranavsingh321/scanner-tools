@@ -1,4 +1,4 @@
-# scanner-tools — offline Java/Python static-analysis + knowledge-graph image.
+# scanner-tools — offline Java/Python static-analysis image.
 #
 # Compose wraps the multi-arch build and gives a one-off scan container. The
 # batch driver stays host-side (./run-tools.sh drives `docker run` per tool).

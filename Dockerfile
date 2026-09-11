@@ -19,27 +19,17 @@ ARG SPOTBUGS_VERSION=4.10.4
 ARG FINDSECBUGS_VERSION=1.14.0
 ARG DEPCHECK_VERSION=13.0.0
 ARG PRESEED_NVD=0
+ARG NVD_API_KEY=
 
 # ---------------------------------------------------------------------------
-# Stage 1: build the knowledge-graph extractor (JavaParser based, offline)
-# ---------------------------------------------------------------------------
-FROM maven:3.9-eclipse-temurin-21 AS kgextractor
-WORKDIR /build
-COPY kg-extractor/pom.xml ./
-RUN mvn -q -B -DskipTests dependency:go-offline
-COPY kg-extractor/src ./src
-RUN mvn -q -B -DskipTests package
-RUN test -f target/kg-extractor.jar && mv target/kg-extractor.jar /kg-extractor.jar
-
-# ---------------------------------------------------------------------------
-# Stage 2: build scc (LOC + complexity metrics)
+# Stage 1: build scc (LOC + complexity metrics)
 # ---------------------------------------------------------------------------
 FROM golang:1.25-alpine AS scc
 RUN apk add --no-cache git ca-certificates \
     && go install github.com/boyter/scc/v3@latest
 
 # ---------------------------------------------------------------------------
-# Stage 3: download and unpack the Java static analysis toolchain
+# Stage 2: download and unpack the Java static analysis toolchain
 # ---------------------------------------------------------------------------
 FROM eclipse-temurin:21-jdk-alpine AS tools
 ARG PMD_VERSION
@@ -70,27 +60,32 @@ RUN wget -q "https://github.com/dependency-check/DependencyCheck/releases/downlo
     && unzip -q /tmp/dc.zip -d /opt
 
 # Optionally pre-seed the NVD database (requires network at build time).
+# NVD moved to an API-only feed that requires a free API key; request one at
+# https://nvd.nist.gov/developers/request-an-api-key and pass it via:
+#   docker build --build-arg PRESEED_NVD=1 --build-arg NVD_API_KEY=<key> ...
 ARG PRESEED_NVD
+ARG NVD_API_KEY
 RUN if [ "$PRESEED_NVD" = "1" ]; then \
+        args=""; \
+        [ -n "$NVD_API_KEY" ] && args="--nvdApiKey $NVD_API_KEY"; \
         mkdir -p /opt/dependency-check/data && \
         /opt/dependency-check/bin/dependency-check.sh --updateonly \
-            --data /opt/dependency-check/data || true; \
+            --data /opt/dependency-check/data $args || true; \
     fi
 
 # ---------------------------------------------------------------------------
 # Final image: fully self-contained, works with zero network access.
 # ---------------------------------------------------------------------------
 FROM eclipse-temurin:21-jdk-alpine
-LABEL org.opencontainers.image.description="Offline static analysis toolkit: PMD, Checkstyle, SpotBugs+FindSecBugs, OWASP dependency-check, scc, repomix, kg-extractor (Java + Python)"
+LABEL org.opencontainers.image.description="Offline static analysis toolkit: PMD, Checkstyle, SpotBugs+FindSecBugs, OWASP dependency-check, scc, repomix"
 ENV JAVA_TOOL_OPTIONS="-Dfile.encoding=UTF-8"
 ENV PATH="/opt/pmd/bin:$PATH"
 ENV SPOTBUGS_HOME="/opt/spotbugs"
 ENV DEPENDENCY_CHECK_HOME="/opt/dependency-check"
-RUN apk add --no-cache git ca-certificates nodejs npm \
+RUN apk add --no-cache bash git ca-certificates nodejs npm \
     && npm install -g repomix --silent \
     && rm -rf /root/.npm
-# Python analyzers (ruff lint/quality, bandit security, radon complexity)
-# plus the stdlib-only Python knowledge-graph extractor, bundled offline.
+# Python analyzers (ruff lint/quality, bandit security, radon complexity).
 RUN apk add --no-cache python3 py3-pip \
     && python3 -m pip install --no-cache-dir --break-system-packages \
         ruff bandit radon \
@@ -101,6 +96,4 @@ COPY --from=tools   /opt/checkstyle       /opt/checkstyle
 COPY --from=tools   /opt/spotbugs         /opt/spotbugs
 COPY --from=tools   /opt/dependency-check /opt/dependency-check
 COPY --from=scc     /go/bin/scc           /usr/local/bin/scc
-COPY --from=kgextractor /kg-extractor.jar /opt/kgextractor/kg-extractor.jar
-COPY py-kg-extractor/py_kg_extractor.py /opt/kgextractor/py-kg-extractor.py
 WORKDIR /repo

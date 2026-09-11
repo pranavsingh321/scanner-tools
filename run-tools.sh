@@ -13,12 +13,10 @@ LANGS="${LANGS:-java}"
 # Tool -> primary output file that indicates "already scanned"
 JAVA_TOOLS="pmd|cpd-report.xml
 checkstyle|checkstyle-report.xml
-spotbugs|spotbugs-report.xml
-kg|knowledge-graph.json"
+spotbugs|spotbugs-report.xml"
 PY_TOOLS="py-ruff|ruff.json
 py-bandit|bandit.json
-py-radon|radon-cc.json
-py-kg|py-knowledge-graph.json"
+py-radon|radon-cc.json"
 SHARED_TOOLS="depcheck|dependency-check-report.json
 scc|scc.json
 repomix|repomix.txt"
@@ -27,12 +25,11 @@ usage() {
     cat <<'EOF'
 Usage: run-tools.sh [options] [repo ...]
 
-Offline Java static analysis pipeline. Runs 7 analyzers in a container per repo:
+Offline static analysis pipeline. Runs analyzers in a container per repo:
   pmd / cpd  (code quality, security, design, duplication)
   checkstyle (Google Java style conventions)
   spotbugs   (bug patterns + FindSecBugs security, requires compiled classes)
   depcheck   (OWASP dependency-check: CVE scan of dependencies)
-  kg         (knowledge graph + complexity extractor, JavaParser source-only)
   scc        (LOC / complexity metrics)
   repomix    (full-codebase LLM pack)
 
@@ -55,8 +52,8 @@ Arguments (one or more):
 With no arguments, Java-facing default repos are used.
 
 Language sets:
-  java    PMD+CPD, checkstyle, spotbugs, kg, depcheck, scc, repomix
-  python  ruff, bandit, radon, py-kg, depcheck, scc, repomix
+  java    PMD+CPD, checkstyle, spotbugs, depcheck, scc, repomix
+  python  ruff, bandit, radon, depcheck, scc, repomix
   all     both of the above (language-matched tools skip repos they cannot scan)
 
 Offline note: the image analyzers-java:latest bundles every tool. Build it on a
@@ -203,13 +200,6 @@ run_tool() {
                 } > "$td/dependency-check-report.json"
             fi
             ;;
-        kg)
-            # knowledge graph + complexity (JavaParser, source only)
-            "${base[@]}" sh -c \
-                'java -Xmx4g -jar /opt/kgextractor/kg-extractor.jar \
-                    -i /repo -o /out/knowledge-graph.json -r "'"$name"'"' \
-                > "$td/kg.log" 2>&1 || true
-            ;;
         scc)
             "${base[@]}" sh -c 'scc /repo --format json > /out/scc.json' \
                 > "$td/scc.log" 2>&1 || true
@@ -239,13 +229,6 @@ run_tool() {
                  radon raw /repo -j > radon-raw.json; \
                  radon mi /repo -j > radon-mi.json' \
                 > "$td/radon.log" 2>&1 || true
-            ;;
-        py-kg)
-            # Python knowledge graph + complexity (stdlib ast, source only)
-            "${base[@]}" sh -c \
-                'python3 /opt/kgextractor/py-kg-extractor.py \
-                    -i /repo -o /out/py-knowledge-graph.json -r "'"$name"'"' \
-                > "$td/py-kg.log" 2>&1 || true
             ;;
     esac
     if [[ ! -f "$td/$outfile" ]]; then
@@ -305,12 +288,12 @@ for entry in "${REPOS[@]}"; do
         [[ -z "$line" ]] && continue
         tool="${line%%|*}"; outfile="${line#*|}"
         case "$tool" in
-            pmd|checkstyle|spotbugs|kg)
+            pmd|checkstyle|spotbugs)
                 if ! has_files "$repo_dir" "*.java"; then
                     echo "==> [$name] $tool skipped (no .java files)"
                     continue
                 fi ;;
-            py-ruff|py-bandit|py-radon|py-kg)
+            py-ruff|py-bandit|py-radon)
                 if ! has_files "$repo_dir" "*.py"; then
                     echo "==> [$name] $tool skipped (no .py files)"
                     continue
